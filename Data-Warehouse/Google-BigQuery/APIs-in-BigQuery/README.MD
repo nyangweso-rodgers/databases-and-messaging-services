@@ -6,6 +6,11 @@
 - [BigQuery Reservation API]()
 - [BigQuery Storage API]()
 - [Further Reading]()
-  - [YouTube - Google Cloud Tech - Understanding the BigQuery API landscape](https://www.youtube.com/watch?v=cbSFJYq2CnU&t=5s)
+  - [docs - Google Cloud - BigQuery API Client Libraries](https://cloud.google.com/bigquery/docs/reference/libraries)
 
-# BigQuery API
+# BigQuery API Client Libraries
+
+# Install the client library
+```py
+    pip install --upgrade google-cloud-bigquery
+```
