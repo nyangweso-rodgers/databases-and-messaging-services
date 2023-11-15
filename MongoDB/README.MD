@@ -102,6 +102,10 @@
   3. Load Balancing
   4. High availability
 
+## MongoDB Conncept 2: Indexing
+
+- Note that **MongoDB** by default indexes the automatically generated field `_id` of documents.
+
 # Access MongoDB shell
 
 ## Create a Database
