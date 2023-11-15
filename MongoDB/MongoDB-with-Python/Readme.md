@@ -117,7 +117,7 @@
 
 - create a `database` called `users-v2` containing `users` collections
 
-## Query `collection`
+## Query `collection`s
 
 - Task 1:
 
@@ -162,4 +162,38 @@
         list_users = collection.find({})
         for user in list_users:
             pprint(user)
+    ```
+
+## Update `collection`s in MongoDB
+
+- Unlike traditional databases, new fields could be added to a particular row of data.
+- Task 1:
+
+  - add `first_name` to a use named `Robert Okoth`
+
+    ```py
+        # update collections in MongoDB
+
+        from pymongo import MongoClient
+        from pprint import pprint
+
+        # connect to MongoDB
+        connection_string = "" # specify the connection string
+        client = MongoClient(connection_string)
+        # Specify the database and collection names
+        db = client["rodgers-users"]
+        collection = db['users']
+
+        # find a document
+        user = collection.find_one({"full_name": "Robert Okoth"})
+        pprint(user)
+
+        # update the document
+        result = collection.update_one({ "_id": user.get("_id") }, { "$set": {"first_name": "Robert" }})
+        print('Number of documents modified : ' + str(result.modified_count))
+
+        # print updated document
+        updated_user = collection.find_one({'_id': user.get('_id')})
+        print("This is the updated document:")
+        pprint(updated_user)
     ```
