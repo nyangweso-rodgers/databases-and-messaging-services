@@ -7,9 +7,10 @@
 - [Getting Started with MongoDB]()
 - [Further Reading]()
   1. [MongoDB Documentation](https://www.mongodb.com/docs/)
-  2. [MongoDB for VS Code](https://www.mongodb.com/docs/mongodb-vscode/)
-  3. [Dev Community - Basics of MongoDB](https://dev.to/moreno8423/basics-of-mongodb-2lme)
-  4. [Dev Community - Getting started with MongoDB](https://dev.to/iamadhee/getting-started-with-mongodb-52pm)
+  2. [https://www.mongodb.com/docs/manual/introduction/#introduction-to-mongodb](https://www.mongodb.com/docs/manual/introduction/)
+  3. [MongoDB for VS Code](https://www.mongodb.com/docs/mongodb-vscode/)
+  4. [Dev Community - Basics of MongoDB](https://dev.to/moreno8423/basics-of-mongodb-2lme)
+  5. [Dev Community - Getting started with MongoDB](https://dev.to/iamadhee/getting-started-with-mongodb-52pm)
 
 # Introduction to MongoDB
 
