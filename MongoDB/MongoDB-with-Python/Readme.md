@@ -197,3 +197,33 @@
         print("This is the updated document:")
         pprint(updated_user)
     ```
+
+## Delete documents in MongoDB
+
+- Task 1:
+
+  - delete a document
+
+    ```py
+        # delete collections in MongoDB
+
+        from pymongo import MongoClient
+        from pprint import pprint
+
+        # connect to MongoDB
+        connection_string = "" # specify the connection string
+        client = MongoClient(connection_string)
+        # Specify the database and collection names
+        db = client["rodgers-users"]
+        collection = db['users']
+
+        # find a document
+        user = collection.find_one({"full_name": "Robert Okoth"})
+        pprint(user)
+
+        # delete document matching a criteria
+        result = collection.delete_many({"full_name": "Robert Okoth"})
+
+        # print deleted count
+        print(f'Deleted {result.deleted_count} documents!')
+    ```
