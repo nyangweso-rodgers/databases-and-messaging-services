@@ -89,6 +89,77 @@
 
 - To work with **MongoDB** in `Python`, install `PyMongo` driver using command - `python -m pip install pymongo`
 
-# Create a `collection` in `MongoDB`
+## Test your MongoDB Connection
+
+```py
+    # test a successful MongoDB connection
+
+    from pymongo import MongoClient
+    #print(dir(MongoClient))
+
+    # Replace the following with your actual MongoDB connection string
+    connection_string = ""
+    client = MongoClient(connection_string)
+
+    # Specify the database and collection names
+    db = client["rodgers-users"]
+    collection = db['users']
+
+    # Check connection status using server_info()
+    try:
+        info = client.server_info()
+        print("Successfully Connected to MongoDB")
+    except Exception as e:
+        print(f"Failed to connect to MongoDB: {e}")
+```
+
+## Create a `collection` in `MongoDB`
+
 - create a `database` called `users-v2` containing `users` collections
-  
+
+## Query `collection`
+
+- Task 1:
+
+  - query a collection matching a particular criteria
+
+    ```py
+        # query collections
+
+        from pymongo import MongoClient
+        from pprint import pprint
+
+        # connect to MongoDB
+        connection_string = ""
+        client = MongoClient(connection_string)
+        # Specify the database and collection names
+        db = client["rodgers-users"]
+        collection = db['users']
+
+        # print one of the users matching a criteria
+        user = collection.find_one({"age": 20})
+        pprint(user)
+    ```
+
+- Task 2:
+
+  - query all documents in a collection
+
+    ```py
+        # query collections
+
+        from pymongo import MongoClient
+        from pprint import pprint
+
+        # connect to MongoDB
+        connection_string = ""
+        client = MongoClient(connection_string)
+        # Specify the database and collection names
+        db = client["rodgers-users"]
+        collection = db['users']
+
+        # print all the users
+        list_users = collection.find({})
+        for user in list_users:
+            pprint(user)
+    ```
