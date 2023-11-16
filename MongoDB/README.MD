@@ -78,6 +78,116 @@
 
 - Next Step is to create a user to access the cluster , this is different from the user you created at the beginning, this new user is for database access, the previous one was for MongoDB Atlas platform administration.
 
+## Access MongoDB shell
+
+- MongoDB shell is a CLI used to access **database**, **collections** and **documents**.
+- to access **MongoDB** shell:
+  - Step 1:
+    - open terminal and type
+      ```sh
+        #
+        sudo systemctl start mongod
+      ```
+    - once starting Mongod Process, we are good to open the mongo shell.
+    - To open mongo shell we have to open terminal and type
+      ```sh
+        #
+        mongo
+      ```
+- Mongo Shell Commands include:
+
+  - Command 1:
+    - see all the databases
+      ```sh
+        show dbs
+      ```
+  - Command 2:
+
+    - create a new database/switch to an exising database `users`
+      ```sh
+        #
+        use users
+      ```
+
+  - Command 3:
+    - see all **collections** of a **database**
+      ```sh
+        #
+        show collections
+      ```
+  - Command 4: `createCollection()`
+    - create a new, `countries` collection in a database
+      ```sh
+        #
+        db.createCollection(countries)
+      ```
+  - Command 5: `find()`
+    - see all the documents in a, `users`, collection
+      ```sh
+        #
+        db.users.find()
+      ```
+  - Command 6: `find()`
+    - find a document matching a query
+      ```sh
+        #
+        db.users.find({first_name:"Rodgers"})
+      ```
+  - Command 7: `findOne()`
+    - find the first occurrance of the document
+      ```sh
+        #
+        db.users.findOne({age: 25})
+      ```
+  - Command 8: `insert()`
+    - insert a document in a `users` collection
+      ```sh
+        # insert a document in
+        db.users.insert({first_name: "Harvey"})
+      ```
+  - Command 9:
+    - insert multiple documents in a `users` collection
+      ```sh
+        # insert a document in
+        db.users.insert({first_name: "Harvey"}, {first_name: "Liam"})
+      ```
+  - Command 10: `update()`
+    - update a document in a `users` collection
+    - here, the first pair is used to find the document, the second is used to update the document
+      ```sh
+        # insert a document in
+        db.users.update({first_name: "Harvey"},{first_name: "Nyangweso"})
+      ```
+    - note: using the above line of code removes all the data of that particular document and write whatever we passed as key value.
+    - to fix this problem, we can use `$set{}`which will only update the matching key value pair.
+      ```sh
+        #
+        db.users.update({first_name: "Harvey"}, { $set : {first_name: "Nyangweso"} })
+      ```
+  - Command 11: `remove()`
+    - remove all the documents from a collection
+      ```sh
+        #
+        db.users.remove({})
+      ```
+    - remove a specific document from a collection
+      ```sh
+        #
+        db.users.remove({ first_name: "Nyangweso"})
+      ```
+  - Command 12: `drop()`
+    - drop the whole collection from a database
+      ```sh
+        #
+        db.users.drop()
+      ```
+  - Command 13: `dropDatabase()`
+    - delete the entire database
+      ```sh
+        #
+        db.dropDatabase();
+      ```
+
 # MongoDB Concepts
 
 1. **MongoDB Server**:
@@ -104,9 +214,35 @@
 
 ## MongoDB Conncept 2: Indexing
 
-- Note that **MongoDB** by default indexes the automatically generated field `_id` of documents.
+- Database Indexing support the efficient execution of queries.
+- Note:
+  - **MongoDB** by default indexes the automatically generated field `_id` of documents.
+  - **MongoDB** indexes can be created and dropped on-demand to accommodate any application requirement.
+- MongoDB offers the following types of indexing:
+  1. Single index
+  2. Compund index
 
-# Access MongoDB shell
+### Single Field Index
+
+- Task 1:
+  - create a single field index:
+    ```sh
+      # create a single field index
+      db.<collection>.createIndex({<field>: <type>})
+    ```
+  - The type of the index (`1` or `-1`) describes the order of the items in our index, where 1 means **ascending** order and -1 means **descending** order
+  - Example:
+    ```sh
+      db.users.createIndex({ age: 1 })
+    ```
+  - this creates an ascending index on age in the `users` collection.
+
+### Compound Index
+
+- these are indexes composed of several different field.
+- Compound index can still be used to filter queries that specify the last name only.
+- **use case**:
+  - instead of having one index on `first_name` and another on `last_name`, it would be more efficient to create an index to include both `first_name` and `last_name` if querying against the two names
 
 ## Create a Database
 
@@ -130,11 +266,27 @@
 
 ## Query Data
 
+## Query Data: `db.collection.find()`
+
 - retrieve data using the `find()` method
   ```sh
     # retrieve data
     db.collection.find()
   ```
+- Task 1:
+  - query documents with a value greater than 1
+    ```sh
+      db.collection.find( { age: {  $gt: 1 }} )
+    ```
+- Task 2:
+  - query documents with `age` between 1 and 10
+    ```sh
+      # query documents with
+      db.collection.find({
+          age: { $gt:1, $lt:10},
+          active: true
+        }).sort({age:-1})
+    ```
 
 ## Update Data
 
