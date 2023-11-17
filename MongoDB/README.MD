@@ -7,10 +7,11 @@
 - [Getting Started with MongoDB]()
 - [Further Reading]()
   1. [MongoDB Documentation](https://www.mongodb.com/docs/)
-  2. [https://www.mongodb.com/docs/manual/introduction/#introduction-to-mongodb](https://www.mongodb.com/docs/manual/introduction/)
-  3. [MongoDB for VS Code](https://www.mongodb.com/docs/mongodb-vscode/)
-  4. [Dev Community - Basics of MongoDB](https://dev.to/moreno8423/basics-of-mongodb-2lme)
-  5. [Dev Community - Getting started with MongoDB](https://dev.to/iamadhee/getting-started-with-mongodb-52pm)
+  2. [mongodb.com/basics - Explaining BSON with Examples](https://www.mongodb.com/basics/bson#:~:text=BSON%20Document%20Example-,What%20is%20BSON%3F,data%20across%20web%20based%20applications.)
+  3. [https://www.mongodb.com/docs/manual/introduction/#introduction-to-mongodb](https://www.mongodb.com/docs/manual/introduction/)
+  4. [MongoDB for VS Code](https://www.mongodb.com/docs/mongodb-vscode/)
+  5. [Dev Community - Basics of MongoDB](https://dev.to/moreno8423/basics-of-mongodb-2lme)
+  6. [Dev Community - Getting started with MongoDB](https://dev.to/iamadhee/getting-started-with-mongodb-52pm)
 
 # Introduction to MongoDB
 
@@ -25,6 +26,16 @@
 | Rows          | Documents       |
 | Columns       | Fields          |
 | Index         | Index           |
+
+## Binary JavaScript Object Notation (BSON)
+
+- **BSON** is a textual object notation widely used to transmit and store data across web based applications.
+- **JSON** is easier to understand as it is human-readable, but compared to BSON, it supports fewer data types. **BSON** encodes type and length information, too, making it easier for machines to parse.
+- `BSON` can be compared to other binary formats, like [Protocol Buffers](https://en.wikipedia.org/wiki/Protocol_Buffers). The greater difference is that `BSON` is more "Schema-less" than **Protocol Buffers**, providing the advantage of flexibility and the slight disadvantage of space efficiency.
+- Advantages of `BSON` include:
+  1. Compact
+  2. Traversable
+  3. Handles additional data types like `Integer`, `Float`, `Decimal128`, `Date`, `Binary`, `GeoJSON` e.t.c.
 
 ## When should I use MongoDB instead of MySQL?
 
@@ -212,38 +223,6 @@
   3. Load Balancing
   4. High availability
 
-## MongoDB Conncept 2: Indexing
-
-- Database Indexing support the efficient execution of queries.
-- Note:
-  - **MongoDB** by default indexes the automatically generated field `_id` of documents.
-  - **MongoDB** indexes can be created and dropped on-demand to accommodate any application requirement.
-- MongoDB offers the following types of indexing:
-  1. Single index
-  2. Compund index
-
-### Single Field Index
-
-- Task 1:
-  - create a single field index:
-    ```sh
-      # create a single field index
-      db.<collection>.createIndex({<field>: <type>})
-    ```
-  - The type of the index (`1` or `-1`) describes the order of the items in our index, where 1 means **ascending** order and -1 means **descending** order
-  - Example:
-    ```sh
-      db.users.createIndex({ age: 1 })
-    ```
-  - this creates an ascending index on age in the `users` collection.
-
-### Compound Index
-
-- these are indexes composed of several different field.
-- Compound index can still be used to filter queries that specify the last name only.
-- **use case**:
-  - instead of having one index on `first_name` and another on `last_name`, it would be more efficient to create an index to include both `first_name` and `last_name` if querying against the two names
-
 ## Create a Database
 
 - use the `use` command to create a database
@@ -263,6 +242,17 @@
 ## Insert Data
 
 - use `insertOne()` or `insertMany()` method
+- output:
+  ```json
+    _id: ObjectId,
+    first_name: String,
+    last_name: String,
+    age: Integer,
+    location: {
+      country: String,
+      city
+    }
+  ```
 
 ## Query Data
 
@@ -296,9 +286,67 @@
 
 - remove data using the `deleteOne()` or `deleteMany()` method
 
-## Indexing
+# Indexing in MongoDB
 
-- indexes can improve query performance. Create an index using the `createIndex()` method
+- Database Indexing support the efficient execution of queries.
+- Note:
+  - **MongoDB** by default indexes the automatically generated field `_id` of documents.
+  - **MongoDB** indexes can be created and dropped on-demand to accommodate any application requirement.
+- MongoDB offers the following types of indexing:
+
+  1. Single index
+  2. Compund index
+
+- To drop an index, use the below syntax:
+  ```sh
+    #
+    db.users.dropIndex("age")
+  ```
+
+## Indexing in MongoDB: Single Field Index
+
+- Single Field Index is an index assigned to one specific field of the document.
+- create a Single Field Index using the following syntax:
+
+  ```sh
+      # create a single field index
+      db.<collection>.createIndex({<field>: <type>})
+  ```
+
+- The type of the index (`1` or `-1`) describes the order of the items in our index, where `1` means **ascending** order and `-1` means **descending** order
+
+- Task 1:
+  - create a single field index:
+    ```sh
+      # create a single field index
+      db.users.createIndex({ age: 1 })
+    ```
+  - this creates an ascending index on age in the `users` collection.
+- Task 2:
+  - create a single field index on an embedded field (field inside another field)
+    ```sh
+      # create a single field index
+      db.users.createIndex({ loaction.country : -1 })
+    ```
+  - this creates a descending index on a country field inside the sub-document, `location`, in the `users` collection
+- Task 3:
+  -create a single field index on an entire embedded document
+  ```sh
+    # create a single field index
+    db.users.createIndex({ loaction: -1 })
+  ```
+
+## Indexing in MongoDB: Compound Index
+
+- **Compound Index** is an index that can hold multiple fields of the document at once (upto 32 fields)
+- Compound index can still be used to filter queries that specify the last name only.
+- **use case**:
+  - instead of having one index on `first_name` and another on `last_name`, it would be more efficient to create an index to include both `first_name` and `last_name` if querying against the two names
+- create a **Compound Index**
+  ```sh
+    # create a compound index
+    db.users.createIndex({'first_name':1, 'last_name':1});
+  ```
 
 # MongoDB for VS Code
 
