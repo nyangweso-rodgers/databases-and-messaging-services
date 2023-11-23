@@ -9,6 +9,8 @@ const saleInvoiceSchema = new Schema({
   },
   updatedAt: {
     type: Date,
+    default: () => Date.now(),
+    immutable: false,
   },
   created_by_name: String,
   updated_by_name: String,

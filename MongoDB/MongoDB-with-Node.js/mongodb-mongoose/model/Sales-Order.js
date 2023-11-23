@@ -9,6 +9,8 @@ const saleOrderSchema = new Schema({
   },
   updatedAt: {
     type: Date,
+    default: () => Date.now(),
+    immutable: false,
   },
   order_date: {
     type: Date

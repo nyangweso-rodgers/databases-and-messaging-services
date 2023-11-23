@@ -21,14 +21,21 @@ const userSchema = new Schema({
     default: () => Date.now(),
     immutable: true,
   },
-  updatedAt: Date,
+  updatedAt: {
+    type: Date,
+    default: () => Date.now(),
+    immutable: false,
+  },
   active: Boolean,
   location: [
     {
       country: String,
       city: String,
+      latitude: Number,
+      longitude: Number
     },
   ],
+  date_of_birth: Date,
   age: Number,
   email: {
     type: String,
