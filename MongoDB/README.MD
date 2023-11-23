@@ -4,7 +4,9 @@
 
 ## Table of Contents
 
-- [Getting Started with MongoDB]()
+- [Introduction to MongoDB]()
+- [MongoDB with Python]()
+- [MongoDB with Node.js]()
 - [Further Reading]()
   1. [MongoDB Documentation](https://www.mongodb.com/docs/)
   2. [mongodb.com/basics - Explaining BSON with Examples](https://www.mongodb.com/basics/bson#:~:text=BSON%20Document%20Example-,What%20is%20BSON%3F,data%20across%20web%20based%20applications.)
