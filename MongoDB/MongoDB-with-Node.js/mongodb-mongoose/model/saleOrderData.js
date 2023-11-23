@@ -34,6 +34,14 @@ const saleOrderSchema = new Schema(
     },
     status: {
       type: String,
+      enum: [
+        "CREATED",
+        "PROCESSING",
+        "DELIVERED",
+        "PAID",
+        "RETURNED",
+        "EXPIRED",
+      ],
     },
     customer: [
       {
@@ -58,7 +66,11 @@ const saleOrderSchema = new Schema(
         delivered_qty: Number,
         item_status: String,
         discount_amount: Number,
-        unit_selling_price: Number,
+        unit_selling_price: {
+          required: true,
+          default: 0.0,
+          type: mongoose.Decimal128,
+        },
         total_ordered: Number,
         total_delivered: Number,
       },
