@@ -10,11 +10,11 @@ const userSchema = new Schema({
   slug: String,
   firstName: {
     type: String,
-    required: true,
+    required: [true, "Add firstName field"],
   },
   lastName: {
     type: String,
-    required: true,
+    required: [true, 'Add lastName field'],
   },
   createdAt: {
     type: Date,
@@ -32,7 +32,7 @@ const userSchema = new Schema({
       country: String,
       city: String,
       latitude: Number,
-      longitude: Number
+      longitude: Number,
     },
   ],
   date_of_birth: Date,
@@ -42,8 +42,9 @@ const userSchema = new Schema({
     minLength: 10,
     required: false,
     lowercase: true,
-  }
+    unique: true,
+  },
 });
 
-const User = model("User", userSchema);
-export default User;
+const user = model("User", userSchema);
+export default user;
