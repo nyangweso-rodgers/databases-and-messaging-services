@@ -30,5 +30,5 @@ const customerSchema = new Schema({
   active: Boolean,
 });
 
-const Customer = model("Customer", customerSchema);
-export default Customer;
+const customer = model("customer", customerSchema);
+export default customer;

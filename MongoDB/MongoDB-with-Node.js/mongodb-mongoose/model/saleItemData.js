@@ -1,20 +1,23 @@
 import mongoose from "mongoose";
+import { nanoid } from "nanoid";
 
 const { Schema, model } = mongoose;
 
 const saleItemSchema = new Schema({
-  id: {
-    type: String,
-    required: true,
-  },
   createdAt: {
     type: Date,
+    default: () => Date.now(),
     immutable: true,
   },
   updatedAt: {
     type: Date,
     default: () => Date.now(),
     immutable: false,
+  },
+  id: {
+    type: String,
+    required: true,
+    default: () => nanoid(7),
   },
   created_by_name: String,
   updated_by_name: String,
@@ -34,5 +37,5 @@ const saleItemSchema = new Schema({
   description: String,
 });
 
-const SaleItem = model("sale_item", saleInvoiceSchema);
-export default SaleItem;
+const sale_items = model("sale_items", saleItemSchema);
+export default sale_items;
