@@ -101,6 +101,11 @@
   mongoose.connect(
     "mongodb+srv://<username>:<password>@test-cluster.uo4jsy5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
   );
+
+  // check and Test Connection
+  const db = mongoose.connection;
+  db.on("error", (error) => console.error("Connection error:", error));
+  db.once("open", () => console.log("Connected to MongoDB Atlas"));
   ```
 
 # Inserting Data
@@ -298,6 +303,5 @@
   - let's updated the `updatedAt` date, everytime a **document** is saved or updated.
   - we add this to our models
     ```js
-      // 
-      
+    //
     ```
