@@ -104,6 +104,12 @@
 - **model** is the actual form of a **schema**.
 - A **model** is a class with which we construct documents i.e., takes a **schema** and apply it to each **document** in its **collection**.
 - **models** are responsible for all document interactions like **creating**, **reading**, **updating**, and **deleting** (CRUD)
+- Example:
+  - create a `User` model
+    ```js
+    // creating a model
+    const User = mongoose.model("User", userSchema);
+    ```
 
 ## Concept 3: Query
 
