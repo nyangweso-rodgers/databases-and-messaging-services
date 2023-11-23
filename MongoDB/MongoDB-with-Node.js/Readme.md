@@ -63,6 +63,42 @@
     "last_name " : "Nyangweso"
   ```
 
+- **schema validation**
+  - we can set some required fields in the schema as follows:
+    ```js
+    const userSchema = new Schema({
+      title: {
+        type: String,
+        required: false,
+      },
+      slug: {
+        type: String,
+        required: false,
+        lowercase: true,
+      },
+      firstName: {
+        type: String,
+        required: true,
+      },
+      lastName: {
+        type: String,
+        requested: true,
+      },
+      createdAt: {
+        type: Date,
+        default: () => Date.now(),
+        immutable: true,
+      },
+      updatedAt: Date,
+      email: {
+        type: String,
+        minLength: 10,
+        required: false,
+        lowercase: true,
+      },
+    });
+    ```
+
 ## Concept 2: Model
 
 - **model** is the actual form of a **schema**.
