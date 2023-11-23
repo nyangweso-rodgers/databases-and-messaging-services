@@ -24,3 +24,6 @@ const driverSchema = new Schema({
     },
   ],
 });
+
+const Driver = model("Driver", driverSchema);
+export default Driver;

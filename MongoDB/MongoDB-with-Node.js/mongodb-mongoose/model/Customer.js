@@ -27,3 +27,6 @@ const customerSchema = new Schema({
   gender: String,
   active: Boolean,
 });
+
+const Customer = model("Customer", customerSchema);
+export default Customer;

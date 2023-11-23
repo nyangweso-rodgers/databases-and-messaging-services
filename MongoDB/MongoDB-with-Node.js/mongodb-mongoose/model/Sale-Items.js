@@ -14,3 +14,6 @@ const saleItemSchema = new Schema({
   updated_by_name: String,
   active: Boolean,
 });
+
+const sale_item = model("sale_item", saleInvoiceSchema);
+export default sale_item;

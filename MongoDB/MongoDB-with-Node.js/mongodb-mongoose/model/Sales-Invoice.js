@@ -27,3 +27,6 @@ const saleInvoiceSchema = new Schema({
     },
   ],
 });
+
+const sales_invoice = model("sales_invoice", saleInvoiceSchema);
+export default sales_invoice;
