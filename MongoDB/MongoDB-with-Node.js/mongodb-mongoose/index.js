@@ -1,22 +1,34 @@
 import mongoose from "mongoose";
-import User from "./model/User.js";
+
+import sale_order from "./model/saleOrderData.js";
 
 mongoose.connect(
   // enter connection string here to connect
   ""
 );
 
+// Test Connection
+
 // Create a document
 
-// Find data
+// create Sale Order Document
+/*
+const createSaleOrder = await sale_order.create({
+  customer: [
+    {
+      customer_name: "Customer 2",
+    },
+  ],
+});
+console.log(createSaleOrder);
+*/
 
-// Update
+// Find document
 
-// Delete data
+// Update document
 
-// other useful methods
-// exists()
+// Delete documents
 
-// where
+// Delete collection
 
-// select
+// Delete Database

@@ -56,36 +56,6 @@
 - so, we create a new folder/file structure: `model/Users_v2.js`
 
   ```js
-  //
-  import mongoose from "mongoose";
-
-  const { Schema, model } = mongoose;
-
-  const userSchema = new Schema({
-    title: String,
-    slug: String,
-    firstName: String,
-    lastName: String,
-    createdAt: Date,
-    updatedAt: Date,
-    active: Boolean,
-    location: [
-      {
-        country: String,
-        city: String,
-      },
-    ],
-    age: Number,
-  });
-
-  const User = model("User", userSchema);
-  export default User;
-  ```
-
-# Schema validation
-
-- we can set some required fields in the
-  ```js
   const userSchema = new Schema({
     title: {
       type: String,
@@ -316,3 +286,18 @@
 
   console.log(userWhere);
   ```
+
+# Multiple schemas
+
+- how multiple schemas can be used together
+
+# Middleware
+
+- In **Mongoose**, **middleware** are functions that run before and/or during the execution of asynchronous functions at the schema level.
+- Examples:
+  - let's updated the `updatedAt` date, everytime a **document** is saved or updated.
+  - we add this to our models
+    ```js
+      // 
+      
+    ```
