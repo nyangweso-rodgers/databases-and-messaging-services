@@ -1,11 +1,10 @@
 import mongoose from "mongoose";
 
-import sale_order from "./model/saleOrderData.js";
-import to_do from "./model/toDoData.js";
+import sale_items from "./model/saleItemData.js";
 
 mongoose.connect(
   // enter connection string here to connect
-  ""
+  "mongodb+srv://nyangweso-rodgers:Mqns718Gf5Ixgk68@test-cluster.uo4jsy5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
 );
 
 // check and Test Connection
@@ -14,23 +13,8 @@ db.on("error", (error) => console.error("Connection error:", error));
 db.once("open", () => console.log("Connected to MongoDB Atlas"));
 
 // Create a document
-const createToDo = to_do.create({
-  description: "Respond to emails",
-});
 
-console.log(createToDo);
-
-// create Sale Order Document
-/*
-const createSaleOrder = await sale_order.create({
-  customer: [
-    {
-      customer_name: "Customer 2",
-    },
-  ],
-});
-console.log(createSaleOrder);
-*/
+// create multiple documents
 
 // Find document
 
