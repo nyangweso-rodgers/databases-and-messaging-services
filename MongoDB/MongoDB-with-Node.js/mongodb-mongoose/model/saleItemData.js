@@ -19,22 +19,36 @@ const saleItemSchema = new Schema({
     required: true,
     default: () => nanoid(7),
   },
-  created_by_name: String,
-  updated_by_name: String,
+  country: {
+    type: String,
+    required: [true, "Enter item country"],
+  },
+  created_by_name: {
+    type: String,
+    default: "Rodgers Nyangweso",
+  },
+  updated_by_name: {
+    type: String,
+    default: "Rodgers Nyangweso",
+  },
   active: {
     type: Boolean,
-    required: true,
+    required: [true, "Specify active status"],
+    enum: ["true", "false"],
   },
   item_code: {
     type: String,
-    required: true,
+    required: [true, "Enter item_code"],
   },
   item_group: String,
-  item_uom: {
-    type: String,
-    required: true,
-  },
+  item_uoms: [
+    {
+      type: String,
+      required: [true, "Enter item uom"],
+    },
+  ],
   description: String,
+  shelf_life_in_days: Number,
 });
 
 const sale_items = model("sale_items", saleItemSchema);
