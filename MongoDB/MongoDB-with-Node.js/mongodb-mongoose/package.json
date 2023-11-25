@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.3.1",
     "mongoose": "^8.0.1",
     "nanoid": "^5.0.3",
     "uniquid": "^1.1.4"
