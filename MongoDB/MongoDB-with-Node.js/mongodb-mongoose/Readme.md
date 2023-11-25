@@ -108,6 +108,25 @@
   db.once("open", () => console.log("Connected to MongoDB Atlas"));
   ```
 
+- Alternatively (and for security reasons)
+  - if we are adding this project to a public repo, it is best that no one can see the **MongoDB** URI since we have included our password. Hence, we can create an `.env` file in our root directory and write our URI inside it like:
+  ```env
+    MONGODB_URI='mongodb+srv://<username>:<password>@test-cluster.uo4jsy5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"'
+  ```
+  - back to `index.js` file, we replace the URI inside `mongoose.connect()` with `process.env.MONGODB_URI` to hide the sensitive information.
+  - ensure, `.env` file is included in the `.gitignore` file.
+  - install the package `dotnev`, [dotnev npm](https://www.npmjs.com/package/dotenv) for us to use the `.env` file in the project.
+    ```sh
+      # install dotnev
+      npm install dotnev
+    ```
+  - import `dotnev` then add the following line at the top of the `index.js` file
+    ```js
+    // index.js
+    import dotenv from "dotenv";
+    dotenv.config();
+    ```
+
 # Inserting Data
 
 ## Inserting Data: Method 1
