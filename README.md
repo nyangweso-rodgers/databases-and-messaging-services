@@ -1,56 +1,50 @@
 # Databases
 
 ## Table Of Contents
+
 - [SQL Databases]()
   - [PosgreSQL]()
-  
 - [NoSQL Databases](https://github.com/nyangweso-rodgers/My-Databases/tree/main/NoSQL-Databases)
-    1. [MongoDB](https://github.com/nyangweso-rodgers/My-Databases/tree/main/MongoDB)
 
-    2. [Redis](https://github.com/nyangweso-rodgers/My-Databases)
+  1. [MongoDB](https://github.com/nyangweso-rodgers/My-Databases/tree/main/MongoDB)
+
+  2. [Redis](https://github.com/nyangweso-rodgers/My-Databases)
 
 - [Data Warehousing](https://github.com/nyangweso-rodgers/My-Databases/tree/main/Data-Warehouse)
-    - [Dimensional Modeling in Data Wareousing](https://github.com/nyangweso-rodgers/My-Databases/tree/main/Data-Warehouse/Dimensional-Modeling-in-Data-Warehousing)
-    - [Google BigQuery](https://github.com/nyangweso-rodgers/My-Databases/tree/main/Data-Warehouse/Google-BigQuery)
+  - [Dimensional Modeling in Data Wareousing](https://github.com/nyangweso-rodgers/My-Databases/tree/main/Data-Warehouse/Dimensional-Modeling-in-Data-Warehousing)
+  - [Google BigQuery](https://github.com/nyangweso-rodgers/My-Databases/tree/main/Data-Warehouse/Google-BigQuery)
+  - [MongoDB Basics - What are ACID Properties in Database Management Systems?](https://www.mongodb.com/basics/acid-transactions)
 
 # Introduction to Databases
-* __Database__: application that allow one to store and access data. _a database is a collection of data that is organized in a manner that facilitates ease of access, as well as efficient management and tracking._. a database is made up of __tables__ that store relevant information.
+
+- **Database**: application that allow one to store and access data. _a database is a collection of data that is organized in a manner that facilitates ease of access, as well as efficient management and tracking._. a database is made up of **tables** that store relevant information.
 
 # Definition of Terms in Databases
-1. __Database Table__ : a table stores and displays data in a structtured format consisting of columns and rows. web applications use them to provide dynamic functions to users e.g., displaying products, content management, and user management.
 
-2. __Primary Key__: field in the table that uniquely identifies the table records. _Features if a Primary Key include_:
-    * it must contain a unique value for each row
-    * it cannot contain NULL values
-    
-3. __Database Management System__ (__DBMS__) : software to create, define and manage database. e.g., _Microsoft_, _Oracle_, _IBM_, _Apache_, _SQLServer_, _DB2_, _Cassandra_, _Firebind, _MongoDB_, _FileMaker_,  _MySQL_, _PostgreSQL_.
+1. **Database Table** : a table stores and displays data in a structtured format consisting of columns and rows. web applications use them to provide dynamic functions to users e.g., displaying products, content management, and user management.
 
-# Setting Python's Virtual Environment for this Prroject
-1. Navigate to the root directory of your project using the terminal or command prompt.
-2. Run the following command to create a new virtual environment: This will create a new directory called env in your project directory, which contains the virtual environment.
+2. **Primary Key**: field in the table that uniquely identifies the table records. _Features if a Primary Key include_:
+   - it must contain a unique value for each row
+   - it cannot contain NULL values
+3. **Database Management System** (**DBMS**) : software to create, define and manage database. e.g., _Microsoft_, _Oracle_, _IBM_, _Apache_, _SQLServer_, _DB2_, _Cassandra_, _Firebind, \_MongoDB_, _FileMaker_, _MySQL_, _PostgreSQL_.
 
-    ```sh
-        python -m venv venv
-    ```
-3. Activate the virtual environment by running the following command: This will activate the virtual environment and change your shell's prompt to indicate that you're working within the virtual environment.
+# ACID Properties in DMS (Database Management Systems)
 
-    ```sh
-         source env/bin/activate  # For Linux or macOS
-         source venv/Scripts/activate  # For Windows
-    ```
-4. You can now install any required modules using pip, which will install them within the virtual environment. For example:
-
-    ```sh
-        pip install numpy
-    ```
-5. This will install the numpy module within the virtual environment, making it available for use in your project.
-6. it's a best practice to use a separate file, usually called requirements.txt or Pipfile, to list the required dependencies for your project. You can generate this file automatically using pip freeze, which will list all of the installed packages and their versions within your virtual environment. Here's an example of how to generate a requirements.txt file:
-
-    ```sh
-        pip freeze > requirements.txt
-    ```
-7. With this approach, others can create their own virtual environment and install the required dependencies using the requirements.txt file, by running the following command:
-    
-    ```sh
-        pip install -r requirements.txt
-    ```
+- **ACID** is an acronym that stands for **atomicity**, **consistency**, **isolation**, and **durability**.
+- Together, these **ACID** properties ensure that a set of database operations (grouped together in a transaction) leave the database in a valid state even in the event of unexpected errors.
+- **ACID** properties:
+  - **Atomicity**
+    - **Atomicity** guarantees that all of the commands that make up a transaction are treated as a single unit and either succeed or fail together.
+    - This is important as in the case of an unwanted event, like a crash or power outage, we can be sure of the state of the database. The transaction would have either completed successfully or been rollbacked if any part of the transaction failed.
+    - Example
+      - money is deducted from the source and if any anomaly occurs, the changes are discarded and the transaction fails.
+  - **Consistency**
+    - **Consistency** guarantees that changes made within a transaction are consistent with database constraints. This includes all rules, constraints, and triggers. If the data gets into an illegal state, the whole transaction fails.
+    - Example:
+      - let’s say there is a constraint that the balance should be a positive integer. If we try to overdraw money, then the balance won’t meet the constraint. Because of that, the consistency of the ACID transaction will be violated and the transaction will fail.
+  - **Isolation**
+    - **Isolation** ensures that all transactions run in an isolated environment. That enables running transactions concurrently because transactions don’t interfere with each other.
+    - Example:
+      - let’s say that our account balance is $200. Two transactions for a $100 withdrawal start at the same time. The transactions run in isolation which guarantees that when they both complete, we’ll have a balance of $0 instead of $100.
+  - **Durability**
+    - **Durability** guarantees that once the transaction completes and changes are written to the database, they are persisted. This ensures that data within the system will persist even in the case of system failures like crashes or power outages.
