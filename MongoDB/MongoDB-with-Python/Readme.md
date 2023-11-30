@@ -40,7 +40,7 @@
 
 - [indent-rainbow](https://marketplace.visualstudio.com/items?itemName=oderwat.indent-rainbow) adds some color to the identation.
 
-# Setting Up Virtual Environment
+# Setting Up Python Virtual Environment
 
 1. Navigate to the root directory of your project using the terminal or command prompt.
 
