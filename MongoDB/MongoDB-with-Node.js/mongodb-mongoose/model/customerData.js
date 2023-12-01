@@ -24,6 +24,8 @@ const customerSchema = new Schema({
       longitude: Number,
       country: String,
       city: String,
+      state: String,
+      zip: String,
     },
   ],
   gender: String,

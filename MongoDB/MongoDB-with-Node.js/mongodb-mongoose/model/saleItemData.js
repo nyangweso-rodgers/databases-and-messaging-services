@@ -4,12 +4,12 @@ import { nanoid } from "nanoid";
 const { Schema, model } = mongoose;
 
 const saleItemSchema = new Schema({
-  createdAt: {
+  created_at: {
     type: Date,
     default: () => Date.now(),
     immutable: true,
   },
-  updatedAt: {
+  updated_at: {
     type: Date,
     default: () => Date.now(),
     immutable: false,

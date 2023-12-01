@@ -10,7 +10,7 @@ const saleOrderSchema = new Schema(
       required: true,
       default: () => nanoid(7),
     },
-    createdAt: {
+    created_at: {
       type: Date,
       required: [true, "add Created At!"],
       default: () => Date.now(),
@@ -57,21 +57,23 @@ const saleOrderSchema = new Schema(
     items: [
       {
         item_id: String,
-        created_at: Date,
-        updated_at: Date,
-        item_name: String,
-        item_uom: String,
-        item_category: String,
+        name: String,
+        uom: String,
+        category_id: String,
         ordered_qty: Number,
         delivered_qty: Number,
-        item_status: String,
+        item_status: { enum: ["FULFILLED", "CANCELLED"] },
         discount_amount: Number,
         unit_selling_price: {
           required: true,
           default: 0.0,
           type: mongoose.Decimal128,
         },
-        total_ordered: Number,
+        total_ordered: {
+          type: Number,
+          required: true,
+          default: 0,
+        },
         total_delivered: Number,
       },
     ],
