@@ -8,3 +8,12 @@
 - `removeData.js` - removes selected data.
 - `retrieveData.js` - fetches all data
 - `updateData.js` - edits data.
+
+# Check and Test MongoDB Connection
+
+```js
+// check and Test Connection
+const db = mongoose.connection;
+db.on("error", (error) => console.error("Connection error:", error));
+db.once("open", () => console.log("Connected to MongoDB Atlas"));
+```
