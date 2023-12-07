@@ -2,35 +2,68 @@ import mongoose from "mongoose";
 
 const { Schema, model } = mongoose;
 
-const customerSchema = new Schema({
-  createdAt: {
-    type: Date,
-    immutable: true,
-  },
-  updatedAt: {
-    type: Date,
-    default: () => Date.now(),
-    immutable: false,
-  },
-  created_by_name: String,
-  updated_by_name: String,
-  customer_name: String,
-  first_name: String,
-  last_name: String,
-  phone_number: String,
-  location: [
-    {
-      latitude: Number,
-      longitude: Number,
-      country: String,
-      city: String,
-      state: String,
-      zip: String,
+const customerSchema = new Schema(
+  {
+    created_by: {
+      type: String,
+      default: "Rodgers Nyangweso",
+      required: true,
     },
-  ],
-  gender: String,
-  active: Boolean,
-});
+    updated_by: {
+      type: String,
+      default: "Rodgers Nyangweso",
+      required: true,
+    },
+    customer_id: {
+      type: String,
+      required: true,
+    },
+    customer_name: String,
+    first_name: {
+      type: String,
+      default: "",
+    },
+    last_name: {
+      type: String,
+      default: "",
+    },
+    contact: [
+      {
+        phone_number: String,
+        email: String,
+      },
+    ],
+    location: [
+      {
+        latitude: {
+          type: String,
+          default: "",
+        },
+        longitude: {
+          type: String,
+          default: "",
+        },
+        country: { type: String, default: "KE" },
+        city: {
+          type: String,
+          default: "",
+        },
+        state: {
+          type: String,
+          default: "",
+        },
+        zip: String,
+      },
+    ],
+    gender: {
+      type: String,
+      enum: ["male", "female"],
+      default: "",
+    },
+    active: Boolean,
+  },
+  { timestamps: true }
+);
 
 const customer = model("customer", customerSchema);
 export default customer;
