@@ -1,4 +1,4 @@
-# Project - Getting Started with MongoDB and Mongoose
+# Project - MongoDB with Mongoose
 
 ## Table of Contents
 
