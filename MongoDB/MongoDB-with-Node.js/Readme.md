@@ -1,7 +1,8 @@
-# MongoDB with Node.js
+# MongoDB with `Node.js`
 
 ## Table of Contents
 
+- [Description](#Description)
 - [Further Reading]()
   1. [official documentation website - mongoosejs.com](https://mongoosejs.com/)
   2. [official documentation - mongodb](https://www.mongodb.com/)
@@ -41,18 +42,18 @@
     ],
   });
   ```
-- with schemas, we define each field and its data type. Permitted types include:
-  1. String
-  2. Number
-  3. Date
-  4. Buffer
-  5. Boolean
-  6. Mixed
-  7. ObjectId
-  8. Array
-  9. Decimal128
-  10. Map
-- a document in MongoDB created from this schema would look like this:
+- with **schemas**, we define each field and its **data type**. Permitted types include:
+  1. `String`
+  2. `Number`
+  3. `Date`
+  4. `Buffer`
+  5. `Boolean`
+  6. `Mixed`
+  7. `ObjectId`
+  8. `Array`
+  9. `Decimal128`
+  10. `Map`
+- a document in **MongoDB** created from this schema would look like this:
 
   ```json
     // sample documents
@@ -113,12 +114,12 @@
 
 ## Concept 3: Query
 
-- A query is just a query we make against mongoDB database.
+- A query is just a query we make against **mongoDB** database.
 
 # Installation and Setup
 
 - Step 1: install [Node.js](https://nodejs.org/en) and [mongodb](https://www.mongodb.com/try)
-- Step 2: Install mongoose using `npm`
+- Step 2: Install **mongoose** using `npm`
   ```sh
     # install mongoose
     npm install mongoose
