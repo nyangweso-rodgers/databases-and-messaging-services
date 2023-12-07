@@ -17,3 +17,65 @@ const db = mongoose.connection;
 db.on("error", (error) => console.error("Connection error:", error));
 db.once("open", () => console.log("Connected to MongoDB Atlas"));
 ```
+
+# Inser a new Document
+
+```js
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config(); // Load environment variables from .env file
+
+import customer from "../../model/customerData.js";
+
+//mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect(
+  // enter connection string here to connect
+  process.env.MONGODB_URI
+);
+
+// insert a customer
+const insertCustomer = await customer.create({
+  customer_id: "9",
+  gender: "male",
+});
+
+// find a single user from the mongodb
+console.log(insertCustomer);
+```
+
+# Insert Multiple Documents
+
+```js
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config(); // Load environment variables from .env file
+
+import customer from "../../model/customerData.js";
+
+//mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect(
+  // enter connection string here to connect
+  process.env.MONGODB_URI
+);
+
+// insert multiple customers
+const customersData = [
+  { customer_id: "1", gender: "male" },
+  { customer_id: "2", gender: "female" },
+  { customer_id: "3", gender: "male" },
+];
+
+const insertCustomer = customer
+  .create(customersData)
+  .then((result) => {
+    console.log("documents inserted successfully:", result);
+  })
+  .catch((err) => {
+    console.log("error while inserting the documents:", err);
+  });
+
+// find a single user from the mongodb
+console.log(insertCustomer);
+```
+
+# Drop `customer` collection
