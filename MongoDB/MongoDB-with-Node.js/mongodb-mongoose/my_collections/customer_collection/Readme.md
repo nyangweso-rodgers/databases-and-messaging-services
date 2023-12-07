@@ -78,4 +78,55 @@ const insertCustomer = customer
 console.log(insertCustomer);
 ```
 
+# Insert Multiple Documents using `Model.insertMany()`
+
+```js
+// insert using `Model.insertMany()`
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config(); // Load environment variables from .env file
+
+import customer from "../../model/customerData.js";
+
+//mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect(
+  // enter connection string here to connect
+  process.env.MONGODB_URI
+);
+
+// insert multiple customers
+const customersData = [
+  {
+    customer_id: "7",
+    first_name: "Rodgers",
+    last_name: "Rodgers",
+    gender: "male",
+  },
+  {
+    customer_id: "8",
+    first_name: "Rodgers",
+    last_name: "Rodgers",
+    gender: "female",
+  },
+  {
+    customer_id: "9",
+    first_name: "Rodgers",
+    last_name: "Rodgers",
+    gender: "male",
+  },
+];
+
+const insertCustomer = customer
+  .insertMany(customersData)
+  .then((result) => {
+    console.log("documents inserted successfully:", result);
+  })
+  .catch((err) => {
+    console.log("error while inserting the documents:", err);
+  });
+
+// find a single user from the mongodb
+console.log(insertCustomer);
+```
+
 # Drop `customer` collection
