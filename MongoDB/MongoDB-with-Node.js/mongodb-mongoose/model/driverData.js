@@ -6,6 +6,7 @@ const driverSchema = new Schema({
   createdAt: {
     type: Date,
     immutable: true,
+    default: () => Date.now(),
   },
   updatedAt: {
     type: Date,

@@ -22,14 +22,16 @@ const customerSchema = new Schema(
     first_name: {
       type: String,
       default: "",
+      required: true,
     },
     last_name: {
       type: String,
       default: "",
+      required: true,
     },
     contact: [
       {
-        phone_number: String,
+        phone_number: { type: String, default: "+254", required: true },
         email: String,
       },
     ],
@@ -38,21 +40,23 @@ const customerSchema = new Schema(
         latitude: {
           type: String,
           default: "",
+          required: true,
         },
         longitude: {
           type: String,
           default: "",
+          required: true,
         },
-        country: { type: String, default: "KE" },
+        country: { type: String, default: "KE", required: true },
         city: {
           type: String,
           default: "",
+          required: true,
         },
         state: {
           type: String,
           default: "",
-        },
-        zip: String,
+        }
       },
     ],
     gender: {
