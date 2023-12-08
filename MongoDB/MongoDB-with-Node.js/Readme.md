@@ -7,6 +7,7 @@
   1. [official documentation website - mongoosejs.com](https://mongoosejs.com/)
   2. [official documentation - mongodb](https://www.mongodb.com/)
   3. [download - node.js](https://nodejs.org/en/)
+  4. [mongoose.docs - connections](https://mongoosejs.com/docs/connections.html)
 
 # Description
 
@@ -112,10 +113,6 @@
     const User = mongoose.model("User", userSchema);
     ```
 
-## Concept 3: Query
-
-- A query is just a query we make against **mongoDB** database.
-
 # Installation and Setup
 
 - Step 1: install [Node.js](https://nodejs.org/en) and [mongodb](https://www.mongodb.com/try)
@@ -126,10 +123,122 @@
   ```
 - Step 3: import mongoose
 
-  ```js
-  // using Node.js `require()`
-  const mongoose = require("mongoose");
+  - using Node.js `require()`
 
-  // or, using ES6 imports
+    ```js
+    // using Node.js `require()`
+    const mongoose = require("mongoose");
+    ```
+
+  - or, using ES6 imports
+
+    ```js
+    // or, using ES6 imports
+    import mongoose from "mongoose";
+    ```
+
+# Connecting to MongoDB
+
+- create an `index.js` file and use **Mongoose** to connect to **MongoDB**
+
+  ```js
+  // index.js
   import mongoose from "mongoose";
+  // import a model
+  import Users from "./model/Users_v2.js";
+
+  mongoose.connect(
+    "mongodb+srv://<username>:<password>@test-cluster.uo4jsy5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+  );
+
+  // check and Test Connection
+  const db = mongoose.connection;
+  db.on("error", (error) => console.error("Connection error:", error));
+  db.once("open", () => console.log("Connected to MongoDB Atlas"));
   ```
+
+- Alternatively (and for security reasons)
+  - if we are adding this project to a public repo, it is best that no one can see the **MongoDB** URI since we have included our password. Hence, we can create an `.env` file in our root directory and write our URI inside it like:
+  ```env
+    MONGODB_URI='mongodb+srv://<username>:<password>@test-cluster.uo4jsy5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"'
+  ```
+  - back to `index.js` file, we replace the URI inside `mongoose.connect()` with `process.env.MONGODB_URI` to hide the sensitive information.
+  - ensure, `.env` file is included in the `.gitignore` file.
+  - install the package `dotnev`, [dotnev npm](https://www.npmjs.com/package/dotenv) for us to use the `.env` file in the project.
+    ```sh
+      # install dotnev
+      npm install dotnev
+    ```
+  - import `dotnev` then add the following line at the top of the `index.js` file
+    ```js
+    // index.js
+    import dotenv from "dotenv";
+    dotenv.config();
+    ```
+
+# Optional Parameters for Connecting to MongoDB
+
+1. `auth`
+
+   - Specify credentials for authentication.
+   - E.g.,
+
+   ```js
+   mongoose.connect("mongodb://username:password@localhost/your-database", {
+     auth: { authSource: "admin" }, // Specify the authentication source (if not default)
+   });
+   ```
+
+2. `dbName`
+   - Specify the name of the database to connect to.
+   - This can be useful if you want to connect to a different database than the one specified in the connection string:
+     ```js
+     mongoose.connect("mongodb://localhost", { dbName: "your-database" });
+     ```
+3. `poolSize`
+   - Set the size of the connection pool.
+   - The **connection pool** helps manage the number of simultaneous connections to the **MongoDB** server:
+     ```js
+     mongoose.connect("mongodb://localhost/your-database", { poolSize: 10 });
+     ```
+4. `bufferCommands`
+   - Enable or disable the buffering of commands.
+   - When set to `false`, **Mongoose** immediately sends write operations to **MongoDB**:
+     ```js
+     mongoose.connect("mongodb://localhost/your-database", {
+       bufferCommands: false,
+     });
+     ```
+5. `useCreateIndex`
+
+   - **Mongoose** uses this option to enable the use of `createIndex() `instead of `ensureIndex()` for automatic index creation:
+
+     ```js
+     mongoose.connect("mongodb://localhost/your-database", {
+       useCreateIndex: true,
+     });
+     ```
+
+6. `useFindAndModify`
+
+   - Set to `false` to disable the use of `findOneAndUpdate()`, `findOneAndDelete()`, etc. Instead, use `updateOne()`, `deleteOne()`, etc.
+
+     ```js
+     mongoose.connect("mongodb://localhost/your-database", {
+       useFindAndModify: false,
+     });
+     ```
+
+7. `autoIndex`
+
+   - **Mongoose** automatically builds indexes defined in your schemas.
+   - Set to `false` to disable automatic index building:
+
+     ```js
+     mongoose.connect("mongodb://localhost/your-database", {
+       autoIndex: false,
+     });
+     ```
+
+8. `useNewUrlParser`
+9. `useUnifiedTopology`
