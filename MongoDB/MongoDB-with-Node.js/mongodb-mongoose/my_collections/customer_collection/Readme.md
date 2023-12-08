@@ -132,7 +132,7 @@ console.log(insertCustomer);
 
 # Insert documents from an external `JSON` object
 
-# Update Documents
+# Update Single Document using `updateOne()` or `findOneAndUpdate()`
 
 - To update a single document you can use the `updateOne()` or `findOneAndUpdate()` methods.
 - The `updateOne()` method takes two arguments:
@@ -203,5 +203,48 @@ console.log(insertCustomer);
   ```
 
 - If you need to retrieve the original document before the update, you might consider using `findOneAndUpdate()`.
+
+# Update Multiple documents using `updateMany()`
+
+- To update multiple documents in **MongoDB** using **Mongoose**, you can use the `updateMany()` method.
+- Syntax:
+
+  ```js
+  const mongoose = require("mongoose");
+
+  // Define your customer schema
+  const customerSchema = new mongoose.Schema({
+    name: String,
+    email: String,
+    // other fields...
+  });
+
+  // Create a Mongoose model
+  const Customer = mongoose.model("Customer", customerSchema);
+
+  // Connect to MongoDB
+  mongoose.connect("mongodb://localhost/your-database", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+
+  // Example: Update multiple documents based on a condition
+  const condition = {
+    /* your condition here */
+  }; // Specify the condition for matching documents
+  const updateData = { $set: { email: "new-email@example.com" } }; // Update fields and values as needed
+
+  Customer.updateMany(condition, updateData)
+    .then((result) => {
+      console.log(`${result.nModified} documents updated successfully.`);
+    })
+    .catch((error) => {
+      console.error("Error updating documents:", error);
+    })
+    .finally(() => {
+      // Close the MongoDB connection after updating
+      mongoose.connection.close();
+    });
+  ```
 
 # Drop `customer` collection
