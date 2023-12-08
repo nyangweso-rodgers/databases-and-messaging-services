@@ -51,8 +51,6 @@
 
 # Creating a Schema and Model
 
-- before connecting to the database, we first need to create a **schema** and **model**
-- Ideally, you would create a schema/model file for each **schema** that is needed.
 - so, we create a new folder/file structure: `model/Users_v2.js`
 
   ```js
@@ -88,44 +86,6 @@
     },
   });
   ```
-
-# Connecting to MongoDB
-
-- create an `index.js` file and use **Mongoose** to connect to **MongoDB**
-
-  ```js
-  // index.js
-  import mongoose from "mongoose";
-  import Users from "./model/Users_v2.js";
-
-  mongoose.connect(
-    "mongodb+srv://<username>:<password>@test-cluster.uo4jsy5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
-  );
-
-  // check and Test Connection
-  const db = mongoose.connection;
-  db.on("error", (error) => console.error("Connection error:", error));
-  db.once("open", () => console.log("Connected to MongoDB Atlas"));
-  ```
-
-- Alternatively (and for security reasons)
-  - if we are adding this project to a public repo, it is best that no one can see the **MongoDB** URI since we have included our password. Hence, we can create an `.env` file in our root directory and write our URI inside it like:
-  ```env
-    MONGODB_URI='mongodb+srv://<username>:<password>@test-cluster.uo4jsy5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"'
-  ```
-  - back to `index.js` file, we replace the URI inside `mongoose.connect()` with `process.env.MONGODB_URI` to hide the sensitive information.
-  - ensure, `.env` file is included in the `.gitignore` file.
-  - install the package `dotnev`, [dotnev npm](https://www.npmjs.com/package/dotenv) for us to use the `.env` file in the project.
-    ```sh
-      # install dotnev
-      npm install dotnev
-    ```
-  - import `dotnev` then add the following line at the top of the `index.js` file
-    ```js
-    // index.js
-    import dotenv from "dotenv";
-    dotenv.config();
-    ```
 
 # Inserting Data
 
@@ -268,59 +228,3 @@
   const deleteUser = await User.deleteOne({ slug: "Rodgy" });
   console.log(deleteUser);
   ```
-
-# Other Useful methods
-
-## `exists()` method
-
-- returns either `null` or the `ObjectId` of a document that matches the provided query.
-
-  ```js
-  // other useful methods
-  // exists()
-  const findUser = await User.exists({ slug: "Rodgy" });
-
-  console.log(findUser);
-  ```
-
-## `where()` method
-
-- `where()` method allows us to chain and build queries
-
-  ```js
-  // where() method
-  // instead of using a standard find method
-  const userFind = await User.findOne({ slug: "Rodgy" });
-
-  // use the equivalent where() method
-  const userWhere = await User.where("slug").equals("Rodgy");
-
-  console.log(userWhere);
-  ```
-
-## `select()` method
-
-- To include projection when using the `where()` method, chain the `select()` method after your query.
-
-  ```js
-  // use the equivalent where() method
-  const userWhere = await User.where("slug")
-    .equals("Rodgy")
-    .select("firstName, createdAt");
-
-  console.log(userWhere);
-  ```
-
-# Multiple schemas
-
-- how multiple schemas can be used together
-
-# Middleware
-
-- In **Mongoose**, **middleware** are functions that run before and/or during the execution of asynchronous functions at the schema level.
-- Examples:
-  - let's updated the `updatedAt` date, everytime a **document** is saved or updated.
-  - we add this to our models
-    ```js
-    //
-    ```
