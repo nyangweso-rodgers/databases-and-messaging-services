@@ -242,3 +242,99 @@
 
 8. `useNewUrlParser`
 9. `useUnifiedTopology`
+
+# Creating a Schema and Model
+
+- before connecting to the database, we first need to create a **schema** and **model**
+- Ideally, you would create a schema/model file for each **schema** that is needed.
+- so, we create a new folder/file structure: `model/Users_v2.js`
+  ````js
+    const userSchema = new Schema({
+      title: {
+        type: String,
+        required: false,
+      },
+      slug: {
+        type: String,
+        required: false,
+        lowercase: true,
+      },
+      firstName: {
+        type: String,
+        required: true,
+      },
+      lastName: {
+        type: String,
+        requested: true,
+      },
+      createdAt: {
+        type: Date,
+        default: () => Date.now(),
+        immutable: true,
+      },
+      updatedAt: Date,
+      email: {
+        type: String,
+        minLength: 10,
+        required: false,
+        lowercase: true,
+      },
+    });
+    ```
+  ````
+
+# Other Useful methods
+
+1. `exists()`:
+
+   - returns either `null` or the `ObjectId` of a document that matches the provided query.
+
+     ```js
+     // other useful methods
+     // exists()
+     const findUser = await User.exists({ slug: "Rodgy" });
+
+     console.log(findUser);
+     ```
+
+2. `where()`:
+
+   - allows us to chain and build queries
+
+     ```js
+     // where() method
+     // instead of using a standard find method
+     const userFind = await User.findOne({ slug: "Rodgy" });
+
+     // use the equivalent where() method
+     const userWhere = await User.where("slug").equals("Rodgy");
+
+     console.log(userWhere);
+     ```
+
+3. `select()`
+
+   - To include projection when using the `where()` method, chain the `select()` method after your query.
+
+     ```js
+     // use the equivalent where() method
+     const userWhere = await User.where("slug")
+       .equals("Rodgy")
+       .select("firstName, createdAt");
+
+     console.log(userWhere);
+     ```
+
+# Multiple schemas
+
+- how multiple schemas can be used together
+
+# Middleware
+
+- In **Mongoose**, **middleware** are functions that run before and/or during the execution of asynchronous functions at the schema level.
+- Examples:
+  - let's updated the `updatedAt` date, everytime a **document** is saved or updated.
+  - we add this to our models
+    ```js
+    //
+    ```
