@@ -247,6 +247,41 @@ console.log(insertCustomer);
     });
   ```
 
+# Delete a single document using `deleteOne()` or `findOneAndDelete()` methods.
+
+- To delete a single document in **MongoDB** using **Mongoose**, you can use the `deleteOne()` or `findOneAndDelete()` methods.
+- `deleteOne()` method takes one argument, which is the filter condition that specifies which document to delete.
+
+  - E.g., delete a document based on the `_id` field.
+
+    ```js
+    import mongoose from "mongoose";
+    import dotenv from "dotenv";
+    dotenv.config();
+
+    import customer from "../../model/customerData.js";
+
+    // Delete a document based on a condition (e.g., _id)
+    const customerIdToDelete = "6572198c08355d37f3d7ac9d"; // Replace with the actual _id value
+
+    const deleteDocument = async () => {
+      // connect to MongoDB
+      await mongoose.connect(process.env.MONGODB_URI);
+
+      try {
+        const result = await customer.deleteOne({ _id: customerIdToDelete });
+        console.log(`${result.deletedCount} document deleted successfully.`);
+      } catch (err) {
+        console.error("Error deleting document:", err);
+      } finally {
+        // Close the MongoDB connection after deleting
+        mongoose.connection.close();
+      }
+    };
+
+    export default deleteDocument;
+    ```
+
 # Drop `customer` collection using `drop()` method
 
 ```js
