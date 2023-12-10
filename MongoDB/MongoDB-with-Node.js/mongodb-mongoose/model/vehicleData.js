@@ -21,8 +21,12 @@ const vehicleSchema = new Schema({
     type: String,
   },
   engine_capacity: {},
-  make: {},
-  model: {},
+  make: {
+    enum: ["Audi", "Isuzu", "Toyota", "Nissan", "Honda", "Suzuki", "Subaru"],
+  },
+  model: {
+    enum: ["Skyline"],
+  },
   capacity: {},
   vehicle_type: {
     enum: ["VAN", "LORRY", "PICK-UP", "CANTER", "TUK TUK"],
