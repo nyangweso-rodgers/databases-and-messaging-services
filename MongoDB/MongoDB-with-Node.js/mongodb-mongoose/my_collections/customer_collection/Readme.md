@@ -19,7 +19,9 @@ db.on("error", (error) => console.error("Connection error:", error));
 db.once("open", () => console.log("Connected to MongoDB Atlas"));
 ```
 
-# Inser a new Document
+# Create Documents in a Collection
+
+## Create a new Document using `create()` method
 
 ```js
 import mongoose from "mongoose";
@@ -36,29 +38,26 @@ mongoose.connect(
 
 // insert a customer
 const insertCustomer = await customer.create({
-  customer_id: "9",
+  customer_id: "12",
   gender: "male",
+  customer_name: "Test Customer",
+  first_name: "First Name",
+  last_name: "Last Name",
+  contact: [
+    {
+      phone_number: "+254",
+      email: "rodgerso65@gmail.com",
+    },
+  ],
 });
 
 // find a single user from the mongodb
 console.log(insertCustomer);
 ```
 
-# Insert Multiple Documents
+## Create Multiple Documents using `create()` method
 
 ```js
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-dotenv.config(); // Load environment variables from .env file
-
-import customer from "../../model/customerData.js";
-
-//mongoose.connect(process.env.MONGODB_URI);
-mongoose.connect(
-  // enter connection string here to connect
-  process.env.MONGODB_URI
-);
-
 // insert multiple customers
 const customersData = [
   { customer_id: "1", gender: "male" },
@@ -79,21 +78,10 @@ const insertCustomer = customer
 console.log(insertCustomer);
 ```
 
-# Insert Multiple Documents using `Model.insertMany()`
+## Create Multiple Documents using `Model.insertMany()`
 
 ```js
 // insert using `Model.insertMany()`
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-dotenv.config(); // Load environment variables from .env file
-
-import customer from "../../model/customerData.js";
-
-//mongoose.connect(process.env.MONGODB_URI);
-mongoose.connect(
-  // enter connection string here to connect
-  process.env.MONGODB_URI
-);
 
 // insert multiple customers
 const customersData = [
@@ -130,9 +118,11 @@ const insertCustomer = customer
 console.log(insertCustomer);
 ```
 
-# Insert documents from an external `JSON` object
+## Create documents from an external `JSON` object
 
-# Update Single Document using `updateOne()` or `findOneAndUpdate()`
+# Update Documents in a Collection
+
+## Update Single Document using `updateOne()` or `findOneAndUpdate()`
 
 - To update a single document you can use the `updateOne()` or `findOneAndUpdate()` methods.
 - The `updateOne()` method takes two arguments:
@@ -143,14 +133,6 @@ console.log(insertCustomer);
   - using `updateOne()`:
 
     ```js
-    import mongoose from "mongoose";
-    import dotenv from "dotenv";
-    dotenv.config();
-
-    import customer from "../../model/customerData.js";
-
-    mongoose.connect(process.env.MONGODB_URI);
-
     // Example: Update a document based on a condition (e.g., _id)
     const customerIdToUpdate = "657211241a3db27e73b32b92"; // Replace with the actual _id value
     const updateDocument = { first_name: "Rodgers" }; // Update fields and values as needed
@@ -172,14 +154,6 @@ console.log(insertCustomer);
 - The `updateOne()` method returns a promise that resolves to an object containing information about the update operation, such as the number of documents matched and modified.
 
   ```js
-  import mongoose from "mongoose";
-  import dotenv from "dotenv";
-  dotenv.config();
-
-  import customer from "../../model/customerData.js";
-
-  mongoose.connect(process.env.MONGODB_URI);
-
   // Example: Update a document based on a condition (e.g., _id)
   const customerIdToUpdate = "657211241a3db27e73b32b92"; // Replace with the actual _id value
   const updateDocument = { last_name: "Nyangweso" }; // Update fields and values as needed
@@ -204,7 +178,7 @@ console.log(insertCustomer);
 
 - If you need to retrieve the original document before the update, you might consider using `findOneAndUpdate()`.
 
-# Update Multiple documents using `updateMany()`
+## Update Multiple documents using `updateMany()`
 
 - To update multiple documents in **MongoDB** using **Mongoose**, you can use the `updateMany()` method.
 - Syntax:
@@ -247,9 +221,12 @@ console.log(insertCustomer);
     });
   ```
 
-# Delete a single document using `deleteOne()` or `findOneAndDelete()` methods.
+# Delete Documents in a Collection
 
 - To delete a single document in **MongoDB** using **Mongoose**, you can use the `deleteOne()` or `findOneAndDelete()` methods.
+
+## Delete a document using `deleteOne()` method.
+
 - `deleteOne()` method takes one argument, which is the filter condition that specifies which document to delete.
 
   - E.g., delete a document based on the `_id` field.
@@ -281,8 +258,56 @@ console.log(insertCustomer);
 
     export default deleteDocument;
     ```
+  - or, 
+    ```js
 
-# Drop `customer` collection using `drop()` method
+    ```
+
+## Delete a document using `findOneAndDelete()` method
+
+```js
+
+```
+
+## Delete all documents within a Collection using `deleteMany()` method
+- to delete all documents in a collection using Mongoose, you can specify an empty filter object, like this:
+  ```js
+      import mongoose from "mongoose";
+      import dotenv from "dotenv";
+      dotenv.config();
+
+      import customer from "../../model/customerData.js";
+
+      // connect to MongoDB
+      mongoose.connect(process.env.MONGODB_URI);
+
+      // Delete a document based on a condition (e.g., _id)
+
+      // delete all documents using deleteMany()
+      async function deleteAllDocuments() {
+        try {
+          // specify an empty filter to match all documents
+          const query = {};
+
+          // Use Mongoose's deleteMany to delete all documents in the collection
+          const result = await customer.deleteMany(query);
+
+          console.log(`${result.deletedCount} documents deleted`);
+        } catch (err) {
+          console.err('Error deleting documents:', err);
+        } finally {
+          // close the connection
+          mongoose.connection.close();
+        }
+      }
+
+      // call the function to delete all documents
+      deleteAllDocuments();
+  ```
+
+# Drop MongoDB Collection
+
+## Drop `customer` collection using `drop()` method
 
 ```js
 import mongoose from "mongoose";

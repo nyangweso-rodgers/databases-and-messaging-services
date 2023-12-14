@@ -8,18 +8,24 @@ import customer from "../../model/customerData.js";
 mongoose.connect(process.env.MONGODB_URI);
 
 // Delete a document based on a condition (e.g., _id)
-const customerIdToDelete = "6572198c08355d37f3d7ac9c"; // Replace with the actual _id value
 
-const deleteDocument = async () => {
+// delete all documents using deleteMany()
+async function deleteAllDocuments() {
   try {
-    const result = await customer.findOneAndDelete({ _id: customerIdToDelete });
-    console.log(`${result.deletedCount} document deleted successfully.`);
+    // specify an empty filter to match all documents
+    const query = {};
+
+    // Use Mongoose's deleteMany to delete all documents in the collection
+    const result = await customer.deleteMany(query);
+
+    console.log(`${result.deletedCount} documents deleted`);
   } catch (err) {
-    console.error("Error deleting document:", error);
+    console.err('Error deleting documents:', err);
   } finally {
-    // Close the MongoDB connection after deleting
+    // close the connection
     mongoose.connection.close();
   }
-};
+}
 
-export default deleteDocument;
+// call the function to delete all documents
+deleteAllDocuments();
