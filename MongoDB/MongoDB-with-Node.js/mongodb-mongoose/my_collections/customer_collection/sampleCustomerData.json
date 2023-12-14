@@ -1,0 +1,24 @@
+[
+  {
+    "customer_id": "1",
+    "first_name": "Test Customer",
+    "last_name": "Test Customer",
+    "gender": "Male",
+    "contact": [
+      {
+        "phone_number": "123",
+        "email": ""
+      }
+    ],
+    "location": [
+      {
+        "latitude": "",
+        "longitude": "",
+        "country": "KE",
+        "city": "Nairobi",
+        "state": "Nairobi"
+      }
+    ],
+    "active": true
+  }
+]
