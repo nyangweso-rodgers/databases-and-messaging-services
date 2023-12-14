@@ -157,6 +157,35 @@
   db.once("open", () => console.log("Connected to MongoDB Atlas"));
   ```
 
+- The connection URI specifies the MongoDB server address, the database name, and certain connection options related to retryable writes and write concern.
+- General format of a MongoDB connection URI is:
+  ```js
+      mongodb://<username>:<password>@<host>:<port>/myFirstDatabase?retryWrites=true&w=majority
+  ```
+- Remarks:
+
+  - The above URI contains various options and parameters that configure the behavior of the **MongoDB** driver when connecting to the database.
+
+    - **Database Name** (`/myFirstDatabase`):
+
+      - This specifies the name of the **MongoDB** database you want to connect to. In this case, the database name is "`myFirstDatabase`".
+      - The `/` character separates the server address from the database name.
+      - If you don't specify a **database name** in your **MongoDB connection URI**, the **MongoDB** driver will connect to the default database of the authenticated user. In **MongoDB**, the default database is often named "`admin`" for users with administrator privileges.
+      - Here's an example URI without specifying a database name:
+        ```js
+          mongodb://username:password@host:port/?retryWrites=true&w=majority
+        ```
+      - In this case, the **MongoDB** driver will connect to the default database associated with the provided credentials. If the user does not have specific authentication details or privileges for a particular database, the default behavior is to connect to the "admin" database.
+
+    - **Retryable Writes** (`retryWrites=true`):
+
+      - `retryWrites=true` enables retryable writes.
+      - This allows **MongoDB** to automatically retry certain write operations that may have been interrupted due to network issues or other transient errors. Retryable writes help ensure data consistency.
+
+    - **Write Concern** (`w=majority`):
+      - The `w=majority `parameter specifies the write concern, which determines the level of acknowledgment requested from MongoDB for write operations.
+      - In this case, it is set to "`majority`," which means that the write operation is considered successful when acknowledged by a majority of replica set members. This helps ensure data durability.
+
 - Alternatively (and for security reasons)
   - if we are adding this project to a public repo, it is best that no one can see the **MongoDB** URI since we have included our password. Hence, we can create an `.env` file in our root directory and write our URI inside it like:
   ```env
