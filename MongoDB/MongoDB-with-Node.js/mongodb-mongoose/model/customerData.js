@@ -16,9 +16,13 @@ const customerSchema = new Schema(
     },
     customer_id: {
       type: String,
-      required: true,
+      required: [true, "Customer MUST have a unique customer identifier"],
     },
-    customer_name: String,
+    customer_name: {
+      type: String,
+      required: [true, "Customer Name MUST be provided"],
+      default: "",
+    },
     first_name: {
       type: String,
       default: "",
@@ -31,8 +35,15 @@ const customerSchema = new Schema(
     },
     contact: [
       {
-        phone_number: { type: String, default: "+254", required: true },
-        email: String,
+        phone_number: {
+          type: String,
+          default: "+254",
+          required: true,
+        },
+        email: {
+          type: String,
+          default: "",
+        },
       },
     ],
     location: [
@@ -56,7 +67,7 @@ const customerSchema = new Schema(
         state: {
           type: String,
           default: "",
-        }
+        },
       },
     ],
     gender: {
@@ -64,7 +75,12 @@ const customerSchema = new Schema(
       enum: ["male", "female"],
       default: "",
     },
-    active: Boolean,
+    active: {
+      type: Boolean,
+      enum: [true, false],
+      required: true,
+      default: true,
+    },
   },
   { timestamps: true }
 );
