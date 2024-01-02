@@ -1,13 +1,14 @@
 [
   {
     "customer_id": "1",
+    "customer_name": "Rodgers Nyangweso",
     "first_name": "Test Customer",
     "last_name": "Test Customer",
     "gender": "Male",
     "contact": [
       {
         "phone_number": "123",
-        "email": ""
+        "email": "rodgerso65@gmail.com"
       }
     ],
     "location": [
@@ -23,13 +24,14 @@
   },
   {
     "customer_id": "2",
+    "customer_name": "Rodgers Nyangweso",
     "first_name": "Test Customer",
     "last_name": "Test Customer",
     "gender": "Male",
     "contact": [
       {
         "phone_number": "123",
-        "email": ""
+        "email": "rodgerso65@gmail.com"
       }
     ],
     "location": [
@@ -45,13 +47,14 @@
   },
   {
     "customer_id": "3",
+    "customer_name": "Rodgers Nyangweso",
     "first_name": "Test Customer",
     "last_name": "Test Customer",
     "gender": "Male",
     "contact": [
       {
         "phone_number": "123",
-        "email": ""
+        "email": "rodgerso65@gmail.com"
       }
     ],
     "location": [
@@ -67,13 +70,14 @@
   },
   {
     "customer_id": "4",
+    "customer_name": "Rodgers Nyangweso",
     "first_name": "Test Customer",
     "last_name": "Test Customer",
     "gender": "Male",
     "contact": [
       {
         "phone_number": "123",
-        "email": ""
+        "email": "rodgerso65@gmail.com"
       }
     ],
     "location": [
@@ -89,13 +93,14 @@
   },
   {
     "customer_id": "5",
+    "customer_name": "Rodgers Nyangweso",
     "first_name": "Test Customer",
     "last_name": "Test Customer",
     "gender": "Male",
     "contact": [
       {
         "phone_number": "123",
-        "email": ""
+        "email": "rodgerso65@gmail.com"
       }
     ],
     "location": [
@@ -111,13 +116,14 @@
   },
   {
     "customer_id": "6",
+    "customer_name": "Rodgers Nyangweso",
     "first_name": "Test Customer",
     "last_name": "Test Customer",
     "gender": "Male",
     "contact": [
       {
         "phone_number": "123",
-        "email": ""
+        "email": "rodgerso65@gmail.com"
       }
     ],
     "location": [
@@ -133,13 +139,14 @@
   },
   {
     "customer_id": "7",
+    "customer_name": "Rodgers Nyangweso",
     "first_name": "Test Customer",
     "last_name": "Test Customer",
     "gender": "Male",
     "contact": [
       {
         "phone_number": "123",
-        "email": ""
+        "email": "rodgerso65@gmail.com"
       }
     ],
     "location": [
@@ -155,13 +162,14 @@
   },
   {
     "customer_id": "8",
+    "customer_name": "Rodgers Nyangweso",
     "first_name": "Test Customer",
     "last_name": "Test Customer",
     "gender": "Male",
     "contact": [
       {
         "phone_number": "123",
-        "email": ""
+        "email": "rodgerso65@gmail.com"
       }
     ],
     "location": [
@@ -177,13 +185,14 @@
   },
   {
     "customer_id": "9",
+    "customer_name": "Rodgers Nyangweso",
     "first_name": "Test Customer",
     "last_name": "Test Customer",
     "gender": "Male",
     "contact": [
       {
         "phone_number": "123",
-        "email": ""
+        "email": "rodgerso65@gmail.com"
       }
     ],
     "location": [
@@ -199,13 +208,14 @@
   },
   {
     "customer_id": "10",
+    "customer_name": "Rodgers Nyangweso",
     "first_name": "Test Customer",
     "last_name": "Test Customer",
     "gender": "Male",
     "contact": [
       {
         "phone_number": "123",
-        "email": ""
+        "email": "rodgerso65@gmail.com"
       }
     ],
     "location": [

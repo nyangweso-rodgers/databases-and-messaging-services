@@ -1,13 +1,14 @@
 [
   {
-    "customer_id": "1",
+    "customer_id": "2",
+    "customer_name": "Rodgers Nyangweso",
     "first_name": "Test Customer",
     "last_name": "Test Customer",
     "gender": "Male",
     "contact": [
       {
         "phone_number": "123",
-        "email": ""
+        "email": "rodgerso65@gmail.com"
       }
     ],
     "location": [
