@@ -51,12 +51,12 @@ const customerSchema = new Schema(
         latitude: {
           type: String,
           default: "",
-          required: true,
+          required: false,
         },
         longitude: {
           type: String,
           default: "",
-          required: true,
+          required: false,
         },
         country: { type: String, default: "KE", required: true },
         city: {
@@ -72,7 +72,7 @@ const customerSchema = new Schema(
     ],
     gender: {
       type: String,
-      enum: ["male", "female"],
+      enum: ["Male", "Female"],
       default: "",
     },
     active: {
