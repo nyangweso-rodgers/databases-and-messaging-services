@@ -1,25 +1,18 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config();
 
 import sale_items from "./model/saleItemData.js";
 
 mongoose.connect(
   // enter connection string here to connect
-  ""
+  process.env.MONGODB_URI
 );
 
 // check and Test Connection
-const db = mongoose.connection;
-db.on("error", (error) => console.error("Connection error:", error));
-db.once("open", () => console.log("Connected to MongoDB Atlas"));
 
 // Create a document
-const createSaleItem = sale_items.create({
-  country: "Uganda",
-  active: true,
-  item_code: "item code 2",
-});
 
-console.log(createSaleItem);
 
 // create multiple documents
 
@@ -28,6 +21,16 @@ console.log(createSaleItem);
 // Update document
 
 // Delete documents
+/*
+import deleteDocument from "./my_collections/customer_collection/deleteDocuments.js";
+deleteDocument()
+  .then(() => {
+    console.log("Delete operation completed");
+  })
+  .catch(() => {
+    console.log("error in the delete operation");
+  });
+*/
 
 // Delete collection
 
