@@ -1,10 +1,26 @@
+// drop customer collection from MongoDB
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-import customer from '../../model/customerData.js';
+import customer from "../../model/customerSchemaModel.js";
 
-mongoose.connect(process.env.MONGODB_URI);
+// Connect to MongoDB
+mongoose
+  .connect(
+    "" //TODO: insert a connection string
+  )
+  .then(() => {
+    console.log("DB connected ....");
+  });
+
+// OR
+/*
+mongoose.connect(
+  process.env.MONGODB_URI,
+  { useNewUrlParser: true, useUnifiedTopology: true }
+);
+*/
 
 // Drop collection
 customer.collection

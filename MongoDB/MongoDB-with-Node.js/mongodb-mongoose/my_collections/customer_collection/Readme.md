@@ -1,14 +1,9 @@
 # Customer collection
 
-## Files
+## Tabe Of Contents
 
-1. `createDocuments.js` - adds data to the database. It also fabricates the database file if it doesn’t exist.
-
-- `dbFileCheck.js` - confirms if the database file has been created.
-- `query.js` - checks if a database exists and executes a function passed to it.
-- `removeData.js` - removes selected data.
-- `retrieveData.js` - fetches all data
-- `updateData.js` - edits data.
+- [Drop MongoDB Collection](#Drop-MongoDB-Collection)
+- [Resources](#Resources)
 
 # Check and Test MongoDB Connection
 
@@ -119,6 +114,12 @@ console.log(insertCustomer);
 ```
 
 ## Create documents from an external `JSON` object
+
+## Batch Insert Documents into a MongoDB Collection
+
+```js
+
+```
 
 # Update Documents in a Collection
 
@@ -258,7 +259,9 @@ console.log(insertCustomer);
 
     export default deleteDocument;
     ```
-  - or, 
+
+  - or,
+
     ```js
 
     ```
@@ -270,39 +273,41 @@ console.log(insertCustomer);
 ```
 
 ## Delete all documents within a Collection using `deleteMany()` method
+
 - to delete all documents in a collection using Mongoose, you can specify an empty filter object, like this:
+
   ```js
-      import mongoose from "mongoose";
-      import dotenv from "dotenv";
-      dotenv.config();
+  import mongoose from "mongoose";
+  import dotenv from "dotenv";
+  dotenv.config();
 
-      import customer from "../../model/customerData.js";
+  import customer from "../../model/customerData.js";
 
-      // connect to MongoDB
-      mongoose.connect(process.env.MONGODB_URI);
+  // connect to MongoDB
+  mongoose.connect(process.env.MONGODB_URI);
 
-      // Delete a document based on a condition (e.g., _id)
+  // Delete a document based on a condition (e.g., _id)
 
-      // delete all documents using deleteMany()
-      async function deleteAllDocuments() {
-        try {
-          // specify an empty filter to match all documents
-          const query = {};
+  // delete all documents using deleteMany()
+  async function deleteAllDocuments() {
+    try {
+      // specify an empty filter to match all documents
+      const query = {};
 
-          // Use Mongoose's deleteMany to delete all documents in the collection
-          const result = await customer.deleteMany(query);
+      // Use Mongoose's deleteMany to delete all documents in the collection
+      const result = await customer.deleteMany(query);
 
-          console.log(`${result.deletedCount} documents deleted`);
-        } catch (err) {
-          console.err('Error deleting documents:', err);
-        } finally {
-          // close the connection
-          mongoose.connection.close();
-        }
-      }
+      console.log(`${result.deletedCount} documents deleted`);
+    } catch (err) {
+      console.err("Error deleting documents:", err);
+    } finally {
+      // close the connection
+      mongoose.connection.close();
+    }
+  }
 
-      // call the function to delete all documents
-      deleteAllDocuments();
+  // call the function to delete all documents
+  deleteAllDocuments();
   ```
 
 # Drop MongoDB Collection
@@ -310,13 +315,29 @@ console.log(insertCustomer);
 ## Drop `customer` collection using `drop()` method
 
 ```js
+// drop customer collection from MongoDB
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-import customer from "../../model/customerData.js";
+import customer from "../../model/customerSchemaModel.js";
 
-mongoose.connect(process.env.MONGODB_URI);
+// Connect to MongoDB
+mongoose
+  .connect(
+    "" //TODO: insert a connection string
+  )
+  .then(() => {
+    console.log("DB connected ....");
+  });
+
+// OR
+/*
+mongoose.connect(
+  process.env.MONGODB_URI,
+  { useNewUrlParser: true, useUnifiedTopology: true }
+);
+*/
 
 // Drop collection
 customer.collection
@@ -332,3 +353,6 @@ customer.collection
     mongoose.connection.close();
   });
 ```
+
+# Resources
+1. []()
