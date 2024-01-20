@@ -4,6 +4,22 @@ const { Schema, model } = mongoose;
 
 const customerSchema = new Schema(
   {
+    audit: [
+      {
+        created_at: {
+          type: Date,
+          required: true,
+          default: new Date(),
+          immutable: true,
+        },
+        updated_at: [
+          {
+            type: Date,
+            required: true
+          },
+        ],
+      },
+    ],
     created_by: {
       type: String,
       default: "Rodgers Nyangweso",
