@@ -1,4 +1,4 @@
-# Customer collection
+# Working with Customer Collection using Mongoose
 
 ## Tabe Of Contents
 
