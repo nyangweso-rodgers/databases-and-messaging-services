@@ -8,7 +8,7 @@ const saleOrderSchema = new Schema(
     id: {
       type: String,
       required: true,
-      default: () => nanoid(7),
+      default: () => nanoid(20),
     },
     audit: [
       {
@@ -24,10 +24,19 @@ const saleOrderSchema = new Schema(
         },
         scheduled_delivery_date: {
           type: Date,
-          default: () => Date.now(),
+          default: () => {
+            const currentDate = new Date();
+          
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+            const day = String(currentDate.getDate()).padStart(2, "0");
+          
+            return `${year}-${month}-${day}`;
+          }
         },
         delivery_date: {
           type: Date,
+          default: () => Date.now(),
         },
       },
     ],
@@ -45,15 +54,18 @@ const saleOrderSchema = new Schema(
     sales_agent: [{
       id: {
         type: String,
+        required: true,
       },
       name: {
         type: String,
+        default: "Rodgers Nyangweso",
         required: true,
         immutable: true,
       },
       contact_mobile: {
         type: String,
-        default: "+2547"
+        default: "+2547",
+        required: true,
       }
     }],
     status: {
@@ -66,6 +78,7 @@ const saleOrderSchema = new Schema(
         "RETURNED",
         "EXPIRED",
       ],
+      default: "CREATED"
     },
 
     items: [
@@ -73,14 +86,17 @@ const saleOrderSchema = new Schema(
         item_id: {
           type: "string",
           required: true,
+          default: "A"
         },
         name: {
           type: String,
           required: true,
+          default: "Test item name"
         },
         uom: {
           type: String,
           required: true,
+          default: "Test uom"
         },
         category_id: {
           type: String,
@@ -88,12 +104,15 @@ const saleOrderSchema = new Schema(
         ordered_qty: {
           type: Number,
           required: true,
+          default: 1
         },
         delivered_qty: {
           type: Number,
           required: true,
+          default: 0
         },
         item_status: {
+          type: String,
           enum: [
             "ITEM_CREATED",
             "ITEM_PROCESSING",
@@ -103,6 +122,8 @@ const saleOrderSchema = new Schema(
             "ITEM_CANCELLED",
             "PITEM_EXPIRED",
           ],
+          default: "ITEM_CREATED",
+          required: true
         },
         currency: {
           type: String,
@@ -123,7 +144,7 @@ const saleOrderSchema = new Schema(
         total_ordered: {
           type: Number,
           required: true,
-          default: 0,
+          default: 1,
         },
         total_delivered: {
           type: Number,
@@ -133,6 +154,9 @@ const saleOrderSchema = new Schema(
       },
     ],
   },
+  {
+    collection: 'sale_order', // Explicitly set the collection name
+  },
   { timestamps: true }
 );
 
@@ -141,5 +165,5 @@ saleOrderSchema.pre("save", function (next) {
   next();
 });
 
-const sale_order = model("sale_order", saleOrderSchema);
-export default sale_order;
+const SaleOrder = model("sale_order", saleOrderSchema);
+export default SaleOrder;
