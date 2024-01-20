@@ -35,6 +35,7 @@ db.once("open", () => console.log("Connected to MongoDB Atlas"));
 ## Task 2: Create an `order-management` Database with an empty `sale-order` Collection
 
 - Remarks:
+
   - MongoDB won't create the database until you insert some data into it or create a collection within it. Therefore, simply connecting to MongoDB won't create the database in Atlas. You need to perform some operations that trigger the creation of the database.
 
     ```js
@@ -44,19 +45,21 @@ db.once("open", () => console.log("Connected to MongoDB Atlas"));
 
     // connect to database
     mongoose
-    .connect(
+      .connect(
         "" //TODO: insert a connection string
-    )
-    .then(() => {
+      )
+      .then(() => {
         // create sale-order collection within the order-management DB
-        return mongoose.connection.createCollection("sale-order");
-    })
-    .then(() =>
+        return mongoose.connection.createCollection("sale_order");
+      })
+      .then(() =>
         console.log(
-        "Connected to MongoDB, created an order-management DB with sale-order collection"
+          "Connected to MongoDB, created an order-management DB with sale-order collection"
         )
-    )
-    .catch(() => console.log("MongoDB connection error!"));
+      )
+      .catch(() => console.log("MongoDB connection error!"));
     ```
+
+## Task 3: Create a single `sales-order` document within the `order-management` DB
 
 # Resources
