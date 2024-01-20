@@ -10,7 +10,7 @@ const connectionURI =
 // connect to database
 mongoose
   .connect(
-    "mongodb+srv://nyangweso-rodgers:Mqns718Gf5Ixgk68@test-cluster.uo4jsy5.mongodb.net/order-management?retryWrites=true&w=majority" //TODO: insert a connection string
+    "mongodb+srv://<user_name>:<password>/order-management?retryWrites=true&w=majority" //TODO: insert a connection string
   )
   .then(() => {
     // create sale_order collection within the order-management DB
