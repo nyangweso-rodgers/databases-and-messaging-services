@@ -24,7 +24,7 @@
 - Our database is empty, so we cannot query any tables yet, but we can check the version with this SQL statement:
 
   ```sh
-    #
+    # check the version
     SELECT version();
   ```
 
