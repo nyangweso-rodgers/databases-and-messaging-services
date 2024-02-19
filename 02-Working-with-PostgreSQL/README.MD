@@ -25,8 +25,11 @@
 
   ```sh
     #
-    SELECT version()
+    SELECT version();
   ```
+
+- Remark:
+  - Always end SQL statements with a semicolon `;` as SQL Shell waits for the semicolon and executes all lines as one SQL statement.
 
 ## Connect to PostgreSQL #2: pgAdmin4
 
