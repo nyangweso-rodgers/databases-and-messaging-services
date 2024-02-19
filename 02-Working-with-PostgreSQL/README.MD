@@ -3,10 +3,33 @@
 ## Table Of Contents
 
 # Introduction to PostgreSQL
-*__PostgreSQL__ is an open-source, __object-relational database system__ that supports a large part of the __SQL__ standard and offers many modern features:
-    * complex queries
-    * foreign keys
-    * triggers
-    * updatable
-    * transactional integrity
-    * multiversion concurrency control
+
+- PostgreSQL is an free open-source database system that supports both relational (SQL) and non-relational (JSON) queries.
+
+# Install PostgreSQL
+
+- Visit [installer by EDB](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads) to download version compatible with your OS.
+
+# Connecting to the PostgreSQL database
+
+- Two most common ways to connect to the PostgreSQL database include:
+  1. SQL Shell (psql), and
+  2. pgAdmin 4
+- Both of them comes with the installation of PostgreSQL
+
+## Connect to PostgreSQL #1: SQL Shell (psql)
+
+- SQL Shell (`psql`) is a terminal based program where you can write and execute SQL syntax in the command-line terminal.
+- Once you have connected to the database, you can start executing SQL statements.
+- Our database is empty, so we cannot query any tables yet, but we can check the version with this SQL statement:
+
+  ```sh
+    #
+    SELECT version()
+  ```
+
+## Connect to PostgreSQL #2: pgAdmin4
+
+# Resources
+
+1. [w3schools - PostgreSQL Tutorial](https://www.w3schools.com/postgresql/postgresql_intro.php)
