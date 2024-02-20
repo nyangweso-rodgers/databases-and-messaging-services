@@ -381,10 +381,11 @@
   - Explore your databases, collections, and documents.
   - Use JavaScript environments to interact your data. Prototype queries, run aggregations, and more.
 
-## Using Playgrounds
+## Explore Data with Playgrounds
 
-- One of the most powerful features of the VS Code **MongoDB** integration is **Mongo Playgrounds**.
-- Playgrounds let you _create_, _run_, and _save_ **MongoDB** commands from a VS Code editor.
+- **MongoDB Playgrounds** are JavaScript environments where you can prototype queries, aggregations, and MongoDB commands with helpful syntax highlighting.
+-  MongoDB for VS Code interprets files with the `.mongodb.js` extension as playgrounds.
+
 - Create a new playground with the **MongoDB**: **Create MongoDB Playground** command.
 - In a playground, you can reference **MongoDB** entities and commands and you get rich IntelliSense as you type. Playgrounds are useful for prototyping database operations and queries. Execute selected lines in the playground queries with the **MongoDB**: Run Selected Lines From Playground command.
 
