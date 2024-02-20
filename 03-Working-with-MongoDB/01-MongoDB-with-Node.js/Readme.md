@@ -11,12 +11,50 @@
 # Installation and Setup
 
 - Step #1: install [Node.js](https://nodejs.org/en) and [mongodb](https://www.mongodb.com/try)
-- Step #2: Install `mongoose` using `npm`
+
+- Step #2: Create a new project folder, `test/` and `cd`
+
+  ```sh
+    # Create a new project
+    mkdir test
+    # switch to the test directory
+    cd test
+  ```
+
+- Step #3: Initialize a new Node.js Project with `package.json` file with default configuration settings
+
+  ```sh
+    # initialize a new Node.js Project
+    npm init -y
+  ```
+
+- Step #4: Install `mongoose` and `nodemon` using `npm`
+
   ```sh
     # install mongoose
-    npm install mongoose
+    npm i mongoose
+    # install nodemon
+    npm i -D nodemon
   ```
-- Step #3: import mongoose
+
+  - `nodemon` is a utility that monitors for changes in your `Node.js` application and automatically restarts the server when changes are detected. It is commonly used during development to streamline the development workflow.
+  - `npm i -D nodemon` is used to install `nodemon` package as a development dependency in a `Node.js` project.
+  - the `D` flag is short for `--save-dev`. It tells `npm` to add the package as a development dependency in the `package.json` file.
+  - **Development dependencies** are typically packages that are only needed during development and testing, not in the production environment.
+
+- Step #5: Modify `package.json` file for running the project.
+
+  - add the below script to `package.json` for running our project.
+  - We will also use ES Modules instead of Common JS, so we’ll add the module type as well. This will also allow us to use top-level await.
+    ```json
+        // package.json
+         "scripts": {
+            "dev": "nodemon index.js"
+         },
+         type: "module",
+    ```
+
+- Step #6: create an `index.js` file and import `mongoose`
 
   - using Node.js `require()`
 
