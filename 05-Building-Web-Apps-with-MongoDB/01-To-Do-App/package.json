@@ -1,0 +1,17 @@
+{
+  "name": "01-to-do-app",
+  "version": "1.0.0",
+  "description": "-To create a to-do App, with HTML, CSS, JavaScript, and MongoDB, we need to set up both the frontend and backend components.",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.1.3"
+  }
+}

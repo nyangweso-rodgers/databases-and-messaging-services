@@ -49,16 +49,31 @@
             <div class="col-sm-12 border">
               <div class="input-group">
                 <input
-                  id=""
+                  id="newTaskInput"
                   class="form-control"
                   type="text"
                   placeholder="New Task"
                 />
-                <button class="btn btn-lg btn-success" type="button">
+                <button
+                  id="addItemButton"
+                  class="btn btn-success"
+                  type="button"
+                >
                   Add Item
                 </button>
               </div>
             </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <span id="newTaskErrorElement" class="display-error-message"></span>
+            </div>
+          </div>
+          <div id="displayTasksRow" class="row border border-primary p-5">
+            <div
+              id="displayTasksCol"
+              class="col-sm-12 border border-secondary p-4"
+            ></div>
           </div>
         </div>
       </section>
