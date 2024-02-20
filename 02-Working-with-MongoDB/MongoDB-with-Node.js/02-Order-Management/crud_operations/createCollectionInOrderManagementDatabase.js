@@ -9,9 +9,7 @@ const connectionURI =
 
 // connect to database
 mongoose
-  .connect(
-    "mongodb+srv://<user_name>:<password>/order-management?retryWrites=true&w=majority" //TODO: insert a connection string
-  )
+  .connect(connectionURI)
   .then(() => {
     // create sale_order collection within the order-management DB
     return mongoose.connection.createCollection("sale_order");

@@ -157,7 +157,7 @@ const saleOrderSchema = new Schema(
     ],
   },
   {
-    collection: "sale_order", // Explicitly set the collection name
+    collection: "sale_order_items", // Explicitly set the collection name
   },
   { timestamps: true }
 );
@@ -167,5 +167,5 @@ saleOrderSchema.pre("save", function (next) {
   next();
 });
 
-const SaleOrder = model("sale_order", saleOrderSchema);
+const SaleOrder = model("sale_order_items", saleOrderSchema);
 export default SaleOrder;
