@@ -118,20 +118,6 @@
   ```
 
 - Run `node server.js` to test the connection.
-- Remark:
-
-  - `server.js` acts as a **server-side** Node.js script that runs on your server. It's responsible for:
-    - Connecting to your MongoDB database using the provided connection string and Mongoose.
-    - Defining API routes to handle requests from your client-side JavaScript (such as adding new tasks).
-    - Interacting with your `ToDo` model to perform CRUD operations (create, read, update, delete) on tasks in the database.
-    - Sending JSON responses back to the client with relevant data or error messages.
-  - This is different from `script.js` file which handles **client-side** JavaScript script that runs in the user's browser. It's responsible for:
-    - Handling user interactions with the UI (e.g., adding new tasks through a form submission button).
-    - Using Fetch API to send HTTP requests to your server-side API routes defined in `server.js`.
-    - Receiving JSON responses from the server and updating the DOM (Document Object Model) of your `index.html` file to reflect the changes (e.g., adding new task elements to the list).
-  - By separating these functionalities, you achieve a clean separation of concerns and security practices:
-    - Sensitive database credentials are only exposed in `server.js`, which never runs in the user's browser.
-    - The client-side code only interacts with your server through well-defined API routes, preventing direct data manipulation attempts.
 
 - Define the `ToDo` model by creating a `model/` folder with a `toDoSchemaModeljsjs` file that defines the schema. Then in the `server.js` file, import the `toDoSchemaModeljs` model
   ```js
