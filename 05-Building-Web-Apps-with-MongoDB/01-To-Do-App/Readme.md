@@ -8,18 +8,49 @@
 
 - In this project,we use Node.js and Fetch API for server-side and client-side communication.
 
+# Typical Flow
+
+- **Step #1**: User input
+
+  - user enters a to do task in the HTML form
+  - form submission triggers an `HTTP` request, `POST`, to the Node.js server
+
+- **Step #2**: Server-side handling
+
+  - Node.js server receives the request
+  - It extracts the user input from the request body.
+  - **Data persistence**
+    - Server initiates a connection to MongoDB.
+    - It creates a new document with the user input.
+    - Asynchronously sends the document to MongoDB for insertion.
+  - **UI Update** (after data persistence):
+    - Server prepares a response containing the same user input data.
+    - After successful persistence (using callbacks, `promises`, or `async`/`await`), it sends the response back to the browser.
+
+- **Step #3**: UI Update
+  - Browser receives the response from the server.
+  - JavaScript code in the HTML page extracts the user input from the response.
+  - It dynamically updates the relevant UI elements to display the input.
+
 # Application Functionality
 
 - A user should be able to add a new new task, see then listed on the UI, and save them to MongoDB Atlas.
 
 - Project Structure:
-  - index.html
-  - index.js
+  - `index.html`
+    - This file will contain the structure of your HTML page, including the input field, button, and area where tasks will be displayed
+  - `script.js`
+    - This file will handle the client-side JavaScript code. It will capture user input, make a Fetch API call to your Node.js backend, and update the UI with the submitted task.
+  - `server.js`
+    - This file will contain the Node.js backend logic. It will handle incoming requests from the client, interact with MongoDB to store tasks, and send responses back to the client.
+  - `.env`
+    - This file will store environment variables, such as your MongoDB connection string.
   - index.css
   - node_modules/
   - package..json
   - package-lock.json
-  - model/toDoSchemaModel.js
+  - `model/toDoSchemaModel.js`
+    - This file will define the schema for your ToDo tasks and create a model for interacting with MongoDB.
 
 ## Step #1: Frontend (HTML, CSS, JavaScript)
 
