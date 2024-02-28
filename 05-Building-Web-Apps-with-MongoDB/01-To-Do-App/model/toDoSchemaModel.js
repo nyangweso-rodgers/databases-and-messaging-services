@@ -22,10 +22,6 @@ const toDoSchema = new Schema(
   { timestamps: true }
 );
 
-toDoSchema.pre("save", function (next) {
-  this.updated_at = Date.now(); // update the date every time a document is saved
-});
-
 // use the schema to create a model
 const ToDo = model("to_do", toDoSchema);
 export default ToDo;
