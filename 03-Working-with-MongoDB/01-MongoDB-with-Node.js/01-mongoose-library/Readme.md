@@ -62,19 +62,6 @@
     "last_name " : "Nyangweso"
   ```
 
-- with **schemas**, we define each field and its **data type**. Permitted types include:
-
-  1. `String`
-  2. `Number`
-  3. `Date`
-  4. `Buffer`
-  5. `Boolean`
-  6. `Mixed`
-  7. `ObjectId`
-  8. `Array`
-  9. `Decimal128`
-  10. `Map`
-
 - **schema validation**
   - we can set some required fields in the schema as follows:
     ```js
