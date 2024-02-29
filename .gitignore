@@ -1,2 +1,6 @@
 # python's virtual environment
 venv/
+
+# node modules
+node_modules/
+.env
