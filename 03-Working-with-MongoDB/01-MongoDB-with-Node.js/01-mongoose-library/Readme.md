@@ -16,8 +16,12 @@
 ## Concept #1: Schema
 
 - **schema** defines what the data structure looks like
-- **schema** definition can be as simple as the following:
+- Example of **schema** definition:
+
   ```js
+  import mongoose from "mongoose";
+
+  const { Schema } = mongoose;
   // sample schema definition
   var userSchema = new mongoose.Schema({
     first_name: String,
@@ -32,6 +36,21 @@
     ],
   });
   ```
+
+- Permitted schema types are:
+
+  1. [string](https://mongoosejs.com/docs/schematypes.html#strings)
+  2. [Number]()
+  3. [Date]()
+  4. [Buffer]()
+  5. [Boolean]()
+  6. [Mixed]()
+  7. [ObjectId]()
+  8. [Array]()
+  9. [Decimal128]()
+  10. [Map]()
+  11. [UUID]()
+
 - a **document** in **MongoDB** created from this **schema** would look like this:
 
   ```json
@@ -162,3 +181,4 @@
 
 1. [official documentation website - mongoosejs.com](https://mongoosejs.com/)
 2. [mongoose.docs - connections](https://mongoosejs.com/docs/connections.html)
+3. [mongoosejs.com/docs - Schemas](https://mongoosejs.com/docs/guide.html)
