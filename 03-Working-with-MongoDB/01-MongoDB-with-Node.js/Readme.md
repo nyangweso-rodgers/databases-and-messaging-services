@@ -77,14 +77,12 @@
   ```js
   // index.js
   import mongoose from "mongoose";
-  // import a model
-  import Users from "./model/Users_v2.js";
 
   mongoose.connect(
     "mongodb+srv://<username>:<password>@test-cluster.uo4jsy5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
   );
 
-  // check and Test Connection
+  // check and test Connection
   const db = mongoose.connection;
   db.on("error", (error) => console.error("Connection error:", error));
   db.once("open", () => console.log("Connected to MongoDB Atlas"));
@@ -204,48 +202,6 @@
 
 8. `useNewUrlParser`
 9. `useUnifiedTopology`
-
-# Other Useful methods
-
-1. `exists()`:
-
-   - returns either `null` or the `ObjectId` of a document that matches the provided query.
-
-     ```js
-     // other useful methods
-     // exists()
-     const findUser = await User.exists({ slug: "Rodgy" });
-
-     console.log(findUser);
-     ```
-
-2. `where()`:
-
-   - allows us to chain and build queries
-
-     ```js
-     // where() method
-     // instead of using a standard find method
-     const userFind = await User.findOne({ slug: "Rodgy" });
-
-     // use the equivalent where() method
-     const userWhere = await User.where("slug").equals("Rodgy");
-
-     console.log(userWhere);
-     ```
-
-3. `select()`
-
-   - To include projection when using the `where()` method, chain the `select()` method after your query.
-
-     ```js
-     // use the equivalent where() method
-     const userWhere = await User.where("slug")
-       .equals("Rodgy")
-       .select("firstName, createdAt");
-
-     console.log(userWhere);
-     ```
 
 # Resources
 
