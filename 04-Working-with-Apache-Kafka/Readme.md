@@ -51,7 +51,7 @@
 - **Offsets** are not reused, even when older messages get deleted. They continue to increment, giving each new message in the partition a unique id.
 - When data is read from a **partition**, it is read in order from the lowest existing **offset** upwards.
 
-## Kafka Concept# Kafka Zookeepr
+## Kafka Concept #5: Zookeepr
 
 - [Zookeeper](https://zookeeper.apache.org/) a service for managing and synchronizing distributed systems. It is a service used to manage Kafka clusters.
 - Kafka uses Zookeeper to manage the brokers in a cluster, and requires Zookeeper even if you're running a Kafka cluster with only one broker.
@@ -65,10 +65,11 @@
 - With Docker, we don't have to install various tools manually, instead, we write a `docker-compose.yml` to manage containers.
 - Some of the most popular **Docker Images** for the set up include:
 
-  1. [bitnami/kafka](https://hub.docker.com/r/bitnami/kafka) image for Kafka and Zookeeper
+  1. [confluentinc/cp-kafka](https://hub.docker.com/r/confluentinc/cp-kafka) Docker Image
+  2. [bitnami/kafka](https://hub.docker.com/r/bitnami/kafka) Docker Image for Kafka and Zookeeper
      - bitnami images for Kafka and Zookeeper is easier to setup and more actively maintained than the **wurstmeister images**
-  2. [wurstmeister/zookeeper](https://hub.docker.com/r/wurstmeister/zookeeper/)
-  3. [wurstmeister/kafka](https://hub.docker.com/r/wurstmeister/kafka/)
+  3. [wurstmeister/zookeeper](https://hub.docker.com/r/wurstmeister/zookeeper/)
+  4. [wurstmeister/kafka](https://hub.docker.com/r/wurstmeister/kafka/)
 
 ### Setting up Kafka on Docker with [confluentinc/cp-kafka](https://hub.docker.com/r/confluentinc/cp-kafka) Docker Image
 
@@ -206,37 +207,15 @@
       docker rmi <image_name>:<tag>
     ```
 
-### Setting up Kafka on Docker with [wurstmeister]() Docker Image
+# Kafka Serialization Schemes
 
-- When using [wurstmeister]() **Docker Image**, create a `docker-compose.yml` file with the following:
+- Common seroalization schemes for Kafka include:
+  - Avro,
+  - JSON, and
+  - Protobuf
+- Avro is an open source data serialisation system which marshals your data (and it’s appropriate schema) to a efficient binary format.
 
-  ```yml
-  #docker-compose.yml
-  version: "3"
-
-  services:
-    zookeeper:
-      image: wurstmeister/zookeeper
-      container_name: zookeeper
-      ports:
-        - "2181:2181"
-    kafka:
-      image: wurstmeister/kafka
-      container_name: kafka
-      ports:
-        - "9092:9092"
-      environment:
-        KAFKA_ADVERTISED_HOST_NAME: localhost
-        KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-  ```
-
-- In the above `docker-compose.yml` file, we have defined the following services:
-
-  - `zookeeper`: Kafka depends on `Zookeeper` to store metadata about the topics and partitions. For development purposes, you don't need to interact with it and you can safely ignore it for the time being.
-
-- Execute the following command to pull the images and create containers: `docker-compose -f docker-compose.yml up -d`. The `-d` means both `Zookeeper` and `Kafka` will run in the background, so you’ll have access to the Terminal after they start.
-- Run the `docker-compose.yml` file by `docker-compose up -d` command.
-- And that’s it! You can use the `docker ps` command to verify both are running:
+# Confluent Schema Registry
 
 # Resources
 
