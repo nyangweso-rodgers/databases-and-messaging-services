@@ -110,28 +110,48 @@
     docker exec -it mongodb-test-container bash
   ```
 
-# Docker Compose Configurations
+# How to Run a MongoDB Server With Docker Compose?
 
-- Create a `docker-compose.yml` file with the following:
+## Step #1: Create a `docker-compose.yml` File
+
+- create a `docker-compose.yml` file and deine the services
   ```yml
-  #docker-compose.yml
-  version: "3"
+  #docker-compose.yml for mongodb
+  version: "2"
   services:
-    app:
-      container-name:
-      ports:
-        - "5500:5500"
     mongo:
-      container-name: mongo
-      image: mongo
+      image: mongo:latest
+      container_name: mongodb-test-container
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: rootpassword
       ports:
-        - "27012:27017"
-    mongo-express:
-      container-name: mongo-express
-      image: mongo-express
-      ports:
-        - "8083:8081"
+        - "27017:27017"
+      volumes:
+        - mongodb_data:/data/db
+  volumes:
+    mongodb_data:
   ```
+
+## Step #2: Start the Compose Service
+
+- start the MongoDB services defined in the compose file by executing the given command:
+  ```sh
+    #
+    docker-compose up -d
+  ```
+- You can view the running mongodb container by `docker ps` command.
+
+## Step #3: Access MongoDB Container
+
+- Open the Bash shell inside the running MongoDB container through the following command
+  ```sh
+    #access the container
+    docker exec -it mongodb-test-container bash
+  ```
+- You can verify MongoDB server by `mongod --version` command.
+
+## Step #4: Connect to MongoDB Server
 
 # Resources
 
