@@ -162,10 +162,5 @@ const saleOrderSchema = new Schema(
   { timestamps: true }
 );
 
-saleOrderSchema.pre("save", function (next) {
-  this.updated_at = Date.now(); // update the date every time a document is saved
-  next();
-});
-
 const SaleOrder = model("sale_order_items", saleOrderSchema);
 export default SaleOrder;
