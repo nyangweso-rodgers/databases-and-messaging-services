@@ -1,26 +1,52 @@
-#docker-compose.yml with
+#docker-compose.yml
 version: "3"
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.2.1
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-  kafka:
-    image: confluentinc/cp-kafka:7.2.1
-    container_name: kafka
-    ports:
-      - "8098:8098"
-    environment:
-      #- KAFKA_BROKER_ID=1
-      - KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      - KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:8098
-      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #employees-api:
+  #build:
+  #context: ./01-Employees-Restful-API
+  #dockerfile: Dockerfile
+  #image: employees-api-image
+  #container_name: employees-api-container
+  #ports:
+  #- "4500:4500"
+  #depends_on:
+  #- mongodb
+  mongodb:
+    container_name: mongo
+    image: mongo
     volumes:
-      - kafka-data:/var/lib/kafka/data
-    depends_on:
-      - zookeeper
+      - C:\Services\mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    #environment:
+    #- MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+    #- MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    #- MONGO_INITDB_DATABASE=admin #you can omit this
+    #env_file:
+    #- .env
+    command: [--auth]
+    restart: always
+
+  #zookeeper:
+  #image: confluentinc/cp-zookeeper:7.2.1
+  #container_name: zookeeper
+  #ports:
+  #- "2181:2181"
+  #environment:
+  #ZOOKEEPER_CLIENT_PORT: 2181
+  #kafka:
+  #image: confluentinc/cp-kafka:7.2.1
+  #container_name: kafka
+  #ports:
+  #- "8098:8098"
+  #environment:
+  #- KAFKA_BROKER_ID=1
+  #- KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+  #- KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:8098
+  #- KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #volumes:
+  #- kafka-data:/var/lib/kafka/data
+  #depends_on:
+  #- zookeeper
 volumes:
-  kafka-data:
+  mongodb_data:

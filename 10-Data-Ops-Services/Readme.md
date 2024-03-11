@@ -4,7 +4,7 @@
 
 # Project Setup
 
-## Terimate the Kafka Environment
+## Terminate the Kafka Environment
 
 - Stop the producer and consumer clients with `Ctrl-C`
 - Stop the Kafka broker with `Ctrl-C`.
