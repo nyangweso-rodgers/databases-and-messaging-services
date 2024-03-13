@@ -165,14 +165,23 @@
     kafka-consumer-groups --bootstrap-server localhost:9092 --list
   ```
 
-## Step #: Create a Kafka Topic
+## Step #: Docker Exec Commands
 
-```sh
-   #create a topic
-   docker exec -it kafka kafka-console-producer --bootstrap-server localhost:8098 --topic test-kafka-topic
-```
+- We can also use the `docker exec` command to run shell commands inside the running Kafka container. This allows you to execute any commands that you could run inside the container, including Kafka command-line tools.
+- Using `docker exec` allows you to interact with the container from the host machine's command line without needing to enter the container shell.
 
-- the `kafka-topics` is a shell script that allows us to execute a `TopicCommand` tool. It’s a command-line tool that can manage and list topics in a Kafka cluster. Additionally, we have to specify the listener hostname (specified with `KAFKA_ADVERTISED_LISTENERS`) with `–bootstrap-server`
+- **List Topics**: Use the `kafka-topics` command to list the topics in the Kafka cluster:
+  ```sh
+    docker exec -it kafka kafka-topics --list --bootstrap-server localhost:8098
+  ```
+- **Create a Kafka Topic**:
+
+  ```sh
+    #create a topic
+    docker exec -it kafka kafka-console-producer --bootstrap-server localhost:8098 --topic test-kafka-topic
+  ```
+
+  - the `kafka-topics` is a shell script that allows us to execute a `TopicCommand` tool. It’s a command-line tool that can manage and list topics in a Kafka cluster. Additionally, we have to specify the listener hostname (specified with `KAFKA_ADVERTISED_LISTENERS`) with `–bootstrap-server`
 
 ## Step #: Run Kafka Producer
 
