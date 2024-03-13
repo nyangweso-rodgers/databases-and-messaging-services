@@ -15,6 +15,8 @@
 
 ## Setting up Kafka on Docker with [confluentinc/cp-kafka](https://hub.docker.com/r/confluentinc/cp-kafka) Docker Image
 
+- We use **Confluent Community Docker Image for Apache Kafka** and **Confluent Docker Image for Zookeeper** – both in version 7.2.1.
+
 ### Step #1: Create `docker-compose.yml` file
 
 - create `docker-compose.yml` file with the following:
@@ -75,6 +77,92 @@
 - Check the logs to see the kafka server has booted up successfully
   ```sh
     docker logs kafka
+  ```
+
+## Step #: Access the shell of the Kafka container
+
+- Access the shell of the Kafka container by running the following command:
+  ```sh
+    #access kafka shell
+    docker exec -it kafka bash
+  ```
+- **Inspect the contents of the directories**: Use the `ls` command to list the contents of these directories and look for Kafka-related files such as `kafka-topics.sh`, `kafka-console-producer.sh`, etc. by running:
+  ```sh
+    #
+    ls /usr/bin
+    #or
+    ls /bin
+  ```
+- **Verify Kafka binaries**: Once you've located the Kafka binaries, you can verify their presence by listing them and checking their permissions.
+  ```sh
+    #
+    ls -l /usr/bin | grep kafka
+  ```
+
+## Step #: Popular Shell Commands
+
+### Commands for Kafka Topic Management
+
+- **List Topics**: Use the `kafka-topics` command to list the topics in the Kafka cluster:
+  ```sh
+    #list available topics
+    kafka-topics --bootstrap-server localhost:8098 --list
+  ```
+- **Create a new topic**: To create a topic in Kafka, you can use the kafka-topics command with the --create option.
+  - Syntax:
+    ```sh
+      #syntax
+      kafka-topics --bootstrap-server localhost:8098 --create --topic <topic_name> --partitions <num_partitions> --replication-factor <replication_factor>
+    ```
+  - Where:
+    - `--bootstrap-server`: Specifies the bootstrap server (Kafka broker) address and port.
+    - `--create`: Indicates that you want to create a new topic.
+    - `--topic`: Specifies the name of the topic you want to create.
+    - `--partitions`: Specifies the number of partitions for the topic.
+    - `--replication-factor`: Specifies the replication factor for the topic.
+  - Example:
+    ```sh
+      #example
+      kafka-topics --bootstrap-server localhost:8098 --create --topic test-topic --partitions 3 --replication-factor 2
+    ```
+- **Describe Topics**: You can describe a specific topic or all topics in the cluster to get detailed information about them:
+  ```sh
+    kafka-topics --bootstrap-server localhost:8098 --describe
+    #or
+    kafka-topics --bootstrap-server localhost:8098 --describe --topic test-kafka-topic
+  ```
+- **Delete a topic**: To delete a topic in Apache Kafka, you can use the `kafka-topics` command with the `--delete` option.
+  - Syntax:
+    ```sh
+      kafka-topics --bootstrap-server localhost:9092 --delete --topic <topic_name>
+    ```
+  - Example:
+    ```sh
+      kafka-topics --bootstrap-server localhost:9092 --delete --topic my-topic
+    ```
+
+### Commands for Kafka Broker
+
+- **View Broker Information**: You can also view information about the brokers in the cluster:
+  ```sh
+    #
+    kafka-broker-api-versions --bootstrap-server localhost:8098
+  ```
+- **Describe Broker Configuration**: Use `kafka-configs` to describe the configuration parameters of a Kafka broker:
+  ```sh
+    kafka-configs --bootstrap-server localhost:8098 --entity-type brokers --describe
+  ```
+- **List Topics Hosted on a Broker**: Use `kafka-topics` to list the topics hosted on a specific broker:
+  ```sh
+    kafka-topics --bootstrap-server localhost:9092 --describe --topic <topic_name>
+  ```
+- **List Brokers in the Cluster**: Use `kafka-broker-api-versions` or `kafka-configs` to list all brokers in the Kafka cluster:
+  ```sh
+    kafka-broker-api-versions --bootstrap-server localhost:9092
+  ```
+- **Describe Consumer Groups Associated with a Broker**: Use `kafka-consumer-groups` to describe the consumer groups associated with a broker:
+  ```sh
+    kafka-consumer-groups --bootstrap-server localhost:9092 --list
   ```
 
 ## Step #: Create a Kafka Topic
