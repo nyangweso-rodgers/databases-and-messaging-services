@@ -24,29 +24,31 @@
   version: "1"
   services:
     zookeeper:
-        image:confluentinc/cp-zookeeper:latest
-        container:zookeeper
-        environment:
-            ZOOKEEPER_CLIENT_PORT: 2181
-            ZOOKEEPER_TICK_TIME: 2000
-        ports:
-        - 22181:2181
-        restart: on-failure
-    kafka:
-        image: confluentinc/cp-kafka:latest
-        container_name: kafka
-        depends_on:
-            - zookeeper
-        ports:
-            - 29092:29092
-        environment:
-            KAFKA_BROKER_ID: 1
-            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-            KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-        restart: on-failure
+    image: confluentinc/cp-zookeeper:7.2.1
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    restart: on-failure
+    environment:
+      - ZOOKEEPER_CLIENT_PORT:2181
+      - ZOOKEEPER_TICK_TIME:2000
+  kafka:
+    image: confluentinc/cp-kafka:7.2.1
+    container_name: kafka
+    ports:
+      - "8098:8098"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:8098
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+    volumes:
+      - C:\Services\kafka-data:/var/lib/kafka/data
+    depends_on:
+      - zookeeper
+    restart: on-failure
   ```
 
 - Here:
@@ -74,5 +76,32 @@
   ```sh
     docker logs kafka
   ```
+
+## Step #: Create a Kafka Topic
+
+```sh
+   #create a topic
+   docker exec -it kafka kafka-console-producer --bootstrap-server localhost:8098 --topic test-kafka-topic
+```
+
+- the `kafka-topics` is a shell script that allows us to execute a `TopicCommand` tool. It’s a command-line tool that can manage and list topics in a Kafka cluster. Additionally, we have to specify the listener hostname (specified with `KAFKA_ADVERTISED_LISTENERS`) with `–bootstrap-server`
+
+## Step #: Run Kafka Producer
+
+- Following, let’s run a console producer with the `kafka-console-producer`:
+  ```sh
+    #
+    docker exec --interactive --tty kafka kafka-console-producer --bootstrap-server localhost:8098 --topic test-kafka-topic
+  ```
+- Please keep in mind that this command will start the **producer** and it will wait for our input (and you should notice the `>` sign). Please specify a couple of messages and hit `Ctrl + D` after you finish:
+
+## Run Kafka Consumer
+
+- As the last step, let’s run a console consumer with the `kafka-console-consumer` command:
+  ```sh
+    #
+    docker exec --interactive --tty kafka kafka-console-consumer --bootstrap-server localhost:8098 --topic first-test-kafka-topic --from-beginning
+  ```
+- This time, we should see that our messages are printed to the output successfully (and to finish please hit `Ctrl+ C`):
 
 # Resources
