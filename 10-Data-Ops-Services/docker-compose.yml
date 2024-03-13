@@ -8,7 +8,7 @@ services:
     image: sale-order-api-image
     container_name: sale-order-api-container
     ports:
-      - "5000:5000"
+      - "3200:5000"
   mongo:
     container_name: mongo
     image: mongo
@@ -31,15 +31,15 @@ services:
       - "2181:2181"
     restart: on-failure
     environment:
-      - ZOOKEEPER_CLIENT_PORT:2181
-      #ZOOKEEPER_TICK_TIME:2000
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
   kafka:
     image: confluentinc/cp-kafka:7.2.1
     container_name: kafka
     ports:
       - "8098:8098"
     environment:
-      #KAFKA_BROKER_ID:1
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:8098
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
