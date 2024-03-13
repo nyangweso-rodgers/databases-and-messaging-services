@@ -1,11 +1,12 @@
 import os as os
 import time
+from time import sleep
 import random
 import json
 from kafka import KafkaProducer
 
-KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:29092")
-KAFKA_TOPIC_TEST = os.environ.get("KAFKA_TOPIC_TEST", "test")
+KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:8098")
+KAFKA_TOPIC_TEST = os.environ.get("test-kafka-topic", "test")
 KAFKA_API_VERSION = os.environ.get("KAFKA_API_VERSION", "7.3.1")
 producer = KafkaProducer(
     bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS],
