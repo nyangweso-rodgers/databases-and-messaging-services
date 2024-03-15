@@ -103,7 +103,31 @@
   - Example:
     ```sh
       #write a message to kafka topic
-      kafka-console-producer --bootstrap-server kafka:8098 --topic test-topic
+      kafka-console-producer --bootstrap-server localhost:8098 --topic test-topic
+    ```
+  - The command should return `>` after which, you can enter a `JSON` message like:
+    ```sh
+      {"tickers": [{"name": "Test 1", "price": 1902}, {"name": "Test 2", "price": 107}, {"name": "Test 3", "price": 215}]}
+    ```
+  - Enter `Control + C` to stop the script.
+
+## Reading from a Kafka Topic
+
+- Kafka provides a [Consumer API](https://docs.confluent.io/platform/current/clients/consumer.html) to read messages from a Kafka topic. This API is available in java with [kafka-clients]() library and python with [kafka-python](https://kafka-python.readthedocs.io/en/master/apidoc/KafkaConsumer.html) package.
+- Kafka also, comes with an out of box script `kafka-console-consumer` to read messages from the kafka topic:
+  ```sh
+    kafka-console-consumer --bootstrap-server localhost:29092 --topic test-topic
+  ```
+- However, this command only prints the values of the kafka message. To print the `key` and `headers`, we have to set the properties `print.headers`, `print.key` to `true`. We can also print the timestamp of the message with the property `print.timestamp`.
+  ```sh
+    kafka-console-consumer --bootstrap-server localhost:29092 --topic test-topic --property print.headers=true --property print.key=true --property print.timestamp=true
+  ```
+- There is other information such as **partition** and **offset**, they can be printed by setting the properties `--property print.offset=true` and `--property print.partition=true`.
+- **Remarks**:
+  - Everytime we read from the a kafka topic, Kafka keeps track of the last offset the consumer read from and allows you to read from that point next time, however we can always read from the beginning using the `arguments --from-beginning`.
+  - To always read from a kafka topic from the beginning:
+    ```sh
+      kafka-console-consumer --bootstrap-server localhost:29092 --topic test-topic --from-beginning --property print.headers=true --property print.key=true --property print.timestamp=true
     ```
 
 # Resources

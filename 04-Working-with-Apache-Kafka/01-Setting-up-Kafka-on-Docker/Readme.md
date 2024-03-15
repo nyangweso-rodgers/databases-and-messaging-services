@@ -8,14 +8,8 @@
 - Some of the most popular **Docker Images** for the set up include:
 
   1. [confluentinc/cp-kafka](https://hub.docker.com/r/confluentinc/cp-kafka) Docker Image
-  2. [bitnami/kafka](https://hub.docker.com/r/bitnami/kafka) Docker Image for Kafka and Zookeeper
-     - bitnami images for Kafka and Zookeeper is easier to setup and more actively maintained than the **wurstmeister images**
-  3. [wurstmeister/zookeeper](https://hub.docker.com/r/wurstmeister/zookeeper/)
-  4. [wurstmeister/kafka](https://hub.docker.com/r/wurstmeister/kafka/)
 
 # Setting up Kafka on Docker with [confluentinc/cp-kafka](https://hub.docker.com/r/confluentinc/cp-kafka) Docker Image
-
-- We use **Confluent Community Docker Image for Apache Kafka** and **Confluent Docker Image for Zookeeper** – both in version 7.2.1.
 
 ## Step #1: Create `docker-compose.yml` file
 
