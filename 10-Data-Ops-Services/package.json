@@ -2,10 +2,10 @@
   "name": "10-data-ops-services",
   "version": "1.0.0",
   "description": "Data Ops Services Project",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node main.js"
+    "start": "node app.js"
   },
   "type": "module",
   "keywords": [],
@@ -17,5 +17,6 @@
     "kafkajs": "^2.2.4",
     "mongodb": "^6.4.0",
     "mongoose": "^8.2.1"
-  }
+  },
+  "devDependencies": {}
 }

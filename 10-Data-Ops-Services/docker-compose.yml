@@ -1,62 +1,82 @@
 #docker-compose.yml
 version: "3"
 services:
-  sale-order-restful-api:
-    build:
-      context: ./01-Sale-Order-Restful-API
-      dockerfile: Dockerfile
-    image: sale-order-api-image
-    container_name: sale-order-api-container
-    ports:
-      - "3200:5000"
-  mongo:
-    container_name: mongo
-    image: mongo
-    volumes:
-      - C:\Services\mongo_data:/data/db
-    ports:
-      - "27017:27017"
-    #env_file:
-    #- .env
-    #environment:
-    #- MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-    #- MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-    #- MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
-    #command: [--auth]
-    #restart: always
+  #sale-order-restful-api:
+  #build:
+  #context: ./01-Sale-Order-Restful-API
+  #dockerfile: Dockerfile
+  #image: sale-order-api-image
+  #container_name: sale-order-api-container
+  #ports:
+  #- "3200:3200"
+  #java-service:
+  #build:
+  #context: ./04-Services-with-Java
+  #dockerfile: Dockerfile
+  #container_name: java-service-container
+  #ports:
+  #- "8080:8080"
+  #volumes:
+  #- ./04-Services-with-Java:/usr/src/app
+  #mongo:
+  #container_name: mongo
+  #image: mongo
+  #volumes:
+  #- C:\Services\mongo_data:/data/db
+  #ports:
+  #- "27017:27017"
+  #env_file:
+  #- .env
+  #environment:
+  #- MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+  #- MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+  #- MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+  #command: [--auth]
+  #restart: always
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.2.1
+    #image: confluentinc/cp-zookeeper:7.2.1
+    image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
     ports:
       - "2181:2181"
-    restart: on-failure
+    #restart: on-failure
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
   kafka:
-    image: confluentinc/cp-kafka:7.2.1
+    #image: confluentinc/cp-kafka:7.2.1
+    image: confluentinc/cp-kafka:latest
     container_name: kafka
     ports:
       - "8098:8098"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:8098
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    volumes:
-      - C:\Services\kafka-data:/var/lib/kafka/data
+      - "29092:29092"
     depends_on:
       - zookeeper
-    restart: on-failure
-  kafka-ui:
-    container_name: kafka-ui
-    image: provectuslabs/kafka-ui:latest
-    ports:
-      - 8080:8080
     environment:
-      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:8098
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:8098,PLAINTEXT_INTERNAL://kafka:29092
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:8098
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:8098
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:8098
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      #KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+    volumes:
+      #- C:\Services\kafka-data:/var/lib/kafka/data
+      - kafka-data:/var/lib/kafka/data
+    #restart: on-failure
+  #kafka-ui:
+  #container_name: kafka-ui
+  #image: provectuslabs/kafka-ui:latest
+  #ports:
+  #- 8080:8080
+  #environment:
+  #DYNAMIC_CONFIG_ENABLED: "true"
 volumes:
-  mongo_data:
+  zookeeper-data:
   kafka-data:
