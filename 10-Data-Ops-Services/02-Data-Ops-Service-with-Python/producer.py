@@ -6,8 +6,8 @@ import json
 from kafka import KafkaProducer
 
 KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:8098")
-KAFKA_TOPIC_TEST = os.environ.get("test-kafka-topic", "test")
-KAFKA_API_VERSION = os.environ.get("KAFKA_API_VERSION", "7.3.1")
+KAFKA_TOPIC_TEST = os.environ.get("test-kafka-topic", "test-topic")
+KAFKA_API_VERSION = os.environ.get("KAFKA_API_VERSION", "7.6.0")
 producer = KafkaProducer(
     bootstrap_servers=[KAFKA_BOOTSTRAP_SERVERS],
     api_version=KAFKA_API_VERSION,
