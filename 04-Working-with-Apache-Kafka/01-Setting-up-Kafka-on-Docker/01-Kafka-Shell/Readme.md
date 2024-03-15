@@ -116,7 +116,7 @@
 - Kafka provides a [Consumer API](https://docs.confluent.io/platform/current/clients/consumer.html) to read messages from a Kafka topic. This API is available in java with [kafka-clients]() library and python with [kafka-python](https://kafka-python.readthedocs.io/en/master/apidoc/KafkaConsumer.html) package.
 - Kafka also, comes with an out of box script `kafka-console-consumer` to read messages from the kafka topic:
   ```sh
-    kafka-console-consumer --bootstrap-server localhost:29092 --topic test-topic
+    kafka-console-consumer --bootstrap-server localhost:8098 --topic test-topic
   ```
 - However, this command only prints the values of the kafka message. To print the `key` and `headers`, we have to set the properties `print.headers`, `print.key` to `true`. We can also print the timestamp of the message with the property `print.timestamp`.
   ```sh
