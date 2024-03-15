@@ -51,32 +51,32 @@ services:
     container_name: kafka
     ports:
       - "8098:8098"
-      - "29092:29092"
+      #- "29092:29092"
     depends_on:
       - zookeeper
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:8098
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:8098,PLAINTEXT_INTERNAL://kafka:29092
-      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:8098
-      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:8098
-      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:8098
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      #KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
     volumes:
-      #- C:\Services\kafka-data:/var/lib/kafka/data
       - kafka-data:/var/lib/kafka/data
     #restart: on-failure
-  #kafka-ui:
-  #container_name: kafka-ui
-  #image: provectuslabs/kafka-ui:latest
-  #ports:
-  #- 8080:8080
-  #environment:
-  #DYNAMIC_CONFIG_ENABLED: "true"
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+    environment:
+      DYNAMIC_CONFIG_ENABLED: "true"
+    #volumes:
+      #- ~/kafka-ui/config.yml:/etc/kafkaui/dynamic_config.yaml
 volumes:
   zookeeper-data:
+    #-driver: local
   kafka-data:
+    #-driver: local
