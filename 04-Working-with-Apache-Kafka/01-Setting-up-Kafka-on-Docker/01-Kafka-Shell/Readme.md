@@ -17,7 +17,7 @@
     docker-compose exec -it kafka bash
   ```
 
-## Inspect the contents of the directories
+## Inspect the contents of the Directories
 
 - Use the `ls` command to list the contents of these directories and look for Kafka-related files such as `kafka-topics.sh`, `kafka-console-producer.sh`, etc. by running:
   ```sh
@@ -87,6 +87,45 @@
     kafka-topics --bootstrap-server localhost:9092 --delete --topic my-topic
   ```
 
+# Kafka Broker Commands
+
+## View Broker Information
+
+- You can also view information about the brokers in the cluster:
+
+  ```sh
+    #
+    kafka-broker-api-versions --bootstrap-server localhost:29092
+  ```
+
+## Describe Broker Configuration
+
+- Use `kafka-configs` to describe the configuration parameters of a Kafka broker:
+  ```sh
+    kafka-configs --bootstrap-server localhost:29092 --entity-type brokers --describe
+  ```
+
+## List Topics Hosted on a Broker
+
+- Use `kafka-topics` to list the topics hosted on a specific broker:
+  ```sh
+    kafka-topics --bootstrap-server localhost:29092 --describe --topic <topic_name>
+  ```
+
+## List Brokers in the Cluster
+
+- Use `kafka-broker-api-versions` or `kafka-configs` to list all brokers in the Kafka cluster:
+  ```sh
+    kafka-broker-api-versions --bootstrap-server localhost:29092
+  ```
+
+## Describe Consumer Groups Associated with a Broker
+
+- Use `kafka-consumer-groups` to describe the consumer groups associated with a broker:
+  ```sh
+    kafka-consumer-groups --bootstrap-server localhost:29092 --list
+  ```
+
 # Kafka Messages
 
 - Once we have the topic created, we can start sending messages to the topic. A **Message** consists of **headers**, a **key**, and a **value**.
@@ -131,3 +170,5 @@
     ```
 
 # Resources
+1. [cp-demo/docker-compose.yml](https://github.com/confluentinc/cp-demo/blob/5.0.0-post/docker-compose.yml)
+2. [provectus/kafka-ui](https://github.com/provectus/kafka-ui/tree/master?tab=readme-ov-file)

@@ -42,3 +42,6 @@
 - This time, we should see that our messages are printed to the output successfully (and to finish please hit `Ctrl+ C`):
 
 # Resources
+
+1. [cp-demo/docker-compose.yml](https://github.com/confluentinc/cp-demo/blob/5.0.0-post/docker-compose.yml)
+2. [provectus/kafka-ui](https://github.com/provectus/kafka-ui/tree/master?tab=readme-ov-file)

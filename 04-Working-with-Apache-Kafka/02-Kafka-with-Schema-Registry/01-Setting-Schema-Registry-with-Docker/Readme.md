@@ -11,16 +11,16 @@
   services:
     schema-registry:
     image: confluentinc/cp-schema-registry:7.3.0
-    hostname: schema-registry
+    #hostname: schema-registry
     container_name: schema-registry
     depends_on:
-      - broker
+      - kafka
     ports:
       - "8081:8081"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "broker:29092"
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "kafka:8098"
+      #SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
   ```
 
 # Resources

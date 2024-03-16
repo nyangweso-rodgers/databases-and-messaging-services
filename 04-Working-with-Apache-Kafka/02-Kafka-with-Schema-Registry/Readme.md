@@ -111,6 +111,7 @@
 
 # Resources
 
-1. [confluentinc/cp-schema-registry Docker Image](https://hub.docker.com/r/confluentinc/cp-schema-registry)
-2. [Apache avro](https://avro.apache.org/)
-3. [Protocol Buffers Documentation](https://protobuf.dev/overview/#scalar)
+1. [Schema Registry Documentation](https://docs.confluent.io/platform/current/schema-registry/index.html)
+2. [confluentinc/cp-schema-registry Docker Image](https://hub.docker.com/r/confluentinc/cp-schema-registry)
+3. [Apache avro](https://avro.apache.org/)
+4. [Protocol Buffers Documentation](https://protobuf.dev/overview/#scalar)
