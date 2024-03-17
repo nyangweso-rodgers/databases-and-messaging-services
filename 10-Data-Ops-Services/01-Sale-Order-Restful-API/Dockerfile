@@ -1,12 +1,18 @@
+#Dockerfile for 01-Sale-Order-Restful-API
 FROM node:alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+# Copy only package.json and package-lock.json files
+#COPY ./01-Sale-Order-Restful-API/package*.json ./
+COPY package.*json ./
 
+# Install dependencies
 RUN npm install
 
-COPY . .
+# Copy the rest of the application files
+#COPY ./01-Sale-Order-Restful-API .
+COPY . . 
 
 #EXPOSE 3000
 

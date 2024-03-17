@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 const { Schema, model } = mongoose;
 
+import saleOrderItemSchema from "./saleOrderItemSchema.js";
+
 const saleOrderSchema = new Schema(
   {
     code: {
@@ -26,6 +28,12 @@ const saleOrderSchema = new Schema(
       default: "Test customer",
       immutable: true,
     },
+    location: {
+      type: "String",
+      required: true,
+      default: "Test location",
+    },
+
     created_by: {
       type: "string",
       default: "Rodgers",
@@ -57,7 +65,7 @@ const saleOrderSchema = new Schema(
         return `${year}-${month}-${day}`;
       },
     },
-    status: {
+    order_status: {
       type: String,
       enum: [
         "CREATED",
@@ -68,6 +76,12 @@ const saleOrderSchema = new Schema(
         "EXPIRED",
       ],
       default: "CREATED",
+    },
+    order_items: [saleOrderItemSchema], // Array of sale order items
+    currency: {
+      type: String,
+      default: "KES",
+      required: true,
     },
   },
   { timestamps: true }
