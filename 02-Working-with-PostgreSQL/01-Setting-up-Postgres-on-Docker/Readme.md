@@ -4,6 +4,36 @@
 
 # PostgreSQL and Docker Setup
 
+## Step #1: Create `docker-compose.yml` files
+
+- Create `docker-compose.yml` file at the root of the project directory with the following:
+  ```yml
+  #docker-compose.yml for postgres
+  version: "1"
+  servvices:
+    db:
+      image: postgres:13
+      container_name: db
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: postgres
+      ports:
+        - 5432:5432
+      volumes:
+        - pgdata:/var/lib/postgresql/data
+    volumes:
+      pgdata: {}
+  ```
+
+## Step #: Access the DB Container
+
+- Access the db container by running:
+  ```sh
+    docker exec -it db psql -U postgres
+  ```
+- Inside the container, you can type `\l` or `\dt`
+
 ## Step #1: Pull the Image
 
 - To run the Postgres database, we first need to pull the postgres image from the [Docker Hub](https://hub.docker.com/)
