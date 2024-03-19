@@ -1,7 +1,7 @@
 import os
 from kafka import KafkaConsumer
 
-KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:8098")
+KAFKA_BOOTSTRAP_SERVERS = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:29092")
 KAFKA_TOPIC_TEST = os.environ.get("KAFKA_TOPIC_TEST", "test-topic")
 KAFKA_API_VERSION = os.environ.get("KAFKA_API_VERSION", "7.6.0")
 consumer = KafkaConsumer(
