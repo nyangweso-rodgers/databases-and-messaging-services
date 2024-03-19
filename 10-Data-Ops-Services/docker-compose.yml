@@ -33,6 +33,14 @@ services:
   #- MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
   #command: [--auth]
   #restart: always
+  node-kafka-producer-api:
+    build:
+      context: ./03-Data-Ops-Services-with-Node.js/01-Kafka-Producer-API
+      dockerfile: Dockerfile
+    image: node-kafka-producer-api
+    container_name: node-kafka-producer-api
+    ports:
+      - 6501:6501
   zookeeper:
     #image: confluentinc/cp-zookeeper:latest
     image: confluentinc/cp-zookeeper:7.3.0
@@ -47,20 +55,22 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
-  broker:
-    image: confluentinc/cp-kafka:latest
-    container_name: broker
+  kafka:
+    #image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
     depends_on:
       - zookeeper
+      #- schema-registry
     ports:
       - 29092:29092
       - 9101:9101
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      #KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      #KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9101
       #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:8098,PLAINTEXT_INTERNAL://kafka:29092
       #KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -72,7 +82,7 @@ services:
       #KAFKA_JMX_PORT: 9101
       #KAFKA_JMX_HOSTNAME: localhost
       KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:29092
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:29092
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: "true"
       #CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
@@ -87,15 +97,15 @@ services:
     hostname: schema-registry
     container_name: schema-registry
     depends_on:
-      #- kafka
-      #- zookeeper
-      - broker
+      - kafka
+      - zookeeper
+      #- broker
     ports:
       - 8081:8081
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      #SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:8098
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "broker:29092"
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:29092
+      #SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "broker:29092"
       #SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:8098,PLAINTEXT_INTERNAL://localhost:8098
       #SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
@@ -108,13 +118,13 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - broker
+      - kafka
     environment:
       DYNAMIC_CONFIG_ENABLED: true
       KAFKA_CLUSTERS_0_NAME: wizard_test
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:29092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
     #volumes:
-      #- ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
+    #- ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
 volumes:
   zookeeper-data:
     #-driver: local
