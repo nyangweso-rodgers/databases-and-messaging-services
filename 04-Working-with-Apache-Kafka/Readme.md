@@ -21,7 +21,7 @@
 
 # Kafka Concepts
 
-## Kafka Concept #!: Broker
+## Kafka Concept #1: Broker
 
 - A single **Kafka Cluster** is made of **Brokers**. They handle **producers** and **consumers** and keeps data replicated in the cluster.
 
@@ -51,16 +51,26 @@
 - **Offsets** are not reused, even when older messages get deleted. They continue to increment, giving each new message in the partition a unique id.
 - When data is read from a **partition**, it is read in order from the lowest existing **offset** upwards.
 
-## Kafka Concept #5: Zookeepr
+## Kafka Concept #5: Producers
+
+- **Producers** are applications that publish data to **Kafka topics**. They write messages to specific topics, and these messages are then stored in the **Kafka brokers**
+
+## Kafka Concept #6: Consumers
+
+- **Consumers** are applications that read data from **Kafka topics**. They subscribe to one or more topics and receive messages from the partitions of those topics.
+
+## Kafka Concept #7: Consumer Groups
+
+- **Consumers** can be organized into **consumer groups**, where each group consists of one or more consumers. Each message in a partition is delivered to only one consumer within a group, allowing parallel processing of data.
+
+## Kafka Concept #8: Zookeepr
 
 - [Zookeeper](https://zookeeper.apache.org/) a service for managing and synchronizing distributed systems. It is a service used to manage Kafka clusters.
 - Kafka uses Zookeeper to manage the brokers in a cluster, and requires Zookeeper even if you're running a Kafka cluster with only one broker.
-
-# Kafka with Schema Registry
 
 # Resources
 
 1. [kafka.apache.org/intro](https://kafka.apache.org/intro)
 2. [zookeeper.apache.org](https://zookeeper.apache.org/)
-3. [kafka.apache.org/downloads](https://kafka.apache.org/downloads)
-4. [How To Set Up Apache Kafka With Docker?](https://codersee.com/how-to-set-up-apache-kafka-with-docker/)
+3. [confluent.io - Kafka Listeners – Explained](https://www.confluent.io/blog/kafka-listeners-explained/)
+4. [confluent.io - Introducing the Kafka Consumer: Getting Started with the New Apache Kafka 0.9 Consumer Client](https://www.confluent.io/blog/tutorial-getting-started-with-the-new-apache-kafka-0-9-consumer-client/)
