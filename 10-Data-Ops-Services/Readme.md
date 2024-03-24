@@ -16,3 +16,5 @@
 # Resources
 
 1. [kafka.apache.org/documentation](https://kafka.apache.org/documentation/)
+2. [UI for Apache Kafka](https://docs.kafka-ui.provectus.io/)
+3. [UI for Apache Kafka - Configuration file](https://docs.kafka-ui.provectus.io/configuration/configuration-file)

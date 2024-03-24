@@ -33,14 +33,22 @@ services:
   #- MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
   #command: [--auth]
   #restart: always
-  node-kafka-producer-api:
+  sale-order-producer-with-kafka-js:
     build:
-      context: ./03-Data-Ops-Services-with-Node.js/01-Kafka-Producer-API
+      context: ./01-Sale-Order-Service/03-Producer-API-with-KafkaJS
       dockerfile: Dockerfile
-    image: node-kafka-producer-api
-    container_name: node-kafka-producer-api
+    image: sale-order-producer-with-kafka-js
+    container_name: sale-order-producer-with-kafka
     ports:
-      - 6501:6501
+      - 80:80
+  #node-kafka-producer-api:
+  #build:
+  #context: ./03-Data-Ops-Services-with-Node.js/01-Kafka-Producer-API
+  #dockerfile: Dockerfile
+  #image: node-kafka-producer-api
+  #container_name: node-kafka-producer-api
+  #ports:
+  #- 6501:6501
   zookeeper:
     #image: confluentinc/cp-zookeeper:latest
     image: confluentinc/cp-zookeeper:7.3.0
@@ -61,7 +69,6 @@ services:
     container_name: kafka
     depends_on:
       - zookeeper
-      #- schema-registry
     ports:
       - 29092:29092
       - 9101:9101
@@ -70,9 +77,11 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       #KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9101
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9101
-      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:8098,PLAINTEXT_INTERNAL://kafka:29092
-      #KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9101,PLAINTEXT_INTERNAL://kafka:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       #KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
@@ -99,7 +108,6 @@ services:
     depends_on:
       - kafka
       - zookeeper
-      #- broker
     ports:
       - 8081:8081
     environment:
@@ -123,6 +131,7 @@ services:
       DYNAMIC_CONFIG_ENABLED: true
       KAFKA_CLUSTERS_0_NAME: wizard_test
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_SCHEMA_REGISTRY: http://schema-registry:8081
     #volumes:
     #- ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
 volumes:
