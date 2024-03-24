@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "sale_order.v1",
+  "namespace": "sales",
+  "doc": "Kafka JS example schema",
+  "fields": [
+    { "name": "customer_id", "type": "int", "doc": "The customer" },
+    { "name": "product_id", "type": "int", "doc": "The product" },
+    { "name": "amount", "type": "int", "doc": "The sale order amount" }
+  ]
+}
