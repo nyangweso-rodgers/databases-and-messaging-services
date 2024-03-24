@@ -105,6 +105,12 @@
       kafka-topics --bootstrap-server localhost:29092 --describe --topic test-kafka-topic
   ```
 
+## `kafka-configs` CLI Tools
+
+```sh
+  kafka-configs --bootstrap-server localhost:9092 --describe --all --topic people.promotions
+```
+
 ## Delete Kafka Topic
 
 - To delete a topic use the `kafka-topics` command with the `--delete` option.
@@ -248,9 +254,19 @@
   - You will notice the column for lag. This specifies how many messages in the specific partition that are still not retrieved and processed by the consumer group.
   - To make sure the consumer group is caught up with all the messages, run the `kafka-console-consumer` again.
 
-## Resetting offsets
+## View and Reset Consumer offsets
+
+- The `__consumer_offsets` **topic** stores the message offset that each consumer group should consume next. In the broker container run the following to get a look at where each consumer group is at for each topic partition.
+  ```sh
+    kafka-consumer-groups --bootstrap-server localhost:29092 --describe --all-groups
+  ```
+- or, for a specific group like `test-consumer-group`, run:
+  ```sh
+     kafka-consumer-groups --bootstrap-server localhost:29092 --describe --group test-consumer-group
+  ```
 
 # Resources
 
 1. [cp-demo/docker-compose.yml](https://github.com/confluentinc/cp-demo/blob/5.0.0-post/docker-compose.yml)
 2. [provectus/kafka-ui](https://github.com/provectus/kafka-ui/tree/master?tab=readme-ov-file)
+3. [Kafka CLI Cheat Sheet](https://thecodinginterface.com/blog/kafka-cli-cheat-sheet/)
