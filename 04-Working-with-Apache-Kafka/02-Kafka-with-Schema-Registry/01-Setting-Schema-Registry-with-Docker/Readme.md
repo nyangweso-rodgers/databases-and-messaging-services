@@ -23,6 +23,48 @@
       #SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
   ```
 
+# Setting Kafka Producer with Schema Registry
+
+# Setting Kafka Producer with Schema Registry using Node.js and `kafkajs`
+
+## Step #1: Setting up the Dependencies
+
+- Install the following Dependencies in the project root directory:
+  ```sh
+    npm i kafkajs @kafkajs/confluent-schema-registry
+  ```
+
+## Step #2: Configuring Kafka and Schema Registry
+
+- set up the Kafka client and the **Schema Registry**. Import the required dependencies and define the Kafka client and Schema Registry configurations:
+
+  ```js
+  //
+  const { Kafka } = require("kafkajs");
+  const { SchemaRegistry } = require("@kafkajs/confluent-schema-registry");
+
+  const kafka = new Kafka({
+    clientId: "my-app",
+    brokers: ["localhost:29092"], // Replace with your Kafka broker(s) configuration
+  });
+
+  const registry = new SchemaRegistry({
+    host: "http://localhost:8081", // Replace with your Schema Registry URL
+  });
+  ```
+
+## Step #3: Creating the Kafka Producer
+
+- Create Kafka Producer using the configured Kafka client:
+  ```sh
+    const producer = kafka.producer();
+  ```
+- The producerobject will be used to send messages to Kafka.
+
+## Step #4: Sending Messages to Kafka
+
+- Let’s add a new `sendMessage` method that sends a message to a Kafka topic:
+
 # Resources
 
 1. [confluentinc/cp-schema-registry Docker Image](https://hub.docker.com/r/confluentinc/cp-schema-registry)

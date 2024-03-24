@@ -109,9 +109,34 @@
   ```
 - Execute build and class SMessage should be generated. Can be used in code from now.
 
+# Schema Management
+
+- Applications that leverage Kafka fall into two categories: they are either producers or consumers (or both in some cases).
+  - **Producers** generate messages or events which are then published to Kafka. These take the form of key-value records which the producers serialize into byte arrays and send to Kafka brokers. The brokers store these serialized records into designated topics.
+  - **Consumers** subscribe to one or more topics, request the stored events, and process them. Consumers must be able to deserialize the bytes, returning them to their original record format.
+- This creates an implicit contract between the two applications. There is an assumption from the producer that the consumer will understand the format of the message. Meanwhile, the consumer also assumes that the producer will continue to send the messages in the same format.
+- A schema is a set of rules that establishes the format of the messages being sent. It outlines the structure of the message, the names of any fields, what data types they contain, and any other important details. This schema is a contract between the two applications. Both the producer and consumer are expected to support the schema.
+- . The schema registry is a service that records the various schemas and their different versions as they evolve. Producer and consumer clients retrieve schemas from the schema registry via HTTPS, store them locally in cache, and use them to serialize and deserialize messages sent to and received from Kafka. This schema retrieval occurs only once for a given schema and from that point on the cached copy is relied upon.
+
+## Register a Schema
+
+- When you register a schema you need to provide the `subject-name` and the schema itself. The `subject-name` is the name-space for the schema, almost like a key when you use a hash-map. The standard naming convention is `topic-name-key` or `topic-name-value`.
+- Once **Schema Registry** receives the schema, it assigns it a unique ID number and a version number. The first time you register a schema for a given subject-name, it is assigned a version of 1.
+- **Methods to Register a schema**:
+  - Confluent CLI
+  - Schema Registry REST API,
+  - Confluent Cloud Console,
+  - Maven and Gradle plugins
+
+## Updating a Schema
+
+- To update previously registered schemas, you will use the same methods that you used to first register the schema Provided you are making compatible changes.
+- Schema Registry will simply assign a new ID to the schema and a new version number. The new ID is not guaranteed to be in sequential order. But the version number will always be incremented by one, hence it will be in sequential order.
+
 # Resources
 
 1. [Schema Registry Documentation](https://docs.confluent.io/platform/current/schema-registry/index.html)
 2. [confluentinc/cp-schema-registry Docker Image](https://hub.docker.com/r/confluentinc/cp-schema-registry)
 3. [Apache avro](https://avro.apache.org/)
 4. [Protocol Buffers Documentation](https://protobuf.dev/overview/#scalar)
+5. [developer.confluent.io - Managing Schemas](https://developer.confluent.io/courses/schema-registry/manage-schemas/#:~:text=When%20you%20register%20a%20schema,or%20topic%2Dname%2Dvalue.)
