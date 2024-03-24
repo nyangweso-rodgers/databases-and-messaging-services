@@ -182,9 +182,7 @@
     ```
   - Enter `Control + C` to stop the script.
 - **Remarks**:
-  - Note that kafka messages are randomly distributed to the `partitions` when the **producer** sends them.
-  - A way to ensure that messages will always go to a specific `partition` through the use of message `keys`.
-  - Example:
+  - Note that kafka messages are randomly distributed to the `partitions` when the **producer** sends them. A way to ensure that messages will always go to a specific `partition` through the use of message `keys`. **Example**:
     ```sh
       kafka-console-producer --bootstrap-server localhost:29092 --topic test-topic --property parse.key=true --property key.separator=,
     ```
