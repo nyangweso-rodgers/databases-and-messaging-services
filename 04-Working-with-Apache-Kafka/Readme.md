@@ -105,27 +105,61 @@
   - `JSON`, and
   - `Protobuf`
 
-# `Avro` Serialization
+## `Avro` Serialization
 
 - `Avro` is an open source data serialisation system which marshals your data (and it’s appropriate schema) to a efficient binary format.
-- Sample message definition in `Avro`:
-  ```avsc
-  {
-    "type": "record"
-    "name": "SMessage",
-    "namespace": "com.lda.test.kafka.schema",
-    "fields": [
+- Example:
+  - An event that represent a `Sale Order` might look like this:
+    ```json
     {
-      "name": "idMsg",
-      "type": "int"
-    },
-    {
-      "name": "msgBody",
-      "type": "string"
+      "created_at": 1424849130111,
+      "customer_id": 1234,
+      "product_id": 5678,
+      "amount": 100,
+      "payment_method": "cash"
     }
-  ]
-  }
-  ```
+    ```
+  - It might have a schema like this that defines these five fields:
+    ```avsc
+    {
+      "type": "record",
+      "doc": "This event records the sale of a product",
+      "name": "SaleOrderEvent",
+      "fields": [
+        { "name": "time", "type": "long", "doc": "The time of the purchase" },
+        { "name": "customer_id", "type": "long", "doc": "The customer" },
+        { "name": "product_id", "type": "long", "doc": "The product" },
+        { "name": "amount", "type": "int" },
+        {
+          "name": "payment_method",
+          "type": {
+            "type": "enum",
+            "name": "payment_types",
+            "symbols": ["cash", "mastercard", "visa"]
+          },
+          "doc": "The method of payment"
+        }
+      ]
+    }
+    ```
+- The set of **primitive type** names is:
+  - `null`: no value
+  - `boolean`: a binary value
+  - `int`: 32-bit signed integer
+  - `long`: 64-bit signed integer
+  - `float`: single precision (32-bit) IEEE 754 floating-point number
+  - `double`: double precision (64-bit) IEEE 754 floating-point number
+  - `bytes`: sequence of 8-bit unsigned bytes
+  - `string`: unicode character sequence
+- `Avro` supports six kinds of **Complex Types**:
+  - records
+  - enums
+  - arrays
+  - maps
+  - unions
+  - fixed
+
+### How to Configi
 
 # `Protobuf` Serialization
 
