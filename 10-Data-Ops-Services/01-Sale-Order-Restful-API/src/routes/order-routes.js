@@ -1,13 +1,12 @@
-// routes/orderRoutes.js
+// define the Sale Order API Routes
 import express from "express";
-//import getSaleOrders from "../controllers/order-controller.js";
-//import createSaleOrder from "../controllers/order-controller.js";
+
 import {
   getSaleOrders,
   getSaleOrder,
   createSaleOrder,
   updateSaleOrder,
-  deleteSaleOrder
+  deleteSaleOrder,
 } from "../controllers/order-controller.js";
 
 const router = express.Router();
