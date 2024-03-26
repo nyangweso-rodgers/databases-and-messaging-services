@@ -2,6 +2,10 @@
 
 ## Table Of Contents
 
+# Objective
+
+- Run a single-broker Kafka cluster in Docker via docker-compose to perform integration tests for a piece of code that involves publishing and consuming Kafka messages.
+
 # What is Apache Kafka?
 
 - Apache Kafka is an open-source distributed event streaming platform. i.e., it’s a platform widely used to work with real-time streaming data pipelines and to integrate applications to work with such streams. It’s mainly responsible for:

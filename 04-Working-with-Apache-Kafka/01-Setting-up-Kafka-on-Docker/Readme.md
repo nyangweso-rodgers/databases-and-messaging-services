@@ -50,6 +50,15 @@ services:
 
 ## Step #3: Define `kafka` Service
 
+### Connecting to Kafka on Docker
+
+- To run within Docker, you will need to configure two listeners for Kafka:
+
+  1. **Communication within the Docker network**
+     - This could be inter-broker communication (i.e., between brokers) and between other components running in Docker, such as **Kafka Connect** or third-party clients or producers.For these comms, we need to use the hostname of the Docker container(s). Each Docker container on the same Docker network will use the hostname of the Kafka broker container to reach it.
+  2. **Non-Docker network traffic**:
+     - This could be clients running locally on the Docker host machine, for example. The assumption is that they will connect on localhost to a port exposed from the Docker container.
+
 - Add configurations for `kafka` service
   ```yml
   version: "1"
@@ -92,6 +101,11 @@ services:
 - What is `KAFKA_ADVERTISED_LISTENERS`
 
   - This environment variable or configuration property in **Kafka** specifies the listeners that the Kafka broker advertises to other components in the cluster. These listeners define the network interfaces and ports on which the broker listens for communication.
+  - `ADVERTISED_LISTENERS` are how clients can connect.
+  - For configuring this correctly, you need to understand that **Kafka brokers** can have multiple **listeners**. A **listener** is a combination of:
+    1. Host/IP
+    2. Port
+    3. Protocol
 
 - **Why is it Important**?
 
@@ -106,18 +120,20 @@ services:
   4. **Listener Names**: Optionally, you can also specify a listener name, which allows you to differentiate between listeners when configuring security settings or client connections.
 
 - **Examples**:
-  1. `KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092`
+  1. `KAFKA_LISTENERS`
+     - is a comma-separated list of listeners and the host/IP and port to which Kafka binds to for listening. For more complex networking, this might be an IP address associated with a given network interface on a machine. The default is 0.0.0.0, which means listening on all interfaces.
+  2. `KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092`
      - This configuration advertises a single listener using the `PLAINTEXT` protocol on port `29092`.
      - The hostname used is "`kafka`," which likely refers to the container name for the `Kafka` broker service in a `docker-compose.yml`.
      - This setup exposes the broker only internally within the Docker network.
      - Why? This might be suitable for a simple setup where all components (`Zookeeper`, `Schema Registry`, `Kafka UI`) reside within the same Docker network and use the container name for discovery.
-  2. `KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9101`
+  3. `KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9101`
      - This configuration advertises two listeners
        - `PLAINTEXT` on port `29092` with hostname "`kafka`" (internal).
        - `PLAINTEXT` on port `9101` with hostname "`localhost`" (external)
      - This setup exposes an internal listener for components within the Docker network and an external listener accessible from the host machine (assuming Docker is running on the host).
      - Why? This allows external **producers** and **consumers** to send messages to the broker using "`localhost:9101`". Internal components can still use "`kafka:29092`".
-  3. `KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9101,PLAINTEXT_INTERNAL://kafka:29092`
+  4. `KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9101,PLAINTEXT_INTERNAL://kafka:29092`
      - This configuration prioritizes the external listener. It advertises:
        - `PLAINTEXT` on port `9101` with hostname "`localhost`" (external)
        - `PLAINTEXT` on port `29092` with a custom name "`kafka`" (internal, might not be discoverable by other services).
@@ -141,6 +157,10 @@ services:
 
 - This configuration specifically targets the replication factor for the internal Kafka offsets topic. This topic is used by Kafka to store information about consumer offsets (positions within topics).
 - The default value for this configuration is usually `1`. Since the offsets topic stores metadata and is less critical for data integrity compared to user topics, a single replica might be sufficient.
+
+### Bonus:
+
+####
 
 ## Step #4: Define `schema-registry` Service
 
@@ -227,3 +247,4 @@ services:
 1. [cp-demo/docker-compose.yml](https://github.com/confluentinc/cp-demo/blob/5.0.0-post/docker-compose.yml)
 2. [provectus/kafka-ui](https://github.com/provectus/kafka-ui/tree/master?tab=readme-ov-file)
 3. [How To Set Up Apache Kafka With Docker?](https://codersee.com/how-to-set-up-apache-kafka-with-docker/)
+4. [Kafka Listeners – Explained](https://www.confluent.io/blog/kafka-listeners-explained/)
