@@ -1,23 +1,22 @@
 #docker-compose.yml
-version: "3"
+version: "1"
 services:
-  #sale-order-restful-api:
-  #build:
-  #context: ./01-Sale-Order-Restful-API
-  #dockerfile: Dockerfile
-  #image: sale-order-api-image
-  #container_name: sale-order-api-container
-  #ports:
-  #- "3200:3200"
-  #java-service:
-  #build:
-  #context: ./04-Services-with-Java
-  #dockerfile: Dockerfile
-  #container_name: java-service-container
-  #ports:
-  #- "8080:8080"
-  #volumes:
-  #- ./04-Services-with-Java:/usr/src/app
+  so-restful-api:
+    build:
+      context: ./01-Sale-Order-Service/01-SO-Restful-API
+      dockerfile: Dockerfile
+    image: so-restful-api
+    container_name: sso-restful-api
+    ports:
+      - 3200:3200
+  so-kafka-producer-with-kafka-js:
+    build:
+      context: ./01-Sale-Order-Service/03-Kafka-Producer-API-with-KafkaJS
+      dockerfile: Dockerfile
+    image: kafka-js-producer
+    container_name: kafka-js-producer
+    ports:
+      - 6501:6501
   #mongo:
   #container_name: mongo
   #image: mongo
@@ -33,39 +32,23 @@ services:
   #- MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
   #command: [--auth]
   #restart: always
-  #sale-order-producer-with-kafka-js:
-    #build:
-      #context: ./01-Sale-Order-Service/03-Producer-API-with-KafkaJS
-      #dockerfile: Dockerfile
-    #image: sale-order-producer-with-kafka-js
-    #container_name: sale-order-producer-with-kafka
-    #ports:
-      #- 80:80
-  #node-kafka-producer-api:
-  #build:
-  #context: ./03-Data-Ops-Services-with-Node.js/01-Kafka-Producer-API
-  #dockerfile: Dockerfile
-  #image: node-kafka-producer-api
-  #container_name: node-kafka-producer-api
-  #ports:
-  #- 6501:6501
   zookeeper:
-    #image: confluentinc/cp-zookeeper:latest
-    image: confluentinc/cp-zookeeper:7.3.0
+    image: confluentinc/cp-zookeeper:latest
+    #image: confluentinc/cp-zookeeper:7.3.0
     hostname: zookeeper
     container_name: zookeeper
     ports:
       - 2181:2181
     #restart: on-failure
     environment:
-      #ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
   kafka:
-    #image: confluentinc/cp-kafka:latest
-    image: confluentinc/cp-kafka:7.6.0
+    image: confluentinc/cp-kafka:latest
+    #image: confluentinc/cp-kafka:7.6.0
     container_name: kafka
     depends_on:
       - zookeeper
@@ -74,12 +57,16 @@ services:
       - 9101:9101
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      #KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://kafka:29092, PLAINTEXT_HOST://localhost:9101
+      #KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9101,PLAINTEXT_INTERNAL://0.0.0.0:29091
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9101
-      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9101,PLAINTEXT_INTERNAL://kafka:29092
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9101,PLAINTEXT_INTERNAL://kafka:29091
+      #KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT, PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      #KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       #KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
@@ -88,19 +75,19 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       #KAFKA_JMX_PORT: 9101
       #KAFKA_JMX_HOSTNAME: localhost
-      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      #KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:29092
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: "true"
       #CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
     volumes:
       - kafka-data:/var/lib/kafka/data
     #restart: on-failure
   ######################
   schema-registry:
-    #image: confluentinc/cp-schema-registry:latest
-    image: confluentinc/cp-schema-registry:7.3.0
+    image: confluentinc/cp-schema-registry:latest
+    #image: confluentinc/cp-schema-registry:7.3.0
     hostname: schema-registry
     container_name: schema-registry
     depends_on:
@@ -110,12 +97,12 @@ services:
       - 8081:8081
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:29092
-      #SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "broker:29092"
-      #SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:8098,PLAINTEXT_INTERNAL://localhost:8098
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9101
+      #SCHEMA_REGISTRY_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9101
       #SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+      #SCHEMA_REGISTRY_HOST_NAME: localhost
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "zookeeper:2181"
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
       SCHEMA_REGISTRY_DEBUG: "true"
   kafka-ui:
@@ -137,3 +124,7 @@ volumes:
     #-driver: local
   kafka-data:
     #-driver: local
+#networks:
+#default:
+#name: my-network
+#external: true
