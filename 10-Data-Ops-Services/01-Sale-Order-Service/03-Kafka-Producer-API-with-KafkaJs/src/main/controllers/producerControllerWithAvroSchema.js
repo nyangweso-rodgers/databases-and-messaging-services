@@ -1,3 +1,4 @@
+//create a sale Order kafka object
 import { Kafka, Partitioners } from "kafkajs";
 import {
   SchemaRegistry,
@@ -5,10 +6,9 @@ import {
   SchemaType,
 } from "@kafkajs/confluent-schema-registry";
 import fs from "fs";
-
 const TOPIC = "sales.sale_order.v1";
 
-const kafkaBrokers = ["kafka:29092", 'localhost:9101'];
+const kafkaBrokers = ["kafka:29092", "localhost:9101"];
 
 // configure Kafka broker
 const kafka = new Kafka({
@@ -60,28 +60,8 @@ const registerSchema = async () => {
   }
 };
 
-// register a schema
-/*
-(async () => {
-  try {
-    await producer.connect();
-    console.log("Producer connected to Kafka broker successfully.");
-
-    const schemaId = await registerSchema();
-    console.log("Schema registered successfully with ID:", schemaId);
-
-    // Produce messages here using the registered schema
-
-    await producer.disconnect();
-    console.log("Producer disconnected from Kafka broker.");
-  } catch (error) {
-    console.error("Error:", error);
-  }
-})();
-*/
-
 // push the actual message to kafka
-const produceMessageToKafka = async (message) => {
+export const produceSaleOrderKafkaMessage = async (message) => {
   try {
     await producer.connect();
     console.log("Producer connected to Kafka broker successfully.");
@@ -108,13 +88,3 @@ const produceMessageToKafka = async (message) => {
     console.log("Producer disconnected from Kafka broker.");
   }
 };
-
-// Prepare test data
-const testSaleOrderData = {
-  customer_id: 10,
-  product_id: 89,
-  amount: 108,
-};
-
-// Call the test function
-produceMessageToKafka(testSaleOrderData);

@@ -1,7 +1,7 @@
 import { Kafka, Partitioners } from "kafkajs";
 
 const kafkaClient = new Kafka({
-  brokers: ["kafka:29092"],
+  brokers: ["localhost:9101"],
   connectionTimeout: 5000, // Increase timeout to 5 seconds (optional)
 });
 const producer = kafkaClient.producer({
@@ -9,7 +9,7 @@ const producer = kafkaClient.producer({
 });
 //const consumer = kafkaClient.consumer({ groupId: "test-group" });
 //const messages = [{ value: "Message 1" }, { value: "Message 2" }];
-const message = "Test message with KafkaJs!";
+const message = "Another Test message with KafkaJs!";
 const run = async () => {
   try {
     await producer.connect();
