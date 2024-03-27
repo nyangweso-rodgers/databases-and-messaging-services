@@ -6,15 +6,15 @@ services:
       context: ./01-Sale-Order-Service/01-SO-Restful-API
       dockerfile: Dockerfile
     image: so-restful-api
-    container_name: sso-restful-api
+    container_name: so-restful-api
     ports:
       - 3200:3200
-  so-kafka-producer-with-kafka-js:
+  producer-with-kafka-js:
     build:
       context: ./01-Sale-Order-Service/03-Kafka-Producer-API-with-KafkaJS
       dockerfile: Dockerfile
-    image: kafka-js-producer
-    container_name: kafka-js-producer
+    image: producer-with-kafka-js
+    container_name: producer-with-kafka-js
     ports:
       - 6501:6501
   #mongo:
