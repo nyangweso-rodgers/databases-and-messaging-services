@@ -4,8 +4,9 @@ import producer from "../Kafka-Producer-Service/test-producer.js";
 
 export const postMessage = async (req, res) => {
   try {
+    console.log("reg", req);
     const message = req.body.message;
-    const payloads = [{ topic: "test-topic",partition: 0,  messages: message }];
+    const payloads = [{ topic: "test-topic",  messages: message, key: "test-key"}];
 
     producer.send(payloads, (error, data) => {
       if (error) {

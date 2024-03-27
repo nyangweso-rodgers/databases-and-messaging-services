@@ -13,7 +13,7 @@ app.use(express.json());
 
 // Parse incoming request bodies
 app.use(bodyParser.json());
-//app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
 app.use(router);
