@@ -1,14 +1,6 @@
 #docker-compose.yml
 version: "1"
 services:
-  so-restful-api:
-    build:
-      context: ./01-Sale-Order-Service/01-SO-Restful-API
-      dockerfile: Dockerfile
-    image: so-restful-api
-    container_name: so-restful-api
-    ports:
-      - 3200:3200
   producer-with-json:
     build:
       context: ./01-Sale-Order-Service/03-Producer-with-JSON
