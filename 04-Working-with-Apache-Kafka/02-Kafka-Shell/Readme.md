@@ -263,6 +263,47 @@
      kafka-consumer-groups --bootstrap-server localhost:29092 --describe --group test-consumer-group
   ```
 
+# `JSON` Command Line Producer and Consumer
+
+## `JSON` Command Line Producer
+
+- to start the `JSON` Schema command line **producer**:
+  ```sh
+    #start a json command line producer
+    kafka-json-schema-console-producer --bootstrap-server localhost:29092 --topic test-topic --property value.schema='{"type":"object","properties":{"f1":{"type":"string"}}
+  ```
+
+## `JSON` Command Line Consumer
+
+- to start the `JSON` Schema command line **consumer**:
+  ```sh
+    #start a json command line consumer
+    kafka-json-schema-console-consumer --bootstrap-server localhost:29092 --topic test-topic
+  ```
+
+# `Protobuf` Command Line Producer and Consumer
+
+## `Protobuf` Command Line Producer
+
+- To start the `Protobuf` command line **producer**:
+  ```sh
+    #start a protobuf command line producer
+  ```
+
+## `Protobuf` Command Line Consumer
+
+- To start the `Protobuf` command line **consumer**:
+  ```sh
+    #start a protobuf command line consumer
+  ```
+
+# Schema Command Line Utilities
+
+- Verify registered schema types by:
+
+
+- You can use the `kafka-avro-console-consumer`, `kafka-protobuf-console-consumer`, and `kafka-json-schema-console-consumer` utilities to get the schema IDs for all messages on a topic, or for a specified subset of messages. This can be useful for exploring or troubleshooting schemas.
+
 # Resources
 
 1. [cp-demo/docker-compose.yml](https://github.com/confluentinc/cp-demo/blob/5.0.0-post/docker-compose.yml)

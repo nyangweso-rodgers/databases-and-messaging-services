@@ -130,19 +130,9 @@
       "doc": "This event records the sale of a product",
       "name": "SaleOrderEvent",
       "fields": [
-        { "name": "time", "type": "long", "doc": "The time of the purchase" },
-        { "name": "customer_id", "type": "long", "doc": "The customer" },
-        { "name": "product_id", "type": "long", "doc": "The product" },
-        { "name": "amount", "type": "int" },
-        {
-          "name": "payment_method",
-          "type": {
-            "type": "enum",
-            "name": "payment_types",
-            "symbols": ["cash", "mastercard", "visa"]
-          },
-          "doc": "The method of payment"
-        }
+        { "name": "customer_id", "type": "int", "doc": "The customer" },
+        { "name": "product_id", "int": "long", "doc": "The product" },
+        { "name": "amount", "int": "int" }
       ]
     }
     ```
@@ -162,6 +152,14 @@
   - maps
   - unions
   - fixed
+- The `Avro` **compatibility type.** Valid options:
+  - `none` — New schema can be any valid `Avro` schema
+  - `backward` —default — New schema can read data produced by the latest registered schema.
+  - `backward_transitive` — New schema can read data produced by all previously registered schemas
+  - `forward` — Latest registered schema can read data produced by the new schema
+  - `forward_transitive` — All previously registered schemas can read data produced by the new schema
+  - `full` — New schema is backward and forward compatible with latest registered schema
+  - `full_transitive` — New schema is backward and forward compatible with all previously registered schemas
 
 ### How to Configi
 

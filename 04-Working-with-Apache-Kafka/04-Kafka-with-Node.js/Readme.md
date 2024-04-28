@@ -47,7 +47,6 @@ const producer = kafka.producer({
     "namespace": "com.my.company",
     "doc": "Kafka JS example schema",
     "fields": [
-      { "name": "time", "type": "long", "doc": "The time of the purchase" },
       { "name": "customer_id", "type": "long", "doc": "The customer" },
       { "name": "product_id", "type": "long", "doc": "The product" },
       { "name": "amount", "type": "int" }
@@ -140,6 +139,9 @@ const producer = kafka.producer({
   ```
 
 ## Step #: Produce a message using the `AVRO` schema
--  since you now have a separate function `registerSchema` that registers the schema and is called within your `produceMessageToKafka` function, you can remove the immediately invoked function expression (IIFE) that registers the schema.
+
+- since you now have a separate function `registerSchema` that registers the schema and is called within your `produceMessageToKafka` function, you can remove the immediately invoked function expression (IIFE) that registers the schema.
 
 # Resources
+
+1. [avro.apache.org/docs](https://avro.apache.org/docs/1.11.1/specification/_print/)

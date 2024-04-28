@@ -245,6 +245,8 @@ services:
 # Resources
 
 1. [cp-demo/docker-compose.yml](https://github.com/confluentinc/cp-demo/blob/5.0.0-post/docker-compose.yml)
-2. [provectus/kafka-ui](https://github.com/provectus/kafka-ui/tree/master?tab=readme-ov-file)
+2. [github.com/provectus/kafka-ui](https://github.com/provectus/kafka-ui/tree/master?tab=readme-ov-file)
 3. [How To Set Up Apache Kafka With Docker?](https://codersee.com/how-to-set-up-apache-kafka-with-docker/)
 4. [Kafka Listeners – Explained](https://www.confluent.io/blog/kafka-listeners-explained/)
+5. [avro.apache.org/docs](https://avro.apache.org/docs/1.11.1/specification/_print/)
+6. [developer.confluent.io/Schema compatibility](https://developer.confluent.io/courses/schema-registry/schema-compatibility/)
