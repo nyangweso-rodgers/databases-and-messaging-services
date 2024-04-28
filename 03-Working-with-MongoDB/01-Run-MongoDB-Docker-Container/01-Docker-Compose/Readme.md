@@ -85,6 +85,26 @@ volumes:
     );
   ```
 
+## Show Databases
+
+```sh
+  show dbs
+```
+
+## Show Collections
+
+- List **collections** of a **database**
+
+  ```sh
+  show collections
+  ```
+
+## Create new non-existant database:
+
+```sh
+  use test_db;
+```
+
 ## Step #6: Create a Collection:
 
 - In the `mongosh` shell, create a collection by:
