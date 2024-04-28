@@ -9,14 +9,22 @@ services:
     container_name: so-restful-api
     ports:
       - 3200:3200
-  producer-with-kafka-js:
+  producer-with-json:
     build:
-      context: ./01-Sale-Order-Service/03-Kafka-Producer-API-with-KafkaJS
+      context: ./01-Sale-Order-Service/03-Producer-with-JSON
       dockerfile: Dockerfile
-    image: producer-with-kafka-js
-    container_name: producer-with-kafka-js
+    image: producer-with-json
+    container_name: producer-with-json
     ports:
       - 6501:6501
+  producer-with-avro:
+    build:
+      context: ./01-Sale-Order-Service/04-Producer-with-avro
+      dockerfile: Dockerfile
+    image: producer-with-avro
+    container_name: producer-with-avro
+    ports:
+      - 8001:8001
   #mongo:
   #container_name: mongo
   #image: mongo
@@ -118,7 +126,7 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
       KAFKA_CLUSTERS_0_SCHEMA_REGISTRY: http://schema-registry:8081
     #volumes:
-    #- ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
+      #- ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
 volumes:
   zookeeper-data:
     #-driver: local
