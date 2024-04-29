@@ -9,27 +9,60 @@
 ## Step #1: Creat a `docker-compose.yml` File with the following:
 
 ```yml
-    version: "1"
+version: "1"
 
-    services:
-        postgres:
-        image: postgres:latest
-        container_name: postgres
-        environment:
-            POSTGRES_USER: rodgers
-            POSTGRES_PASSWORD: mysecretpassword
-            POSTGRES_DB: test_db
-        ports:
-            - "5432:5432"
-        volumes:
-            - postgres_volume:/var/lib/postgresql/data
-
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: rodgers
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: test_db
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: postgres-pgadmin
+    ports:
+      - "5050:80"
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - ./pgadmin_volume:/var/lib/pgadmin
+    depends_on:
+      - postgres
 volumes:
   postgres_volume:
     driver: local
 ```
 
 - Remarks:
+
+  - create a `.env` file in the same directory as your `docker-compose.yml` that contains the environment variables:
+
+    ```env
+      #for POSTGRES
+      POSTGRES_USER=rodgers
+      POSTGRES_PASSWORD=<specify password>
+      POSTGRES_DB=test_db
+
+      #for PGADMIN
+      PGADMIN_DEFAULT_EMAIL=<specify email>
+      PGADMIN_DEFAULT_PASSWORD=<specify password>
+    ```
+
   - `driver: local`: This line specifies the volume driver to be used for the named volume. In this case, it uses the local driver, which means it will be managed by Docker on the local filesystem.
 
 ## Step #2: Run PostgreSQL Docker Container
@@ -39,11 +72,22 @@ volumes:
       docker-compose up -d
   ```
 
-## Step #: Connect to PostgreSQL using `psql`
+## Step #3: Connect to PostgreSQL service from PgAdmin running in the Docker container.
+
+- This is an example of how to configure **PgAdmin** connection:
+  - **Host name/address**: `postgres` (the name of your service in Docker Compose)
+  - **Port**: `5432` (the port exposed in your Docker Compose)
+  - **Username**: as per your `.env` file ()
+  - **Password**: as per your `.env` file ()
+- Note:
+  - **Network Connection Between Containers**: Since `pgadmin` and `postgres` are running as services within the same Docker Compose file, they are by default on the same network.
+  - **Correct Credentials and Host**: When setting up your `PgAdmin` connection, make sure to use the correct credentials from your `.env` file and specify the `host` as `postgres` (the service name in the Docker Compose file). This should match what you have set up in your environment variables.
+
+## Step #4: Connect to PostgreSQL using `psql`
 
 - Use the following command to connect to PostgreSQL container:
   ```sh
-    docker exec -it test-postgres psql -U rodgers -d mydb
+    docker exec -it postgres psql -U rodgers -d test_db
   ```
 - Remarks:
   - `docker exec`: This command is used to execute a command in a running container.
@@ -58,9 +102,6 @@ volumes:
 
 - To execute an SQL query, simply type it at the prompt followed by a semicolon (`;`), and hit enter
 - Basic commands to interact with PostgreSQL database using `psql` are as follows:
-
-### Command #:
-
 - Check the version with this SQL statement:
 
   ```sh
@@ -94,8 +135,7 @@ volumes:
 - or, insert multiple rows:
   ```sh
     # insert into the sale_order table
-    insert into sale_order (id, item, quantity)
-    values ('SO-TEST-2', 'test item 2', 2), ('SO-TEST-3', 'test item 3', 3), ('SO-TEST-4', 'test item 4', 4);
+    insert into sale_order (id, item, quantity) values ('SO-TEST-2', 'test item 2', 2), ('SO-TEST-3', 'test item 3', 3), ('SO-TEST-4', 'test item 4', 4);
   ```
 - Display table:
 
@@ -115,4 +155,6 @@ volumes:
 
 # Resources and Further Reading
 
-1. [hashnode.dev/setup-postgresql-docker](https://mayukh551.hashnode.dev/setup-postgresql-docker)
+1. [docker.com/blog - how-to-use-the-postgres-docker-official-image/](https://www.docker.com/blog/how-to-use-the-postgres-docker-official-image/)
+2. [hashnode.dev/setup-postgresql-docker](https://mayukh551.hashnode.dev/setup-postgresql-docker)
+3. [Setting up PostgreSQL and pgAdmin 4 with Docker](https://medium.com/@marvinjungre/get-postgresql-and-pgadmin-4-up-and-running-with-docker-4a8d81048aea)
