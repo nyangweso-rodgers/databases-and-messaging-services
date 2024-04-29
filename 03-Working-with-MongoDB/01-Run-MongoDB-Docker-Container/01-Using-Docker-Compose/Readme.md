@@ -4,6 +4,10 @@
 
 # Run a MongoDB Server With Docker Compose?
 
+# What is Docker Compose?
+
+- **Docker Compose** is a very powerful tool that’s used to manage multiple containers, called services, with a single file.
+
 ## Step #1: Create a `docker-compose.yml` File
 
 ```yml
