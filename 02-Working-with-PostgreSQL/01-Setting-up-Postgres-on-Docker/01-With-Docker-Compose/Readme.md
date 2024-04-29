@@ -61,9 +61,12 @@ volumes:
 
 ### Command #:
 
-```psql
-    mydb=> SELECT * FROM mytable;
-```
+- Check the version with this SQL statement:
+
+  ```sh
+    # check the version
+    SELECT version();
+  ```
 
 - To list all databases in your PostgreSQL server, use the `\l` command:
   ```sh
@@ -77,6 +80,30 @@ volumes:
   ```sh
     mydb=> \d mytable
   ```
+- Create `sale_order` table:
+  ```sh
+    # create the order
+    create table sale_order (id varchar(255), item varchar(255), quantity int);
+  ```
+- insert data into the `sale_order` table
+  ```sh
+    # insert into the sale_order table
+    insert into sale_order table
+    values ('SO-TEST-123', 'test item 1', 1);
+  ```
+- or, insert multiple rows:
+  ```sh
+    # insert into the sale_order table
+    insert into sale_order (id, item, quantity)
+    values ('SO-TEST-2', 'test item 2', 2), ('SO-TEST-3', 'test item 3', 3), ('SO-TEST-4', 'test item 4', 4);
+  ```
+- Display table:
+
+  ```sh
+    # display the sale order table
+    select * from sale_order;
+  ```
+
 - To switch to another database, use the `\c` command followed by the database name:
   ```sh
     mydb=> \c anotherdb
