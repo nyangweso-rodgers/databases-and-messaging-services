@@ -8,26 +8,30 @@
 
 - **Docker Compose** is a very powerful tool that’s used to manage multiple containers, called services, with a single file.
 
+# Setup
+
 ## Step #1: Create a `docker-compose.yml` File
 
-```yml
-#docker-compose.yml for mongodb
-version: "2"
-services:
-  mongo:
-    image: mongo
-    container_name: mongo
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME: root
-      - MONGO_INITDB_ROOT_PASSWORD: rootpassword
-      #- MONGO_INITDB_DATABASE=admin #you can omit this
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-volumes:
-  mongodb_data:
-```
+- Create a `docker-compose.yml` file with the following:
+
+  ```yml
+  #docker-compose.yml for mongodb
+  version: "2"
+  services:
+    mongo:
+      image: mongo
+      container_name: mongo
+      environment:
+        - MONGO_INITDB_ROOT_USERNAME: root
+        - MONGO_INITDB_ROOT_PASSWORD: rootpassword
+        - MONGO_INITDB_DATABASE=admin #you can omit this
+      ports:
+        - "27017:27017"
+      volumes:
+        - mongodb_data:/data/db
+  volumes:
+    mongodb_data:
+  ```
 
 - **Remarks**:
   - **Environment Variables**:
@@ -38,11 +42,15 @@ volumes:
 - start the MongoDB services defined in the compose file by executing the given command:
   ```sh
     #
-    docker-compose up -d
+    docker-compose up --build -d
   ```
 - You can view the running mongodb container by `docker ps` command.
 
-## Step #3: Access MongoDB Container
+## Step #3: Access MongoDB
+
+### Step #3.1: Access MongoDB Compass
+
+### Step #32.: Access MongoDB Container
 
 - Open the Bash shell inside the running MongoDB container through the following command
   ```sh
