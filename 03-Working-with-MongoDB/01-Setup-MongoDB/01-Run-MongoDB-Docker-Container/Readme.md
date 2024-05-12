@@ -1,10 +1,10 @@
-# Run MongoDB Server with `docker-compose.yml` File
+# Run MongoDB Docker Container
 
 ## Table Of Contents
 
 # Run a MongoDB Server With Docker Compose?
 
-# What is Docker Compose?
+## What is Docker Compose?
 
 - **Docker Compose** is a very powerful tool that’s used to manage multiple containers, called services, with a single file.
 
@@ -48,7 +48,17 @@
 
 ## Step #3: Access MongoDB
 
-### Step #3.1: Access MongoDB Compass
+### Step #3.1: Access MongoDB via MongoDB Compass
+
+- Connection string:
+
+  ```sh
+    mongodb://localhost:27017
+  ```
+
+- Remarks:
+  - If you already installed "MongoDB", and if you accidentally exit from the MongoDB server, then "restart your system".
+  - On **Windows**: press `Windows + R`, then type `services.msc` and click "ok", it opens "services" window, and then search for "MongoDB Server" in the list. After you find "MongoDB Server", right-click and choose "start" from the pop-up menu.
 
 ### Step #32.: Access MongoDB Container
 
@@ -130,3 +140,6 @@
   ```
 
 # Resources
+
+1. [How to Run & Deploy MongoDB Docker Container?](https://hevodata.com/learn/mongodb-docker/)
+2. [How to Run MongoDB in a Docker Container](https://www.howtogeek.com/devops/how-to-run-mongodb-in-a-docker-container/)
