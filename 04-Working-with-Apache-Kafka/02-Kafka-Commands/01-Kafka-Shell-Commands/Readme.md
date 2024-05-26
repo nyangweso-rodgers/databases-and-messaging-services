@@ -63,8 +63,11 @@
     docker exec -it kafka bash
     # confirm the listed kafka Topics
     kafka-topics --list --bootstrap-server kafka:29092
-    #or,
-    kafka-topics --bootstrap-server localhost:29092 --list
+  ```
+- If no topics exists, the following will be returned:
+  ```sh
+    __consumer_offsets
+    _schemas
   ```
 
 ## Create a New Kafka Topic
@@ -88,12 +91,10 @@
     docker exec -it kafka bash
     # Create a new kafka topic
     kafka-topics --create --bootstrap-server kafka:29092 --partitions 1 --replication-factor 1 --topic test-kafka-topic
-    #or,
-    kafka-topics --bootstrap-server localhost:29092 --create --topic test-kafka-topic-2 --partitions 3 --replication-factor 1
   ```
 - **Remarks**:
 
-  - `--partitions` - Kafka topics are partitioned i.e the data of topics are spread across multiple brokers for scalability.
+  - `--partitions` - **Kafka topics** are **partitioned** i.e the data of **topics** are spread across multiple brokers for scalability.
   - `--replication-factor` - To make data in a topic fault-tolerant and highly-available, every topic can be replicated, so that there are always multiple brokers that have a copy of the data.
 
   - **Kafka**'s information are stored in **log files**, which are divided as:
@@ -174,7 +175,7 @@
 
 - Let’s run a **console producer** with the `kafka-console-producer`:
   ```sh
-    docker exec --interactive --tty kafka kafka-console-producer --bootstrap-server localhost:8098 --topic test-kafka-topic
+    docker exec --interactive --tty kafka kafka-console-producer --bootstrap-server localhost:9101 --topic test-kafka-topic
   ```
 - **Note**:
   - this command will start the **producer** and it will wait for our input (and you should notice the `>` sign). Please specify a couple of messages and hit `Ctrl + D` after you finish:
@@ -188,7 +189,7 @@
   - Example:
     ```sh
       #write a message to kafka topic
-      kafka-console-producer --bootstrap-server localhost:29092 --topic test-topic
+      kafka-console-producer --bootstrap-server localhost:9101 --topic test-kafka-topic
     ```
   - The command should return `>` after which, you can enter a `JSON` message like:
     ```sh
@@ -201,14 +202,6 @@
     ```sh
       kafka-console-producer --bootstrap-server localhost:29092 --topic test-topic --property parse.key=true --property key.separator=,
     ```
-
-## `JSON` Command Line Producer
-
-- to start the `JSON` Schema command line **producer**:
-  ```sh
-    #start a json command line producer
-    kafka-json-schema-console-producer --bootstrap-server localhost:29092 --topic test-topic --property value.schema='{"type":"object","properties":{"f1":{"type":"string"}}
-  ```
 
 # Kafka Consumer
 
@@ -323,6 +316,14 @@
 ```sh
     docker exec -it schema-registry bash
 ```
+
+## `JSON` Command Line Producer
+
+- to start the `JSON` Schema command line **producer**:
+  ```sh
+    #start a json command line producer
+    kafka-json-schema-console-producer --bootstrap-server localhost:29092 --topic test-kafka-topic --property value.schema='{"type":"object","properties":{"f1":{"type":"string"}}
+  ```
 
 # Resources and Further Reading
 
