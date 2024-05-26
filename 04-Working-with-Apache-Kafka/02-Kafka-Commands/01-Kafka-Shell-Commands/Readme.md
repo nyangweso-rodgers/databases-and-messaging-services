@@ -325,6 +325,22 @@
     kafka-json-schema-console-producer --bootstrap-server localhost:29092 --topic test-kafka-topic --property value.schema='{"type":"object","properties":{"f1":{"type":"string"}}
   ```
 
+# Create `avro` Schema
+
+- We can use [Apache Avro](https://avro.apache.org/) as a data format for our messages.
+- Add a simple message definition to `src/main/avro/message-schema.avsc`:
+  ```avsc
+  {
+    "type": "record",
+    "name": "example",
+    "namespace": "com.my.company",
+    "fields": [
+      { "name": "id", "type": "string" },
+      { "name": "value", "type": "int" }
+    ]
+  }
+  ```
+
 # Resources and Further Reading
 
 1. [Kafka CLI Cheat Sheet](https://thecodinginterface.com/blog/kafka-cli-cheat-sheet/)
