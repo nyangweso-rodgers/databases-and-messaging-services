@@ -316,6 +316,14 @@
      kafka-consumer-groups --bootstrap-server localhost:29092 --describe --group test-consumer-group
   ```
 
+# Schema Registry CLI Commands
+
+## Exec into `schema-registry` Container
+
+```sh
+    docker exec -it schema-registry bash
+```
+
 # Resources and Further Reading
 
 1. [Kafka CLI Cheat Sheet](https://thecodinginterface.com/blog/kafka-cli-cheat-sheet/)

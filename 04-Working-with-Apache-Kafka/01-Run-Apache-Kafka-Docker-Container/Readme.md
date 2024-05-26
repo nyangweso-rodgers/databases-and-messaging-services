@@ -4,55 +4,37 @@
 
 # Setting up Kafka on Docker
 
-- With Docker, we don't have to install various tools manually, instead, we write a `docker-compose.yml` to manage containers.
-- Some of the most popular **Docker Images** for the set up include:
+- With Docker, we don't have to install various tools manually, instead, we write a `docker-compose.yml` to manage **containers**.
+- Some of the most popular **Docker Images** for **Apache Kafka** include:
 
   1. [confluentinc/cp-kafka](https://hub.docker.com/r/confluentinc/cp-kafka) Docker Image
 
 # Setting up Kafka on Docker with [confluentinc/cp-kafka](https://hub.docker.com/r/confluentinc/cp-kafka) Docker Image
 
-## Step #1: Create `docker-compose.yml` file and define `zookeeper`, `kafka`, `schema-registry`, and `kafka-ui` Services
+## Step #1: Create `docker-compose.yml` file and configure the Services
 
-```yml
-version: "1"
-services:
-  zookeeper:
-  kafka:
-  schema-registry:
-  kafka-ui:
-```
+- Configure `zookeeper`, `kafka`, `schema-registry`, and `kafka-ui` Services.
 
-## Step #2: Define `zookeeper` Service
+## Step #2: Configure `zookeeper` Service
 
+- [Zookeeper](https://zookeeper.apache.org/) is a service for managing and synchronizing distributed systems. It is a service used to manage **Kafka clusters**.
+- **Kafka** uses **Zookeeper** to manage the **brokers** in a **cluster**, and requires **Zookeeper** even if you're running a **Kafka cluster** with only one broker.
 - Add configurations for `zookeeper` service
+
   ```yml
-  version: "1"
   services:
     zookeeper:
-      image: confluentinc/cp-zookeeper:7.2.1
-      container_name: zookeeper
-      ports:
-        - "2181:2181"
-      restart: on-failure
-      environment:
-        - ZOOKEEPER_CLIENT_PORT:2181
-        - ZOOKEEPER_TICK_TIME:2000
-    kafka:
-    schema-registry:
-    kafka-ui:
   ```
-- Understanding **Environment Variables** for `zookeeper`
 
-  1. `ZOOKEEPER_CLIENT_PORT`:
-     - This instructs `Zookeeper` where it should listen for connections by clients- Kafka in our case.
-  2. `ZOOKEEPER_SERVER_ID`
-     - When running in **clustered mode**, we have to set the `ZOOKEEPER_SERVER_ID`.
+- Where:
+  - `ZOOKEEPER_CLIENT_PORT`: instructs `Zookeeper` where it should listen for connections by clients- **Kafka** in our case.
+  - `ZOOKEEPER_SERVER_ID`: When running in **clustered mode**, we have to set the `ZOOKEEPER_SERVER_ID`.
 
-## Step #3: Define `kafka` Service
+## Step #3: Configure `kafka` Service
 
 ### Connecting to Kafka on Docker
 
-- To run within Docker, you will need to configure two listeners for Kafka:
+- To run within **Docker**, you will need to configure two listeners for **Kafka**:
 
   1. **Communication within the Docker network**
      - This could be inter-broker communication (i.e., between brokers) and between other components running in Docker, such as **Kafka Connect** or third-party clients or producers.For these comms, we need to use the hostname of the Docker container(s). Each Docker container on the same Docker network will use the hostname of the Kafka broker container to reach it.
@@ -61,34 +43,11 @@ services:
 
 - Add configurations for `kafka` service
   ```yml
-  version: "1"
   services:
-    zookeeper:
-      #
     kafka:
-      image: confluentinc/cp-kafka:7.2.1
-      container_name: kafka
-      ports:
-        - "8098:8098"
-      environment:
-        KAFKA_BROKER_ID: 1
-        KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:8098
-        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-        KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-        KAFKA_DEFAULT_REPLICATION_FACTOR: "2"
-      volumes:
-        - C:\Services\kafka-data:/var/lib/kafka/data
-      depends_on:
-        - zookeeper
-      restart: on-failure
-    schema-registry:
-      #
-    kafka-ui:
-      #
   ```
-- the `depends_on` will make sure to start the `zookeeper` container before the `kafka`.
+- Where:
+  - `depends_on` will make sure to start the `zookeeper` container before the `kafka`.
 
 ### Understanding `kafka` Environment Variables
 
@@ -158,73 +117,29 @@ services:
 - This configuration specifically targets the replication factor for the internal Kafka offsets topic. This topic is used by Kafka to store information about consumer offsets (positions within topics).
 - The default value for this configuration is usually `1`. Since the offsets topic stores metadata and is less critical for data integrity compared to user topics, a single replica might be sufficient.
 
-### Bonus:
-
-####
-
-## Step #4: Define `schema-registry` Service
+## Step #4: Configure `schema-registry` Service
 
 - Add configurations for `schema-registry` service
-  ```yml
-  version: "1"
-  services:
-    zookeeper:
-      #
-    kafka:
-      #
-    schema-registry:
-      image: confluentinc/cp-schema-registry:7.3.0
-      #hostname: schema-registry
-      container_name: schema-registry
-      depends_on:
-        - kafka
-      ports:
-        - "8081:8081"
-      environment:
-        SCHEMA_REGISTRY_HOST_NAME: schema-registry
-        SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "kafka:8098"
-        #SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-    kafka-ui:
-      #
-  ```
-
-## Step #5: Define `kafka-ui` Service
-
-- `kafka-ui` is an application that will give us a nice UI to view our cluster.
-- Add configurations for `kafka-ui` service
 
   ```yml
-  version: "1"
   services:
-    zookeeper:
-      ##
-    kafka:
-      ##
     schema-registry:
-      ###
-    kafka-ui:
-      container_name: kafka-ui
-      image: provectuslabs/kafka-ui:latest
-      ports:
-        - 8080:8080
-      depends_on:
-        - kafka
-      environment:
-        DYNAMIC_CONFIG_ENABLED: true
-        KAFKA_CLUSTERS_0_NAME: wizard_test
-        KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
-        KAFKA_CLUSTERS_0_SCHEMA_REGISTRY: http://schema-registry:8081
-      #volumes:
-      #- ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
   ```
 
-- `kafka-ui` Configinition Properties:
-  1. `KAFKA_CLUSTERS_0_NAME: xxxxxx`:
-     - This is the Cluster name. In this case, the cluster name will be `wizard_test`
-  2. `KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS:`
-     - This Address where to connect
-  3. `KAFKA_CLUSTERS_0_SCHEMAREGISTRY`: for SchemaRegistry's address
-  4.
+## Step #5: Configure `kafka-ui` Service
+
+- [provectuslabs/kafka-ui](https://hub.docker.com/r/provectuslabs/kafka-ui) is a Free, open-source web UI to monitor and manage Apache Kafka **clusters**.
+- `kafka-ui` is an application that will give us a UI to view our **cluster**.
+
+  ```yml
+  services:
+    kafka-ui:
+  ```
+
+- Where:
+  - `KAFKA_CLUSTERS_0_NAME: xxxxxx`: is the **Cluster name**. In this case, the cluster name will be `local`
+  - `KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS:` is the Address where to connect
+  - `KAFKA_CLUSTERS_0_SCHEMAREGISTRY`: for SchemaRegistry's address
 
 ## Step #6: Start `zookeeper`, `kafka`, `schema-registry`, and `kafka-ui` Containers
 
@@ -244,8 +159,8 @@ services:
 
 # Resources
 
-1. [cp-demo/docker-compose.yml](https://github.com/confluentinc/cp-demo/blob/5.0.0-post/docker-compose.yml)
-2. [github.com/provectus/kafka-ui](https://github.com/provectus/kafka-ui/tree/master?tab=readme-ov-file)
+1. [github.com/cp-demo - docker-compose.yml](https://github.com/confluentinc/cp-demo/blob/5.0.0-post/docker-compose.yml)
+2. [github.com/provectus - kafka-ui](https://github.com/provectus/kafka-ui/tree/master?tab=readme-ov-file)
 3. [How To Set Up Apache Kafka With Docker?](https://codersee.com/how-to-set-up-apache-kafka-with-docker/)
 4. [Kafka Listeners – Explained](https://www.confluent.io/blog/kafka-listeners-explained/)
 5. [avro.apache.org/docs](https://avro.apache.org/docs/1.11.1/specification/_print/)
