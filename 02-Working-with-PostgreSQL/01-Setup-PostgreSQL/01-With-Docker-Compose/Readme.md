@@ -6,49 +6,53 @@
 
 - **Docker Compose** is a very powerful tool that’s used to manage multiple containers, called services, with a single file.
 
-## Step #1: Creat a `docker-compose.yml` File with the following:
+# How to Setup PostgreSQL Database with Docker Compose?
 
-```yml
-version: "1"
+## Step 1: Creat a `docker-compose.yml` File.
 
-services:
-  postgres:
-    image: postgres:latest
-    container_name: postgres
-    environment:
-      POSTGRES_USER: rodgers
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: test_db
-    ports:
-      - "5432:5432"
-    env_file:
-      - .env
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - postgres_volume:/var/lib/postgresql/data
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: postgres-pgadmin
-    ports:
-      - "5050:80"
-    env_file:
-      - .env
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    volumes:
-      - ./pgadmin_volume:/var/lib/pgadmin
-    depends_on:
-      - postgres
-volumes:
-  postgres_volume:
-    driver: local
-```
+- Create a `docker-compose.yml` file with the following contents:
 
-- Remarks:
+  ```yml
+  version: "1"
+
+  services:
+    postgres:
+      image: postgres:latest
+      container_name: postgres
+      environment:
+        POSTGRES_USER: rodgers
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_DB: test_db
+      ports:
+        - "5432:5432"
+      env_file:
+        - .env
+      environment:
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_DB: ${POSTGRES_DB}
+      volumes:
+        - postgres_volume:/var/lib/postgresql/data
+    pgadmin:
+      image: dpage/pgadmin4
+      container_name: postgres-pgadmin
+      ports:
+        - "5050:80"
+      env_file:
+        - .env
+      environment:
+        PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+        PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      volumes:
+        - ./pgadmin_volume:/var/lib/pgadmin
+      depends_on:
+        - postgres
+  volumes:
+    postgres_volume:
+      driver: local
+  ```
+
+- **Remarks**:
 
   - create a `.env` file in the same directory as your `docker-compose.yml` that contains the environment variables:
 
@@ -65,16 +69,16 @@ volumes:
 
   - `driver: local`: This line specifies the volume driver to be used for the named volume. In this case, it uses the local driver, which means it will be managed by Docker on the local filesystem.
 
-## Step #2: Run PostgreSQL Docker Container
+## Step 2: Run PostgreSQL Docker Container
 
 - Run the below command to run the PostgreSQL container
   ```sh
       docker-compose up -d
   ```
 
-## Step #3: Connect to PostgreSQL service from PgAdmin running in the Docker container.
+## Step 3: Configure PgAdmin Connection
 
-- This is an example of how to configure **PgAdmin** connection:
+- Configure the **PgAdmin** connection by specifying the following parameters:
   - **Host name/address**: `postgres` (the name of your service in Docker Compose)
   - **Port**: `5432` (the port exposed in your Docker Compose)
   - **Username**: as per your `.env` file ()
@@ -83,7 +87,7 @@ volumes:
   - **Network Connection Between Containers**: Since `pgadmin` and `postgres` are running as services within the same Docker Compose file, they are by default on the same network.
   - **Correct Credentials and Host**: When setting up your `PgAdmin` connection, make sure to use the correct credentials from your `.env` file and specify the `host` as `postgres` (the service name in the Docker Compose file). This should match what you have set up in your environment variables.
 
-## Step #4: Connect to PostgreSQL using `psql`
+## Step 4: Connect to PostgreSQL using `psql`
 
 - Use the following command to connect to PostgreSQL container:
   ```sh
