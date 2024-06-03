@@ -4,11 +4,9 @@
 
 # Introduction to PostgreSQL
 
-- PostgreSQL is an free open-source database system that supports both relational (SQL) and non-relational (JSON) queries.
+- **PostgreSQL** is an free open-source database system that supports both relational (SQL) and non-relational (JSON) queries.
 
-# Install PostgreSQL
 
-- Visit [installer by EDB](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads) to download version compatible with your OS.
 
 # Connecting to the PostgreSQL database
 
