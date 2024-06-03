@@ -56,7 +56,12 @@
       volumes:
         - postgres_volume:/var/lib/postgresql/data
       healthcheck:
-      test: ["CMD", "psql", "-U", "postgres", "-c", "SELECT 1"]
+      #test: ["CMD", "psql", "-U", "postgres", "-c", "SELECT 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_TEST_DB} -c 'SELECT 1'",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -86,6 +91,12 @@
         driver: local
   ```
 
+- Where:
+  - For `test: ["CMD-SHELL", "PGPASSWORD=${POSTGRES_PASSWORD} psql -U ${POSTGRES_USER} -d ${POSTGRES_TEST_DB} -c 'SELECT 1'"]` command:
+    - `CMD-SHELL`: Allows running shell commands, which is necessary to set the `PGPASSWORD` environment variable inline.
+    - `PGPASSWORD=${POSTGRES_PASSWORD}`: Sets the `PGPASSWORD` environment variable to the value of `POSTGRES_PASSWORD`, which is read by `psql` to authenticate without prompting for a password.
+    - `psql -U ${POSTGRES_USER} -d ${POSTGRES_TEST_DB} -c 'SELECT 1'`: Runs the psql command to connect to the specified database as the specified user and execute a simple query (SELECT 1), which is a common way to check if the database is responding.
+- Remarks:
 - Check `wal_level`:
 
   ```sh
