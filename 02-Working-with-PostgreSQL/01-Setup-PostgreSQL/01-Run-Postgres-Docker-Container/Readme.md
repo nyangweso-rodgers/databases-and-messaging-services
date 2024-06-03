@@ -87,25 +87,52 @@
   - **Network Connection Between Containers**: Since `pgadmin` and `postgres` are running as services within the same Docker Compose file, they are by default on the same network.
   - **Correct Credentials and Host**: When setting up your `PgAdmin` connection, make sure to use the correct credentials from your `.env` file and specify the `host` as `postgres` (the service name in the Docker Compose file). This should match what you have set up in your environment variables.
 
-## Step 4: Connect to PostgreSQL using `psql`
+## Step : Connecting to a Postgres container
 
-- Use the following command to connect to PostgreSQL container:
+- To connect to a **PostgreSQL** instance running within a **Docker container**, you can use the `docker exec` command combined with the `psql` command:
+  ```bash
+    docker exec -it <container> psql -U <username>
+  ```
+- Example:
   ```sh
     docker exec -it postgres psql -U rodgers -d test_db
   ```
-- Remarks:
-  - `docker exec`: This command is used to execute a command in a running container.
-  - `-it` flag is used when running the `docker exec` command. It is a combination of two separate flags: `-i` and `-t`: `-i` (or `--interactive`): It enables you to interact with the container's process by providing input through the command line. `-t` (or `--tty`): This flag allocates a pseudo-TTY (Teletypewriter) for the container. It allows you to see the output of the command and provides a terminal-like interface, making the interaction with the container more user-friendly.
-  - `test-postgres`: This specifies the name of the container in which the command will be executed.
-  - `psql`: This is the command that will be executed inside the container. It stands for **PostgreSQL interactive terminal**.
-  - `-U rodgers`: The `-U` flag stands for user and specifies the name of the user to connect as. In this case, it is connecting as user `rodgers`
-  - `-d mydb`: The `-d` flag is used to state the database you are going to use.
-- After the running the above command, the `psql` terminal will open. Now you can interact with your postgres database by running your SQL commands.
 
-## Bonus: Basic `psql` Commands
+## Step : Creating a Postgres user
+
+- The default user created by the `postgres` image when launching a container is named `postgres`. To create a specific user with superuser privileges, you can use the `POSTGRES_USER` environment variable as follows:
+- Note that, the password defined in the `POSTGRES_PASSWORD` variable will be assigned to the user defined in the `POSTGRES_USER` variable.
+- Example:
+  ```sh
+    docker run -d -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin -p 5432:5432 postgres
+  ```
+  - This command launches a Postgres container with a new root user named `admin`, identified by the password `admin`.
+
+## Step : Creating a custom database
+
+- By default, **Postgres** creates a database matching the name of the user defined in the `POSTGRES_USER` variable.
+- To define a different name for the default database that is created when the image is first started, you can use the `POSTGRES_DB` variable as follows:
+  ```sh
+    docker run -d -e POSTGRES_USER=<username> -e POSTGRES_PASSWORD=<password> -e POSTGRES_DB=<database> -p <host_port>:<container_port> postgres
+  ```
+- Example:
+  ```sh
+    docker run -d -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin -e POSTGRES_DB=test_db -p 5432:5432 postgres
+  ```
+  - This command launches a Postgres container with a new root user named admin, identified by the password admin, whose default database is `test_db`.
+
+## Step : Connecting pgAdmin to Postgres
+
+- Where:
+  - `PGADMIN_DEFAULT_EMAIL` is used to create a new user account on **pgAdmin**.
+  - `PGADMIN_DEFAULT_PASSWORD` is used as a password for the user account identified by `PGADMIN_DEFAULT_EMAIL`.
+
+# Bonus: Basic `psql` Commands
 
 - To execute an SQL query, simply type it at the prompt followed by a semicolon (`;`), and hit enter
-- Basic commands to interact with PostgreSQL database using `psql` are as follows:
+
+## Command : Check Version
+
 - Check the version with this SQL statement:
 
   ```sh
@@ -113,45 +140,105 @@
     SELECT version();
   ```
 
-- To list all databases in your PostgreSQL server, use the `\l` command:
+## Command : List Databases
+
+- To list all databases in your **PostgreSQL** server, use the `\l` command:
   ```sh
     mydb=> \l
   ```
+- **Remarks**:
+  - Running the above command will list all the databases in your **PostgreSQL** server incluing `template0` and `template1`. `template0` and `template1` are template databases that are used as the basis for creating new databases. Here’s what they are and their purposes:
+  - `template0`:
+    - **Purpose**: `template0` is a pristine template database. It remains unchanged and is used to create new databases that are guaranteed to start from a clean state.
+    - **Usage**: When you create a new database, you can specify `template0` as the template to avoid inheriting any custom objects or modifications. This is particularly useful if you need a new database that is free from any user-defined changes.
+    - **Immutability**: `template0` is meant to be left unchanged. It does not include any custom objects, extensions, or configurations that might have been added by users.
+  - `template1`:
+    - **Purpose**: `template1` is the default template database used when creating new databases unless another template is specified. It allows users to define custom objects, configurations, and extensions that will be copied to any new database created from this template.
+    - **Usage**: When a new database is created without specifying a template, **PostgreSQL** uses `template1` by default. Any changes made to `template1` will be present in all databases created from it.
+    - **Customizability**: You can add custom objects, such as tables, functions, and extensions, to `template1`, and these changes will be propagated to new databases created from it.
+  - When you create a new database in _PostgreSQL_, you can specify which template to use. By default, **PostgreSQL** uses `template1`. If you want to create a new database from `template0` (to ensure it is a clean slate), you can specify it like this:
+    ```sh
+      #psql
+      CREATE DATABASE new_db TEMPLATE template0;
+    ```
+
+## Command : Connect to a specific database
+
+- Use the `\c` command followed by the database name you want to connect to. For example, if you want to connect to `test_db`, you would run:
+  ```sh
+    #psql
+    postgres=# \c test_db
+  ```
+
+## Command : Check the current database
+
+- To see which database you are currently connected to, use the following command:
+
+  ```sh
+    test_db=# \conninfo
+  ```
+
+- **Sample Output**:
+  ```sh
+    You are connected to database "test_db" as user "admin" on host "postgres" (address "172.22.0.2") at port "5432".
+  ```
+
+## Command : List Tables in a Database
+
 - To list all tables in the current database, use the `\dt` command:
   ```sh
     mydb=> \dt
   ```
+
+## Command : Database Table Information
+
 - To get information about a specific table, use the `\d` command followed by the table name:
   ```sh
     mydb=> \d mytable
   ```
+
+## Command : Create Database Table
+
 - Create `sale_order` table:
   ```sh
     # create the order
     create table sale_order (id varchar(255), item varchar(255), quantity int);
   ```
+
+## Command : Insert Table Row/Data
+
 - insert data into the `sale_order` table
   ```sh
     # insert into the sale_order table
     insert into sale_order table
     values ('SO-TEST-123', 'test item 1', 1);
   ```
-- or, insert multiple rows:
+
+## Command : Insert Multiple Table Rows
+
+- Insert multiple rows:
   ```sh
     # insert into the sale_order table
     insert into sale_order (id, item, quantity) values ('SO-TEST-2', 'test item 2', 2), ('SO-TEST-3', 'test item 3', 3), ('SO-TEST-4', 'test item 4', 4);
   ```
+
+## Command : Display Database Table
+
 - Display table:
 
   ```sh
-    # display the sale order table
     select * from sale_order;
   ```
+
+## Command : Switch To Another Database Table
 
 - To switch to another database, use the `\c` command followed by the database name:
   ```sh
     mydb=> \c anotherdb
   ```
+
+## Command : Exit `psql`
+
 - To quit `psql`, type `\q` and hit enter:
   ```sh
     mydb=> \q
@@ -160,5 +247,5 @@
 # Resources and Further Reading
 
 1. [docker.com/blog - how-to-use-the-postgres-docker-official-image/](https://www.docker.com/blog/how-to-use-the-postgres-docker-official-image/)
-2. [hashnode.dev/setup-postgresql-docker](https://mayukh551.hashnode.dev/setup-postgresql-docker)
+2. [hashnode.dev - setup-postgresql-docker](https://mayukh551.hashnode.dev/setup-postgresql-docker)
 3. [Setting up PostgreSQL and pgAdmin 4 with Docker](https://medium.com/@marvinjungre/get-postgresql-and-pgadmin-4-up-and-running-with-docker-4a8d81048aea)
