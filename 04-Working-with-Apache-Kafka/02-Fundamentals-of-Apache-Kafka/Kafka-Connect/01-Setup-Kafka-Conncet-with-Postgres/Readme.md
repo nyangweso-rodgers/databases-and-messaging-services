@@ -51,8 +51,11 @@
   - For **Debezium** to work with **Postgres**, **Postgres** needs to have the **logical replication** enabled and if you observe the line command: `["postgres", "-c", "wal_level=logical"]` we are configuring the **Postgres DB** to start with `wal_level` as logical.
   - If we don't do this step, then **debezium** would not be able to capture the changes happening on **Postgres**. The default `wal_level` is `replica`.
 
-## Step 2: Create Source Connector
+## Step 2: Configure Postgres Connector
 
+### Step 2.1: Register Postgres connector using HTTP API
+
+- We need to register the **Postgres connector** using **HTTP API** so that **debezium** could read the transaction logs from the server.
 - To create a **source connector**, We require a bit of `JSON` to send to the **REST API** to configure the **source connector**:
 
   ```json
@@ -98,22 +101,73 @@
     - `transforms.AddPrefix.replacement` contains the replacing string.
 
 - This provides a name for the connector, how to connect to the database and which table to read.
-
-# Step 3: Applying the configuration
-
-- Start a **connector** which will read the postgres table out of the postgres database.
+- To register the above **connector**, run the below `curl` and we would see the connector registered:
   ```sh
-    curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d @delegates-survey-pg-connector.json
+    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @connector.json
   ```
-- Check that the upload is successful and the connector is running:
-  ```sh
-    curl -i http://localhost:8083/connectors/delegates-survey-pg-connector/status
-  ```
-- Remarks :
+  - or:
+    ```sh
+      curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d @delegates-survey-pg-connector.json
+    ```
+- Both of these commands will start a **connector** which will read the **postgres** table out of the **postgres database**.
+- **Remarks**:
+  - We can check that the upload is successful and the **connector** is running by:
+    ```sh
+      curl -i http://localhost:8083/connectors/delegates-survey-pg-connector/status
+    ```
   - **Kafka connect** has a **REST** endpoint which we can use to find out things like what connectors are enabled in the container.
     ```sh
       curl -H "Accept:application/json" localhost:8083/connectors/
     ```
+
+### Step 2.2: Register Postgres connector using Debezium UI
+
+- Click the **Manage** icon to open the **Overview** tab.
+- From **Connection Details** section, note down the following attributes: `username`, `password`, `host`, `port`, and `database`.
+- On the **Kafka server**, create a new file, `source-connector.json`:
+  ```sh
+    touch source-connector.json
+  ```
+- Add the following to `source-connector.json` file and save it:
+  ```json
+  {
+    "name": "source-connector",
+    "config": {
+      "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+      "database.hostname": "[Vultr_hostname]",
+      "database.port": "[Vultr_port]",
+      "database.user": "[Vultr_username]",
+      "database.password": "[Vultr_password]",
+      "database.dbname": "defaultdb",
+      "database.server.name": "myserver",
+      "plugin.name": "wal2json",
+      "table.include.list": "public.orders",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "database.sslmode": "require"
+    }
+  }
+  ```
+- Invoke the **Kafka Connect REST** endpoint to create the **connector**.
+  ```sh
+    curl -X POST -H "Content-Type: application/json" --data @source-connector.json http://localhost:8083/connectors
+  ```
+
+## Step 3: List Kafka Topics
+
+- If there was no issue running the above steps we could confirm that our **connector** is working fine by checking if the **topic** is created for `customers` table by the **connector**.
+  ```sh
+    kafka-topics --bootstrap-server localhost:9092 --list
+  ```
+- Sample output:
+
+## Step 4: Reading the data
+
+- We can check that the data availability on the **topic**.
+- There would be data present in the **topic** because when the **connector** starts it takes an initial snapshot of the database table. This is a default `config` named `snapshot.mode` which we didn't configure but is set to `initial` which means that the **connector** will do a snapshot on the initial run when it doesn't find the last known **offset** from the transaction log available for the database server.
+  ```bash
+    #kafka bash
+    kafka-console-consumer --bootstrap-server localhost:9092 --topic postgres.public.customers --from-beginning
+  ```
 
 # Step 4: Configure Sink Connector
 
