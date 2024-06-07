@@ -1,1 +1,0 @@
-# Fundamentals Of PostgreSQL
