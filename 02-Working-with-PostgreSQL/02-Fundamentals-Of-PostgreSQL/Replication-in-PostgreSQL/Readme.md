@@ -104,6 +104,20 @@
   show wal_level;
   ```
 
+# Steps to Logical Replication in PostgreSQL using `psql`
+
+## Step 1: Create a new empty database
+
+- Create a new empty target database where you want to replicate the specific tables.
+
+# Display Information About Active Replication
+
+```sh
+  #psql
+  SELECT * FROM pg_stat_replication;
+```
+
+- This will display information about the active replication connections, including the lag and state of each replication slot.
 - When a **publication** is created, the **publication** information will be added to **pg_publication catalogue table**:
   ```sh
     #psql

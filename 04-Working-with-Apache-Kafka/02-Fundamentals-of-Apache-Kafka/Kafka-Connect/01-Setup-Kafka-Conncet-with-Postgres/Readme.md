@@ -101,24 +101,75 @@
     - `transforms.AddPrefix.replacement` contains the replacing string.
 
 - This provides a name for the connector, how to connect to the database and which table to read.
-- To register the above **connector**, run the below `curl` and we would see the connector registered:
+
+- To **register** the above **connector**, run the below `curl` commands:
+
   ```sh
-    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @connector.json
+    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @register-customers-pg-connector.json
+    #or,
+    curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d @register-pg-connector.json
   ```
-  - or:
-    ```sh
-      curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d @delegates-survey-pg-connector.json
+
+  - **Sample Output**:
+    ```json
+    {
+      "name": "register-pg-connector",
+      "config": {
+        "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+        "tasks.max": "1",
+        "plugin.name": "pgoutput",
+        "database.hostname": "postgres",
+        "database.port": "5432",
+        "database.user": "admin",
+        "database.password": "Rodgy@01",
+        "database.dbname": "test_db",
+        "database.server.name": "postgres",
+        "table.include.list": "test_db.customers",
+        "heartbeat.interval.ms": "5000",
+        "publication.autocreate.mode": "filtered",
+        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "value.converter.schemas.enable": "false",
+        "topic.prefix": "test_db",
+        "topic.creation.enable": "true",
+        "topic.creation.default.replication.factor": "1",
+        "topic.creation.default.partitions": "1",
+        "topic.creation.default.cleanup.policy": "delete",
+        "topic.creation.default.retention.ms": "604800000",
+        "name": "register-pg-connector"
+      },
+      "tasks": [],
+      "type": "source"
+    }
     ```
+
 - Both of these commands will start a **connector** which will read the **postgres** table out of the **postgres database**.
+
 - **Remarks**:
   - We can check that the upload is successful and the **connector** is running by:
     ```sh
-      curl -i http://localhost:8083/connectors/delegates-survey-pg-connector/status
+      curl -X GET "http://localhost:8083/connectors/register-customers-pg-connector/status"
     ```
+    - Sample Output:
+      ```json
+      {
+        "name": "register-customers-pg-connector",
+        "connector": { "state": "RUNNING", "worker_id": "172.25.0.11:8083" },
+        "tasks": [
+          { "id": 0, "state": "RUNNING", "worker_id": "172.25.0.11:8083" }
+        ],
+        "type": "source"
+      }
+      ```
+    - The status message indicates that your **Kafka connector** is successfully running. Both the connector and its task are in the "RUNNING" state, which means it has been properly configured and is currently active.
   - **Kafka connect** has a **REST** endpoint which we can use to find out things like what connectors are enabled in the container.
     ```sh
       curl -H "Accept:application/json" localhost:8083/connectors/
     ```
+    - Sample output:
+      ```sh
+        ["delegates_surveys-pg-connector","register-customers-pg-connector"]
+      ```
 
 ### Step 2.2: Register Postgres connector using Debezium UI
 
@@ -129,24 +180,24 @@
     touch source-connector.json
   ```
 - Add the following to `source-connector.json` file and save it:
+
   ```json
   {
     "name": "source-connector",
     "config": {
       "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
-      "database.hostname": "[Vultr_hostname]",
-      "database.port": "[Vultr_port]",
-      "database.user": "[Vultr_username]",
-      "database.password": "[Vultr_password]",
+
+      "database.user": "<database-user>",
+      "database.password": "database-password]",
       "database.dbname": "defaultdb",
       "database.server.name": "myserver",
       "plugin.name": "wal2json",
       "table.include.list": "public.orders",
-      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-      "database.sslmode": "require"
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter"
     }
   }
   ```
+
 - Invoke the **Kafka Connect REST** endpoint to create the **connector**.
   ```sh
     curl -X POST -H "Content-Type: application/json" --data @source-connector.json http://localhost:8083/connectors
@@ -228,3 +279,4 @@
 # Resources and Further Reading
 
 1. [postgresql.org/docs - logical-replication](https://www.postgresql.org/docs/current/logical-replication.html)
+2. [www.iamninad.com - docker-compose-for-your-next-debezium-and-postgres-project](https://www.iamninad.com/posts/docker-compose-for-your-next-debezium-and-postgres-project/)

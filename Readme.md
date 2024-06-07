@@ -2,6 +2,15 @@
 
 ## Table Of Contents
 
+# Database Replication
+
+# What is Logical Replication?
+
+- **Logical replication** is a method of replicating data objects and their changes, based upon their replication identity (usually a primary key). We use the term **logical** in contrast to **physical replication**, which uses exact block addresses and byte-by-byte replication.
+- **Logical replication** allows fine-grained control over both data replication and security.
+- **Logical replication** uses a **publish** and **subscribe** model with one or more **subscribers** subscribing to one or more publications on a publisher node. **Subscribers** pull data from the publications they subscribe to and may subsequently re-publish data to allow cascading replication or more complex configurations.
+  - **Logical replication** of a table typically starts with taking a snapshot of the data on the publisher database and copying that to the **subscriber**. Once that is done, the changes on the **publisher** are sent to the **subscriber** as they occur in real-time. The subscriber applies the data in the same order as the publisher so that transactional consistency is guaranteed for publications within a single subscription. This method of data replication is sometimes referred to as transactional replication.
+
 # ACID (Atomicity, Consistency, Isolation, & Durability) Properties in DMS (Database Management Systems)
 
 - **ACID** properties ensure that a set of database operations (grouped together in a transaction) leave the database in a valid state even in the event of unexpected errors.

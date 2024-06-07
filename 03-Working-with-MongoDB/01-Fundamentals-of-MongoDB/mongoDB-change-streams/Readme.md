@@ -18,7 +18,7 @@
 
 # Where to Use Change Streams?
 
-1. Real-time Analytics: Change Streams are valuable for real-time data analysis, allowing immediate response to data changes.
+1. **Real-time Analytics**: **Change Streams** are valuable for real-time data analysis, allowing immediate response to data changes.
 2. Data Replication: They can be used to replicate data changes across multiple systems or databases in real-time.
 3. Synchronization Across Distributed Systems: Change Streams help keep distributed systems synchronized by propagating changes instantly.
 4. Building Event-Driven Architectures: They are essential for building event-driven systems where actions are triggered based on database changes.
@@ -38,92 +38,6 @@
 - APIs for Managing Change Streams: MongoDB drivers offer APIs for establishing and managing change streams.
 - Subscription to Relevant Changes: Developers can subscribe to specific changes based on their application’s requirements.
 - Processing Changes: Developers can process these changes as needed in their application logic.
-
-# Application
-
-## Objective
-
-- Build a **real-time application** using **MongoDB Change Streams**. The `Node.js` Application should listens for changes in a **MongoDB** collection and triggers notifications for new document insertions.
-
-## Step 1: Connect to MongoDB
-
-- Establish a connection to our MongoDB database using the appropriate driver for Node.js.
-
-  ```js
-  //src/app/utils/mongo-db-connection.js
-  import { MongoClient } from "mongodb";
-  import dotenv from "dotenv";
-
-  // Load environment variables from .env file
-  dotenv.config();
-
-  const MONGO_URI = process.env.MONGO_URI_FOR_SURVEY_SERVICE;
-
-  // Define an asynchronous function to connect to MongoDB
-  const connectToMongoDB = async () => {
-    const mongoClient = new MongoClient(MONGO_URI);
-
-    try {
-      // Attempt to connect to the MongoDB server
-      await mongoClient.connect();
-
-      // Log a success message if connected
-      console.log("Connected to MongoDB");
-
-      // Return the database object from the client
-      return mongoClient.db("myDatabase");
-    } catch (error) {
-      // Log an error message if connection fails
-      console.error("Error connecting to MongoDB:", error);
-    }
-  };
-
-  // Call the connectToMongoDB function and assign the returned database object to 'db'
-  const db = await connectToMongoDB();
-
-  export default db;
-  ```
-
-## Step 2: Create a Change Stream
-
-- create a change stream to monitor the desired collection for insertions.
-
-  ```js
-  //src/app/index.js
-  import db from "./utils/mongo-db-connection.js";
-
-  // Access the 'notifications' collection from the connected database
-  const collection = db.collection("participants_survey");
-
-  // Create a change stream on the 'notifications' collection
-  const changeStream = collection.watch();
-  ```
-
-- We access, `participants_survey` collection from the connected MongoDB database using `db.collection` method. It then creates a change stream on the `participants_survey` collection using the ‘`watch`‘ method. This **change stream** will allow the application to listen for changes in the `participants_survey` collection in real-time.
-
-## Step 3: Listen for Changes
-
-- Now, listen for changes in the **change stream** and handle new document insertions.
-
-  ```js
-  //src/app/index.js
-
-  // Listen for changes in the change stream
-  changeStream.on("change", (change) => {
-    // Check if the change is an insertion
-    if (change.type === "insert") {
-      // Extract the new document from the change event
-      const newParticipantSurvey = change.fullDocument;
-
-      // Log the new notification to the console
-      console.log("New Participant Survey Response", newParticipantSurvey);
-    }
-  });
-  ```
-
-- Here, we setup a listener for changes in the **change stream**. When a change event occurs, it checks if the operation type is an insertion (`insert`). If it is, it extracts the new document from the change event and logs it to the console as a new notification
-
-## Step 4: Run the Application
 
 # Resources and Further Reading
 
