@@ -24,6 +24,38 @@
 
 # Comands
 
+## Command : Switch to Admin
+
+```sh
+  #
+  use admin
+```
+
+## Command : Creating User
+
+```sh
+  #mongosh
+  use admin
+  db.createUser({user: "mongo", pwd: "mongo", roles: ["root"]})
+```
+
+## Command 1: Display Current Database
+
+- To display the database you are using, type `db`
+  ```sh
+    #mongosh
+    db
+  ```
+- The operation should return `test`, which is the default database.
+
+## Command 2: Switch Database
+
+- To switch databases, issue the use `<db>` helper, as in the following example:
+  ```sh
+    #mongosh
+    use <database_name>
+  ```
+
 ## Command 1: Show Databases
 
 ```sh
