@@ -2,51 +2,9 @@
 
 ## Table Of Contents
 
-# Kafka Connect
 
-- **Kafka Connect** is a tool for scalably and reliably streaming data between **Apache Kafka** and other data systems. It makes it simple to quickly define **connectors** that move large data sets in and out of **Kafka**. **Kafka Connect** can ingest entire databases or collect metrics from all your application servers into **Kafka topics**, making the data available for **stream processing** with low latency.
 
-# Types Of Kafka Connectors
 
-- There are two types of Kafka connectors:
-  1. **Source connector**: Used to move data from source systems to **Kafka topics**.
-  2. **Sink connector**: Used to send data from **Kafka topics** into target (sink) systems.
-
-# What is Debezium?
-
-- **Debezium** is a set of **source connectors** for **Kafka Connect**. We can use it to capture changes in our databases so that your applications can respond to them in real-time.
-- **Debezium** is built upon the **Apache Kafka** project and uses **Kafka** to transport the changes from one system to another. The most interesting aspect of **Debezium** is that at the core it is using **Change Data Capture** (CDC) to capture the data and push it into **Kafka**. The advantage of this is that the source database remains untouched in the sense that we don’t have to add triggers or log tables. This is a huge advantage as triggers and log tables degrade performance.
-
-# Run Debezium Kafka Connect using Docker
-
-```yml
-# debezium connector
-debezium:
-  #image: debezium/connect:1.9
-  image: debezium/connect:latest
-  ports:
-    - 8083:8083
-  environment:
-    CONFIG_STORAGE_TOPIC: my_connect_configs
-    OFFSET_STORAGE_TOPIC: my_connect_offsets
-    STATUS_STORAGE_TOPIC: my_connect_statuses
-    BOOTSTRAP_SERVERS: kafka:29092
-  links:
-    - zookeeper
-    - postgres
-  depends_on:
-    - kafka
-    - zookeeper
-    - postgres
-    - mongo
-```
-
-- Where:
-  - `BOOTSTRAP_SERVERS: kafka:29092` - The **Kafka broker** to connect to.
-  - `GROUP_ID: 1`: - Consumer group ID assigned to Kafka Connect consumer.
-  - `CONFIG_STORAGE_TOPIC` - Topic to store connector configuration.
-  - `OFFSET_STORAGE_TOPIC` - Topic to store connector offsets.
-  - `STATUS_STORAGE_TOPIC` - Topic to store connector status.
 
 # Configure Debezium to Capture CDC Events
 
@@ -145,8 +103,4 @@ debezium:
 
 - We recommend using a [continuous run Schedule type](). The idea is that the streaming Flow runs indefinitely or until there are no messages to extract, or it stops if there is an error. When the Flow stops for any of the reasons above, it restarts automatically after the configured number of seconds.
 
-# Resources and Further Reading
 
-1. [docs.confluent.io - Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html)
-2. [runchydata.com/blog - postgresql-change-data-capture-with-debezium](https://www.crunchydata.com/blog/postgresql-change-data-capture-with-debezium)
-3. [official tutorial for Debezium UI ](https://debezium.io/blog/2021/08/12/introducing-debezium-ui/)
