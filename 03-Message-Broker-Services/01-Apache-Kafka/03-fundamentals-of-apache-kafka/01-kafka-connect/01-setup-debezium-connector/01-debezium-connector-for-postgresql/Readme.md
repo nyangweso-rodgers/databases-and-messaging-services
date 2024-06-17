@@ -123,7 +123,7 @@
         "database.hostname": "postgres",
         "database.port": "5432",
         "database.user": "admin",
-        "database.password": "Rodgy@01",
+        "database.password": "<password>",
         "database.dbname": "test_db",
         "database.server.name": "postgres",
         "table.include.list": "test_db.customers",
@@ -173,43 +173,11 @@
         ["delegates_surveys-pg-connector","register-customers-pg-connector"]
       ```
 
-### Step 2.2: Register Postgres connector using Debezium UI
-
-- Click the **Manage** icon to open the **Overview** tab.
-- From **Connection Details** section, note down the following attributes: `username`, `password`, `host`, `port`, and `database`.
-- On the **Kafka server**, create a new file, `source-connector.json`:
-  ```sh
-    touch source-connector.json
-  ```
-- Add the following to `source-connector.json` file and save it:
-
-  ```json
-  {
-    "name": "source-connector",
-    "config": {
-      "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
-
-      "database.user": "<database-user>",
-      "database.password": "database-password]",
-      "database.dbname": "defaultdb",
-      "database.server.name": "myserver",
-      "plugin.name": "wal2json",
-      "table.include.list": "public.orders",
-      "value.converter": "org.apache.kafka.connect.json.JsonConverter"
-    }
-  }
-  ```
-
-- Invoke the **Kafka Connect REST** endpoint to create the **connector**.
-  ```sh
-    curl -X POST -H "Content-Type: application/json" --data @source-connector.json http://localhost:8083/connectors
-  ```
-
 ## Step 3: List Kafka Topics
 
 - If there was no issue running the above steps we could confirm that our **connector** is working fine by checking if the **topic** is created for `customers` table by the **connector**.
   ```sh
-    kafka-topics --bootstrap-server localhost:9092 --list
+    kafka-topics --bootstrap-server localhost:29092 --list
   ```
 - Sample output:
 
@@ -256,7 +224,7 @@
 ## Step : Viewing the Data
 
 ```sh
-  kafka-console-consumer --bootstrap-server kafka:9092 --topic postgres.public.delegates_surveys --from-beginning
+  kafka-console-consumer --bootstrap-server kafka:29092 --topic postgres.public.delegates_surveys --from-beginning
 ```
 
 ## Register Schema
