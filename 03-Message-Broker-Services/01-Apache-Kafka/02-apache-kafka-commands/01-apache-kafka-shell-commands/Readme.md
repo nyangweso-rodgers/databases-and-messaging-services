@@ -25,10 +25,9 @@
 - Access the shell of the **Kafka container** by running the following command:
 
   ```sh
-    #access kafka shell
     docker exec -it kafka bash
 
-    #or,
+    #or
     docker-compose exec -it kafka bash
   ```
 
@@ -61,7 +60,6 @@
 - Use the `kafka-topics` command to list the topics in the **Kafka cluster**:
   ```sh
     docker exec -it kafka bash
-    # confirm the listed kafka Topics
     kafka-topics --list --bootstrap-server kafka:29092
   ```
 - If no topics exists, the following will be returned:
@@ -89,7 +87,6 @@
 - Create a new **kafka topic**, `test-kafka-topic` with `docker exec` command
   ```sh
     docker exec -it kafka bash
-    # Create a new kafka topic
     kafka-topics --create --bootstrap-server kafka:29092 --partitions 1 --replication-factor 1 --topic test-kafka-topic
   ```
 - **Remarks**:
@@ -123,7 +120,7 @@
     ```
 - Example:
   ```sh
-    kafka-topics --bootstrap-server localhost:29092 --delete --topic test-kafka-topic
+    kafka-topics --bootstrap-server localhost:29092 --delete --topic  test-kafka-topic
   ```
 
 # Kafka Broker Commands
