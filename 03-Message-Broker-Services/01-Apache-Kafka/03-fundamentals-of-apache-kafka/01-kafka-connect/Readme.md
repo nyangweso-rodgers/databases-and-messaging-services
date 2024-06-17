@@ -13,3 +13,4 @@
 # Resources and Further Reading
 
 1. [docs.confluent.io - Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html)
+2. [support.etlworks.com/articles - Real-time-change-replication-with-Kafka-and-Debezium](https://support.etlworks.com/hc/en-us/articles/360020461693-Real-time-change-replication-with-Kafka-and-Debezium)
