@@ -1,9 +1,9 @@
 # Connecting to the PostgreSQL Database
 
-- Two most common ways to connect to the PostgreSQL database include:
+- Two most common ways to connect to the **PostgreSQL database** include:
   1. SQL Shell (psql), and
   2. pgAdmin 4
-- Both of them comes with the installation of PostgreSQL
+- Both of them comes with the installation of **PostgreSQL**
 
 ## Connect to PostgreSQL #1: SQL Shell (psql)
 

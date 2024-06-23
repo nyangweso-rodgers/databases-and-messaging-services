@@ -100,8 +100,9 @@
 
 ## Step : Creating a Postgres user
 
-- The default user created by the `postgres` image when launching a container is named `postgres`. To create a specific user with superuser privileges, you can use the `POSTGRES_USER` environment variable as follows:
-- Note that, the password defined in the `POSTGRES_PASSWORD` variable will be assigned to the user defined in the `POSTGRES_USER` variable.
+- The default **user** created by the `postgres` image when launching a container is named `postgres`. To create a specific user with superuser privileges, you can use the `POSTGRES_USER` environment variable as follows:
+- **Note**:
+  - the **password** defined in the `POSTGRES_PASSWORD` variable will be assigned to the **user** defined in the `POSTGRES_USER` variable.
 - Example:
   ```sh
     docker run -d -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin -p 5432:5432 postgres
