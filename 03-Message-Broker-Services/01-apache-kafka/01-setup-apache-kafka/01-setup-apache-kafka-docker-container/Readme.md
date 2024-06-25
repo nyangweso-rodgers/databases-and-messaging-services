@@ -110,7 +110,13 @@
     schema-registry:
   ```
 
-## Step 5: Configure `kafka-ui` Service
+# Web UIs for managing Apache Kafka
+
+## Web UIs for managing Apache Kafka 1: UI for Apache Kafka
+
+- **Kafka UI** —or, as its developer **Provectus** calls it, **UI for Apache Kafka** — is a free, open source web UI that stands out for being lightweight and easy to use.
+
+### Step 5: Configure `kafka-ui`
 
 - [provectuslabs/kafka-ui](https://hub.docker.com/r/provectuslabs/kafka-ui) is a Free, open-source web UI to monitor and manage Apache Kafka **clusters**.
 - `kafka-ui` is an application that will give us a UI to view our **cluster**.
@@ -124,6 +130,12 @@
   - `KAFKA_CLUSTERS_0_NAME: xxxxxx`: is the **Cluster name**. In this case, the cluster name will be `local`
   - `KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS:` is the Address where to connect
   - `KAFKA_CLUSTERS_0_SCHEMAREGISTRY`: for SchemaRegistry's address
+
+## Web UIs for managing Apache Kafka 2: Conduktor
+
+- **Conduktor** for Apache Kafka is a comprehensive platform that enables users to easily manage, monitor, and analyze their Kafka clusters. It provides a powerful user interface to manage Kafka resources, perform analytics, and monitor tasks with built-in tools. Furthermore, Conduktor includes enterprise-grade features such as **data masking**, cold storage, multitenancy, audit logs, message encryption, and many other features that make it an excellent solution for large enterprises that must meet strict compliance and governance regulations.
+
+## Web UIs for managing Apache Kafka 3: Redpanda Console
 
 ## Step 6: Start `zookeeper`, `kafka`, `schema-registry`, and `kafka-ui` Containers
 

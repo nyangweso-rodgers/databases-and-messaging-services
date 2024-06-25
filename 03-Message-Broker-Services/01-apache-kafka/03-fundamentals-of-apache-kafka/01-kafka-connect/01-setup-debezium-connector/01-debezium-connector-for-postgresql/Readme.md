@@ -107,9 +107,9 @@
 - To **register** the above **connector**, run the below `curl` commands:
 
   ```sh
-    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @register-customers-pg-connector.json
+    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @register-customer-postgresdb-connector.json
     #or,
-    curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d @register-pg-connector.json
+    curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d @register-postgresdb-connector.json
   ```
 
   - **Sample Output**:
@@ -150,7 +150,7 @@
 - **Remarks**:
   - We can check that the upload is successful and the **connector** is running by:
     ```sh
-      curl -X GET "http://localhost:8083/connectors/register-customers-pg-connector/status"
+      curl -X GET "http://localhost:8083/connectors/customer-postgresdb-connector/status"
     ```
     - Sample Output:
       ```json
@@ -187,7 +187,7 @@
 - There would be data present in the **topic** because when the **connector** starts it takes an initial snapshot of the database table. This is a default `config` named `snapshot.mode` which we didn't configure but is set to `initial` which means that the **connector** will do a snapshot on the initial run when it doesn't find the last known **offset** from the transaction log available for the database server.
   ```bash
     #kafka bash
-    kafka-console-consumer --bootstrap-server localhost:9092 --topic postgres.public.customers --from-beginning
+    kafka-console-consumer --bootstrap-server localhost:29092 --topic postgres.public.customer --from-beginning
   ```
 
 # Step 4: Configure Sink Connector
