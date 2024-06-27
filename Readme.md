@@ -2,6 +2,32 @@
 
 ## Table Of Contents
 
+# Database Scaling
+
+- There are two main ways to scale a database: **vertically** and **horizontally**
+
+## 1. Vertical Scaling (Scale-up)
+
+- Involves adding more resources to your existing server to enhance its computational power. This could mean increasing the CPU power, RAM, SSD, or other hardware resources on your existing machine.
+- **Advantages of Vertical Scaling** include:
+  - Simplicity: Vertical scaling is usually simpler as it involves just increasing the server's power. There's no need for code changes or complex architecture designs.
+  - Data Consistency: Since there's only one database, there's no issue of data consistency.
+- **Disadvantages of Vertical Scaling** include:
+  - Limited Growth: There's a limit to how much you can scale up a single server. At some point, you won't be able to add any more resources.
+  - Downtime: To upgrade the server, you might need to face some downtime unless your system supports hot-swappable components.
+  - Cost: High-end servers can become very expensive.
+
+## 2. Horizontal Scaling (Scale-out)
+
+- Involves adding more servers to your existing pool of **servers**. The load is distributed across multiple servers, thereby increasing the ability to handle more requests.
+- **Advantages of Horizontal Scaling** include:
+  - Greater Capacity: Horizontal scaling allows for virtually limitless scaling, as you can always add more servers to handle more traffic.
+  - Redundancy: Having multiple servers can increase the availability of your application. If one server fails, the others can take over.
+  - Cost-effective: Rather than investing in a high-end server, you can distribute the load across multiple cost-effective servers.
+- **Disadvantages of Horizontal Scaling** include:
+  - Complexity: Horizontal scaling introduces complexity into your system. Your application code needs to handle distributing data across multiple servers, and this could require significant re-architecting of your application.
+  - Data Consistency: When data is distributed across multiple servers, it's harder to maintain consistency. This is especially important for databases, where you want to ensure that all users are seeing the same data.
+
 # Database Replication
 
 # What is Logical Replication?
