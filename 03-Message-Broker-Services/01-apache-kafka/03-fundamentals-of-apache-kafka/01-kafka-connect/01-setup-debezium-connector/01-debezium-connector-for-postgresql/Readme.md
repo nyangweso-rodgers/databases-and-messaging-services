@@ -187,7 +187,7 @@
 - There would be data present in the **topic** because when the **connector** starts it takes an initial snapshot of the database table. This is a default `config` named `snapshot.mode` which we didn't configure but is set to `initial` which means that the **connector** will do a snapshot on the initial run when it doesn't find the last known **offset** from the transaction log available for the database server.
   ```bash
     #kafka bash
-    kafka-console-consumer --bootstrap-server localhost:29092 --topic postgres.public.customer --from-beginning
+    kafka-console-consumer --bootstrap-server localhost:29092 --topic test_db.public.customer --from-beginning
   ```
 
 # Step 4: Configure Sink Connector
@@ -237,7 +237,7 @@
 
 - Remove the connectors by:
   ```sh
-    curl -X DELETE http://localhost:8083/connectors/delegates-survey-pg-connector
+    curl -X DELETE http://localhost:8083/connectors/customer-postgresdb-connector
   ```
 
 # PostgreSQL connector limitations
