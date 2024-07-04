@@ -1,5 +1,7 @@
 # Debezium connector for PostgreSQL
 
+## Table Of Contents
+
 # Setting up Debezium with PostgreSQL
 
 - Setting up the **Debezium connector** for **Postgres** with all the changes required to allow **Debezium** to capture the changes.
@@ -108,8 +110,6 @@
 
   ```sh
     curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @register-customer-postgresdb-connector.json
-    #or,
-    curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d @register-postgresdb-connector.json
   ```
 
   - **Sample Output**:

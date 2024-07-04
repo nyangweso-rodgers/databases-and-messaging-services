@@ -172,7 +172,7 @@
 
 # 4. Web UIs for managing Apache Kafka
 
-## 4.1 Web UIs for managing Apache Kafka 1: UI for Apache Kafka
+## 4.1 Web UIs for managing Apache Kafka: UI for Apache Kafka
 
 - **Kafka UI** —or, as its developer **Provectus** calls it, **UI for Apache Kafka** — is a free, open source web UI that stands out for being lightweight and easy to use.
 
@@ -191,29 +191,13 @@
   - `KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS:` is the Address where to connect
   - `KAFKA_CLUSTERS_0_SCHEMAREGISTRY`: for SchemaRegistry's address
 
-## Web UIs for managing Apache Kafka 2: Conduktor
+## 4.2 Web UIs for managing Apache Kafka: Conduktor
 
 - **Conduktor** for Apache Kafka is a comprehensive platform that enables users to easily manage, monitor, and analyze their Kafka clusters. It provides a powerful user interface to manage Kafka resources, perform analytics, and monitor tasks with built-in tools. Furthermore, Conduktor includes enterprise-grade features such as **data masking**, cold storage, multitenancy, audit logs, message encryption, and many other features that make it an excellent solution for large enterprises that must meet strict compliance and governance regulations.
 
-## Web UIs for managing Apache Kafka 3: Redpanda Console
+## 4.3 Web UIs for managing Apache Kafka: Redpanda Console
 
-## Step 6: Start `zookeeper`, `kafka`, `schema-registry`, and `kafka-ui` Containers
-
-- start the containers by:
-  ```sh
-    docker-compose up -d
-  ```
-- This command will start a new containers named "`kafka`" and map port `29092` of the host machine to port '`29092`' of the container. It also links the "`kafka`" container to the "`zookeeper`" container, so that the `Kafka` container can connect to the `zookeeper` container.
-- Check the logs to see the **zookeeper** container has booted up successfully:
-  ```sh
-    docker logs zookeeper
-  ```
-- Check the logs to see the kafka server has booted up successfully
-  ```sh
-    docker logs kafka
-  ```
-
-# Kafka REST Proxy
+# 5. Kafka REST Proxy
 
 - **Kafka REST Proxy** provides a RESTful interface to interact with **Apache Kafka clusters**, allowing applications to produce and consume messages via HTTP. This is particularly useful for clients that do not have a native Kafka library or require an HTTP-based interface for simplicity.
 
@@ -237,23 +221,23 @@ services:
       KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
 ```
 
-### Detailed Configuration Explanation
+## Kafka REST Proxy Configuration Explanation
 
-#### 1. Dependencies:
+### 5.1 Dependencies:
 
 - `depends_on`: Specifies that the Kafka **REST Proxy service** depends on **Zookeeper**, **Kafka**, and **Schema Registry** services to be up and running. This ensures that the **REST Proxy** starts only after its dependencies are available.
 
-#### 2. Ports
+### 5.2 Ports
 
 - `8082:8082`: Exposes port `8082`, which is the default port for the Kafka REST Proxy’s RESTful API.
 
-#### 3. Environment Variables
+### 5.3 Environment Variables
 
 - `KAFKA_REST_HOST_NAME`: Sets the **hostname** for the **Kafka REST Proxy** service.
 - `KAFKA_REST_BOOTSTRAP_SERVERS`: Lists the **Kafka bootstrap servers** for the **REST Proxy** to connect to. This enables the proxy to communicate with the Kafka cluster.
 - `KAFKA_REST_LISTENERS`: Defines the address and port on which the REST Proxy will listen for HTTP requests. In this case, it listens on all network interfaces (0.0.0.0) on port 8082.
 
-# Kafka Connect(debezium)
+# 6. Kafka Connect(debezium)
 
 - **Kafka Connect** is a framework for integrating **Kafka** with various data sources and **sinks**. It enables you to stream data between **Kafka** and other systems, such as **databases**, key-value stores, search indexes, and file systems, without writing any code. **Kafka Connect** is highly scalable and fault-tolerant, making it ideal for building robust data pipelines.
 
@@ -302,17 +286,17 @@ services:
         retries: 5
 ```
 
-## Detailed Configuration Explanation
+## Kafka Connect Configuration Explanation
 
-### Dependencies
+### 6.1 Dependencies
 
 - `depends_on`: Specifies that the **Kafka Connect service** depends on **Kafka brokers** (kafka). This ensures **Kafka Connect** starts only after the brokers are available.
 
-### Ports
+### 6.2 Ports
 
 - `8083:8083`: Exposes port `8083`, which is the default port for the Kafka Connect REST API.
 
-### Environment Variables:
+### 6.3 Environment Variables
 
 - `BOOTSTRAP_SERVERS`: Lists the Kafka bootstrap servers for Kafka Connect to communicate with.
 - `GROUP_ID`: Sets the consumer group ID for Kafka Connect.
@@ -325,7 +309,7 @@ services:
 - `KEY_CONVERTER` and `VALUE_CONVERTER`: Set the converters for keys and values.
 - `ENABLE_DEBEZIUM_SCRIPTING`: Enables scripting support for Debezium connectors, allowing custom transformations.
 
-# ksqlDB Server
+# 7. ksqlDB Server
 
 - **ksqlDB** is a streaming SQL engine that allows you to create real-time data processing and analytics applications using SQL. It builds on top of **Kafka Streams**, providing an easy-to-use SQL interface for stream processing. With **ksqlDB**, you can define stream transformations, aggregations, joins, windowing, and more using familiar SQL syntax.
 - **Key Components** of **ksqlDB** include:
@@ -377,17 +361,17 @@ services:
       KSQL_CONNECT_URL: "http://connect:8083"
 ```
 
-### Configuration Explanation
+## ksqlDB Server Configuration Explanation
 
-#### Dependencies:
+### 7.1 Dependencies
 
 - `depends_on`: Specifies that the **ksqlDB server** depends on **Kafka brokers** (**kafka**). This ensures that the **ksqlDB server** starts only after the brokers are available.
 
-#### Ports:
+### 7.2 Ports:
 
 - `8088:8088`: Exposes port `8088`, which is the default port for the ksqlDB server’s REST API.
 
-#### Environment Variables
+### 7.3 Environment Variables
 
 - `KSQL_CONFIG_DIR`: Specifies the directory where **ksqlDB** configuration files are stored.
 - `KSQL_LISTENERS`: Defines the address and port on which the ksqlDB server will listen for HTTP requests. In this case, it listens on all network interfaces (0.0.0.0) on port 8088.
@@ -397,9 +381,9 @@ services:
 - `KSQL_HOST_NAME`: Sets the hostname for the ksqlDB server.
 - `KSQL_CONNECT_URL`: Specifies the URL for Kafka Connect, enabling the ksqlDB server to interact with Kafka Connect for integration purposes.
 
-# Graphical user interfaces
+# 8. Graphical user interfaces
 
-## Debezium UI
+## 8.1 Debezium UI
 
 - **Debezium UI** is a graphical user interface for managing **Debezium connectors**. It simplifies the configuration, deployment, and monitoring of CDC (Change Data Capture) connectors, providing an intuitive way to handle data streaming from various databases to **Kafka**.
 - Setup:
@@ -421,7 +405,7 @@ services:
   - Kafka Connect UI (Open Source): A web-based interface to manage and monitor Kafka Connect connectors. (old)
   - Confluent Control Center (Enterprise): A comprehensive monitoring and management tool for Kafka clusters and connectors, including support for Debezium.
 
-## AKHQ
+## 8.2 AKHQ
 
 - **AKHQ** (formerly known as **KafkaHQ**) is an open-source web interface for managing and monitoring Apache Kafka clusters. It provides features like topic inspection, consumer group management, and real-time data browsing.
 
@@ -451,7 +435,7 @@ services:
   - **Kafka Manager** (Open Source): A web-based management tool for Kafka clusters, providing insights into broker stats, topics, and partitions.
   - **Confluent Control Center** (Enterprise): An enterprise-grade monitoring and management solution for **Kafka**, offering advanced features like end-to-end monitoring, client performance metrics, and more.
 
-## ksqlDB UI
+## 8.3 ksqlDB UI
 
 - **ksqlDB UI** is accessible via the Confluent Control Center and provides a graphical interface for interacting with **ksqlDB**. This UI allows users to write and execute **ksqlDB** queries, manage streams and tables, and visualize real-time data flows. The **ksqlDB UI** simplifies the process of developing and managing stream processing applications by offering features like inline autocompletion, schema inspection, and query visualization.
 
@@ -470,6 +454,22 @@ services:
 - Alternatives
   - **Confluent Control Center** (Enterprise): Offers a comprehensive UI for managing **ksqlDB**, along with other components of the Kafka ecosystem, providing robust tools for developing, monitoring, and scaling stream processing applications.
   - **DBVisualizer** (Open Source and Commercial): A universal database tool that can connect to various databases and offers advanced SQL querying, though not specifically tailored for stream processing like **ksqlDB**.
+
+# 9. Start The Containers
+
+- start the containers by:
+  ```sh
+    docker-compose up -d
+  ```
+- This command will start a new containers named "`kafka`" and map port `29092` of the host machine to port '`29092`' of the container. It also links the "`kafka`" container to the "`zookeeper`" container, so that the `Kafka` container can connect to the `zookeeper` container.
+- Check the logs to see the **zookeeper** container has booted up successfully:
+  ```sh
+    docker logs zookeeper
+  ```
+- Check the logs to see the kafka server has booted up successfully
+  ```sh
+    docker logs kafka
+  ```
 
 # Resources and Further Reading
 
