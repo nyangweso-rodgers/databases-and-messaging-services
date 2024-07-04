@@ -66,31 +66,33 @@
     For mongosh info see: https://docs.mongodb.com/mongodb-shell/
   ```
 
-- **Remark**:
-  - To confirm your **MongoDB** instance is running, run the Hello command:
-    ```sh
-      db.runCommand({hello: 1})
-    ```
-  - The result of this command returns a document describing your `mongod` deployment:
-    ```sh
-      {
-        isWritablePrimary: true,
-        topologyVersion: {
-          processId: ObjectId('66573f5ac9f4dcfbff93864d'),
-          counter: Long('0')
-        },
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 100000,
-        localTime: ISODate('2024-05-29T14:58:41.485Z'),
-        logicalSessionTimeoutMinutes: 30,
-        connectionId: 21,
-        minWireVersion: 0,
-        maxWireVersion: 21,
-        readOnly: false,
-        ok: 1
-      }
-    ```
+## tep 3: Validate MongoDB Deployment
+
+- To confirm **MongoDB** instance is running, run the Hello command:
+  ```sh
+    #mongosh
+    db.runCommand({hello: 1})
+  ```
+- The result of this command returns a document describing your `mongod` deployment:
+  ```sh
+    {
+      isWritablePrimary: true,
+      topologyVersion: {
+        processId: ObjectId('66573f5ac9f4dcfbff93864d'),
+        counter: Long('0')
+      },
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 100000,
+      localTime: ISODate('2024-05-29T14:58:41.485Z'),
+      logicalSessionTimeoutMinutes: 30,
+      connectionId: 21,
+      minWireVersion: 0,
+      maxWireVersion: 21,
+      readOnly: false,
+      ok: 1
+    }
+  ```
 - This basically means that, any one with access to the system, can do anything possible to **MongoDB** databases since there is no restriction implemented. For example, once can list the databases;
   ```bash
     #mongosh
@@ -111,7 +113,7 @@
     db.getUsers(); #output: { users: [], ok: 1 }
   ```
 
-## Step 3: Create MongoDB Administrative, `admin` User
+## Step 4: Create MongoDB Administrative, `admin` User
 
 - To create an `admin` user, switch to default `admin` **MongoDB** database.
 - Listing available databases first;
@@ -167,7 +169,7 @@
     ]
     ```
 
-## Step 4: Create other user
+## Step 5: Create other user
 
 - For a database name, `test_db`, we can create a seperate user with a read and write access to the database as follows:
   ```sh
@@ -176,7 +178,7 @@
     db.createUser({user: 'test_user', pwd: 'test_pwd', roles: [{role: "readWrite", db: "test_db"}]})
   ```
 
-## Step 5: Connect to MongoDB with auth
+## Step 6: Connect to MongoDB with auth
 
 - Connect to `admin` database with `auth`:
 
@@ -189,7 +191,7 @@
     docker exec -it mongodb-community-server mongosh -u test_db <pwd> --authenticationDatabase test_db
   ```
 
-## Step 6: Update the `MONGO_URI` to Use the New Credentials
+## Step 7: Update the `MONGO_URI` to Use the New Credentials
 
 ```yml
 #

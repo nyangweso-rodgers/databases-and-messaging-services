@@ -27,3 +27,7 @@
    - includes a set of `key` `value` pairs.
    - All documents include a dynamic schema which means documents which comprise of same collection do not need to have same set of fields and structure.
 5. **Replica Sets**: are a set of a few connected mongodb instances that store the same data.
+
+# Resources and Further Reading
+
+1. [github.com/mongodb-js](https://github.com/mongodb-js)
