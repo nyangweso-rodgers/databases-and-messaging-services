@@ -1,8 +1,11 @@
 # Logical Replication
 
-# What is Logical Replication?
+## Table Of Contents
 
-- The **PostgreSQL logical replication** follows the **publish/subscribe** model. The **publisher** node creates a **publication**, which is also called a **change set** or a **replication set**. The **publication** is simply a set of changes from one or more tables. The **subscriber** node creates a **subscription**, with the capability to **subscribe** to either one or more **publications**.
+# What is Logical Replication in Postgresql?
+
+- **Logical replication** was introduced for use with **PostgreSQL v10.0**. **Logical replication** works by copying/replicating data objects and their changes based on their replication identity.
+- The term **logical** is used to distinguish it from **physical replication**, which makes use of byte-by-byte replication and exact block addresses.
 
 # Use Cases of Postgres Logical Replication
 
@@ -24,24 +27,50 @@
   - **Data Consistency Checks**: At various stages, we'll verify that data remains consistent across all instances, demonstrating the reliability of PostgreSQL's logical replication mechanism.
   - **Role Reversal and Recovery**: Finally, we'll bring the original master back online as a replica, completing our exploration of logical replication dynamics and ensuring all databases are synchronized.
 
-## Check Active Replication Slots
+## 1. Connecting to a Postgres Docker Container
 
-- Check the currently active replication slots in your PostgreSQL database.
+- To connect to a **PostgreSQL** instance running within a **Docker container**, you can use the `docker exec` command combined with the `psql` command:
+- Example:
+  ```sh
+    docker exec -it postgres psql -U admin -d test_db
+  ```
+
+## 2. Check Active Replication Slots
+
+- Check the currently **active replication** slots in your **PostgreSQL** database.
   ```sql
     SELECT * FROM pg_replication_slots;
   ```
-- - This will display information about the **active replication connections**, including the **lag** and **state** of each **replication slot**.
+- This will display information about the **active replication connections**, including the **lag** and **state** of each **replication slot**.
+- Sample Output:
+- Where:
+  - `slot_name`: The name of the **replication slot**. e.g., in this case the `slot_name` is called `debezium`
+  - `plugin`: The logical decoding output plugin used for this slot. In this case, `Pplugin: pgoutput` indicates the slot is configured for **logical replication** using the **pgoutput** plugin. **Logical replication** allows replicating specific data
+  - `slot_type`: The type of **replication slot**, which can be **physical** or **logical**.
+  - `datoid`: The OID of the database this slot is associated with.
+  - `database`: The name of the database this slot is associated with
+  - `temporary`: Indicates if the slot is **temporary**. e.g., `f` (false) implies that this slot is not **temporary** and will persist even after a server restart.
+  - `active`: Indicates if the slot is currently active. E.g., the `active` column with a value of `f` indicates that the **replication slot** is currently not being used by any **consumer** to replicate data.
+  - `active_pid`: The process ID of the backend which is currently using this slot.
+  - `xmin`: The oldest transaction ID that might be needed by this slot.
+  - `catalog_xmin`: The oldest transaction ID that might be needed by the logical replication slot.
+  - `restart_lsn`: The log sequence number (LSN) from which streaming replication will start.
+  - `confirmed_flush_lsn`: The LSN up to which the client has confirmed receiving data.
+  - `wal_status`: The status of the **Write-Ahead Logging** (**WAL**).
+  - `safe_wal_size`: The size of WAL segments that are considered safe.
+  - `two_phase`: Indicates if the slot supports two-phase commit
+  - `conflicting`: Indicates if there are conflicting transactions.
 
-## Identify Active Connections
+## 3. Identify Active Connections
 
-- Identify active replication connections and their PIDs by:
+- Identify **active replication** connections and their **PIDs** by:
   ```sql
     SELECT * FROM pg_stat_replication;
   ```
 
-## Terminate the Active Replication Slot
+## 4. Terminate the Active Replication Slot
 
-- If you find that the replication slot "debezium" is active and you need to terminate it, you can use the PID to terminate the session.
+- If you find that the **replication slot** "debezium" is **active** and you need to terminate it, you can use the **PID** to terminate the session.
   ```sql
       SELECT pg_terminate_backend(10196);
   ```
