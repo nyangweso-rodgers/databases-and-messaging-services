@@ -1,7 +1,15 @@
 # Debezium
 
+# What Is Change Data Capture (CDC)?
+
+# Use-cases of CDC
+
+1. OLAP (online analytical processing) systems use CDC to migrate data from transactional databases to analytical databases.
+2. OLTP (online transactional processing) systems can also use CDC as an event bus to replicate data in a different data store. For example, from MySQL to Elasticsearch.
+
 # What is Debezium?
 
+- **Debezium** works on top of **kafka connect**. **Kafka Connect** is a framework for streaming data between multiple systems. When deployed, it provides REST APIs to manage connectors.
 - **Debezium** is a set of **source connectors** for **Kafka Connect**. We can use it to capture changes in our databases so that your applications can respond to them in real-time.
 - **Debezium** is built upon the **Apache Kafka** project and uses **Kafka** to transport the changes from one system to another. The most interesting aspect of **Debezium** is that at the core it is using **Change Data Capture** (CDC) to capture the data and push it into **Kafka**. The advantage of this is that the source database remains untouched in the sense that we don’t have to add triggers or log tables. This is a huge advantage as triggers and log tables degrade performance.
 
@@ -250,6 +258,27 @@ schema-registry:
   - `CONFIG_STORAGE_TOPIC` - Topic to store connector configuration.
   - `OFFSET_STORAGE_TOPIC` - Topic to store connector offsets.
   - `STATUS_STORAGE_TOPIC` - Topic to store connector status.
+
+# Properties
+
+1. `database.server.name`
+   - This property is not a connection property to the database, but rather the name used to keep this connection uniquely identified. It is used in the topic name generated for the CDC process against the source database. My suggestion is to not pick the type of database as the name (e.g. postgres or mysql). Picking a name like this could cause those maintaining the code to believe this name needs to align to the type of the database.
+2. `io.debezium.transforms.ExtractNewRecordState`
+   - By default, **Debezium** provides nested elements of **before**, **after**, and **operation**. For most use-cases, extracting just the **after** state is sufficient, and **Debezium** provides a **Single Message Transform** (SMT) to do just that. Nested elements can be tricky if you are not writing stream applications; so allowing the data to be flattened with one simple SMT is very helpful. Using this SMT makes it easier to pull data into ksqlDB for enrichment.
+3. `database.history`
+   - Many connectors allow for metadata related to the connector to be sourced to a different Kafka cluster. This flexibility leads to confusion, especially to developers new to Kafka Connector and a specific Connector.
+   - Debezium's database history, is designed this way. You need to set-up bootstrap server, protocol, and any other connection to the kafka cluster to maintain this information, even if it is the same cluster. For enterprise deployments, this flexibility is critical. For proof-of-concepts, development, and trying to get something up and running quickly it is a lot of duplicate configuration.
+4. `decimal.handling.mode`
+   - Setting this to `string` can address **sink connector** issues that cannot handle the decimal logical type.
+5. `snapshot.mode`
+   - There are different **modes** of **snapshots**.The most used modes are:
+     - `initial` used when you need the schema changes and the row level changes from the beginning. Schema changes are written to schema history and schema change topics and the data changes are written to `<topic.prefix>.<table_name>`
+     - `schema_only` takes the **snapshot** of only schema. This is useful if you don't want the entire data of the tables instead you only need the data from the moment you deployed. This mode is used if your tables contain dynamic data in an OLTP system.
+     - `when_needed` takes the **snapshot** whenever it's necessary i.e. when the binlogs are deleted or the schema history topic is deleted etc...
+
+# Snapshots
+
+- **Debezium** stores the **snapshots** of the database to provide high fault tolerance. In order to perform a snapshot, the connector first tries to get the global read lock that blocks the writes by the other clients and then reads the schema of all the tables and releases the lock. Acquiring a lock is very important because it helps in maintaining consistency as it blocks writes during that period. In case the global read lock is not possible, then it acquires table-level locks.
 
 # Resources and Further Reading
 
