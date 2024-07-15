@@ -137,7 +137,7 @@ services:
 
 ## Step 5: Define a Debezium Source Connector Configuration File
 
-- Create a configuration file named `debezium_source_pg.json` with the following connector **configurations**:
+- Create a configuration file named `register-postgresdb-source-connector-for-customer.json` with the following connector **configurations**:
 
   ```json
   {
@@ -309,18 +309,7 @@ services:
 
 - Example service account key file:
   ```json
-  {
-    "type": "service_account",
-    "project_id": "confluent-243016",
-    "private_key_id": "<>",
-    "private_key": "<>",
-    "client_email": "<>",
-    "client_id": "<>",
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "<>",
-    "auth_provider_x509_cert_url": "<>",
-    "client_x509_cert_url": "<>"
-  }
+  {}
   ```
 
 ### Step 7.3.: BigQuery Sink Connector Configurations
