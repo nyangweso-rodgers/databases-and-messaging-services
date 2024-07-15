@@ -53,24 +53,24 @@
     ls -l /usr/bin | grep kafka
   ```
 
-# Topics
+# 1. Topics
 
-## List Available Kafka Topics
+## 1.1 List Available Kafka Topics
 
-- Use the `kafka-topics` command to list the topics in the **Kafka cluster**:
+- Use the `kafka-topics` command to list the **topics** in the **Kafka cluster**:
   ```sh
-    docker exec -it kafka bash
+    #available kafka topics
     kafka-topics --list --bootstrap-server kafka:29092
   ```
-- If no topics exists, the following will be returned:
+- If no **topics** exists, the following will be returned:
   ```sh
     __consumer_offsets
     _schemas
   ```
 
-## Create a New Kafka Topic
+## 1.2 Create a New Kafka Topic
 
-- To create a topic in Kafka, you can use the `kafka-topics` command with the `--create` option.
+- To create a **topic** in Kafka, you can use the `kafka-topics` command with the `--create` option.
 
   - Syntax:
     ```sh
@@ -102,7 +102,7 @@
 
   - This sequence of numbers `00000000000000000000` in **index**, **log** and **timeindex** files, is the segment. The segment is - to put it simply - a file that we're using to store events. Kafka divides the events into multiple files, each of which is referred to as a **segment**. Each **segment** has a default maximum value of 1 GB, meaning that if we reach 1 GB of logs new files will be created for that partition.
 
-## Describe Kafka Topics
+## 1.3 Describe Kafka Topics
 
 - You can describe a specific topic or all topics in the cluster to get detailed information about them:
   ```sh
@@ -111,7 +111,7 @@
     kafka-topics --bootstrap-server localhost:29092 --describe --topic test-kafka-topic
   ```
 
-## Delete Kafka Topic
+## 1.4 Delete Kafka Topic
 
 - To delete a topic use the `kafka-topics` command with the `--delete` option.
   - Syntax:
@@ -123,19 +123,19 @@
     kafka-topics --bootstrap-server localhost:29092 --delete --topic  test-kafka-topic
   ```
 
-# Kafka Broker Commands
+# 2. Kafka Broker Commands
 
 - It is the `broker` responsability to storage and manage the kafka topics. It receives and ensures it will be storage in the required topic, it also is responsible for producing the messages that the consumers will read.
 - When combined, the **brokers** form a **cluster**, and they work together in various ways.
 
-## List Brokers in the Cluster
+## 2.1 List Brokers in the Cluster
 
 - Use `kafka-broker-api-versions` or `kafka-configs` to list all brokers in the Kafka cluster:
   ```sh
     kafka-broker-api-versions --bootstrap-server localhost:29092
   ```
 
-## View Broker Information
+## 2.2 View Broker Information
 
 - You can also view information about the brokers in the cluster:
 
@@ -144,14 +144,14 @@
     kafka-broker-api-versions --bootstrap-server localhost:29092
   ```
 
-## Describe Broker Configuration
+## 2.3 Describe Broker Configuration
 
 - Use `kafka-configs` to describe the configuration parameters of a Kafka broker:
   ```sh
     kafka-configs --bootstrap-server localhost:29092 --entity-type brokers --describe
   ```
 
-## List Topics Hosted on a Broker
+## 2.4 List Topics Hosted on a Broker
 
 - Use `kafka-topics` to list the topics hosted on a specific broker:
   ```sh
@@ -200,9 +200,9 @@
       kafka-console-producer --bootstrap-server localhost:29092 --topic test-topic --property parse.key=true --property key.separator=,
     ```
 
-# Kafka Consumer
+# 5. Kafka Consumer Commands
 
-## Run Kafka Consumer
+## 5.1 Run Kafka Consumer
 
 - Let’s run a **console consumer** with the `kafka-console-consumer` command:
   ```sh
@@ -210,7 +210,7 @@
   ```
 - This time, we should see that our messages are printed to the output successfully (and to finish please hit `Ctrl+ C`):
 
-## Reading from a Kafka Topic
+## 5.2 Reading from a Kafka Topic
 
 - **Kafka** provides a [Consumer API](https://docs.confluent.io/platform/current/clients/consumer.html) to read messages from a **Kafka topic**. This API is available in `java` with [kafka-clients]() library and `python` with [kafka-python](https://kafka-python.readthedocs.io/en/master/apidoc/KafkaConsumer.html) package.
 
@@ -243,7 +243,7 @@
 
   - **Note**: when you get the **messages**, it is not retrieved in order. Order is not guaranteed if you have multiple **partitions**. This is because when the **producer** send messages to the **topic**, the messages are distributed across the **partitions**. You can have a guaranteed ordering of messages retrieved if you have a single-partition topic.
 
-### Reading Messages from specific partitions and offsets
+### 5.3 Reading Messages from specific partitions and offsets
 
 - We can also specify the **partition** that we want to read by adding the `--partition` parameter followed the partition number. For example, to read messages sent to `partition 0`:
   ```sh
@@ -283,14 +283,15 @@
 
 - To list the **consumer groups**:
   ```sh
-   kafka-consumer-groups --bootstrap-server localhost:9092 --list
+    #list consumer groups
+   kafka-consumer-groups --bootstrap-server localhost:29092 --list
   ```
 
 ### Describe Consumer Groups
 
 - To get the details of the **consumer groups**, append with `--describe` and specify the group.
   ```sh
-   kafka-consumer-groups --bootstrap-server localhost:9092 --group test-consumer-group --describe
+   kafka-consumer-groups --bootstrap-server localhost:29092 --group test-consumer-group --describe
   ```
 - You will notice the column for lag. This specifies how many messages in the specific `partition` that are still not retrieved and processed by the **consumer group**.
 - To make sure the **consumer group** is caught up with all the messages, run the `kafka-console-consumer` again.
