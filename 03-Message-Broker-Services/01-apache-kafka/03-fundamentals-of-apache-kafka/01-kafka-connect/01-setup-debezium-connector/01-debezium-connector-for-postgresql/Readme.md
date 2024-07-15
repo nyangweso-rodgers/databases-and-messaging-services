@@ -243,12 +243,7 @@ services:
 
 - Sample Output:
   ```json
-  {
-    "name": "register-customers-pg-connector",
-    "connector": { "state": "RUNNING", "worker_id": "172.25.0.11:8083" },
-    "tasks": [{ "id": 0, "state": "RUNNING", "worker_id": "172.25.0.11:8083" }],
-    "type": "source"
-  }
+  {}
   ```
 - The status message indicates that your **Kafka connector** is successfully running. Both the connector and its task are in the "`RUNNING`" state, which means it has been properly configured and is currently active.
 - **Remarks**:
