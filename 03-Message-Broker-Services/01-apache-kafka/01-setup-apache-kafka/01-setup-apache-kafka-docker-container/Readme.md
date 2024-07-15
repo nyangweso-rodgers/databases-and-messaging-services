@@ -407,7 +407,7 @@ services:
 
 ## 8.2 AKHQ
 
-- **AKHQ** (formerly known as **KafkaHQ**) is an open-source web interface for managing and monitoring Apache Kafka clusters. It provides features like topic inspection, consumer group management, and real-time data browsing.
+- **AKHQ** (formerly known as **KafkaHQ**) is an open-source web interface for managing and monitoring **Apache Kafka** clusters. It provides features like topic inspection, consumer group management, and real-time data browsing.
 
 - Setup:
   ```yml
@@ -437,7 +437,7 @@ services:
 
 ## 8.3 ksqlDB UI
 
-- **ksqlDB UI** is accessible via the Confluent Control Center and provides a graphical interface for interacting with **ksqlDB**. This UI allows users to write and execute **ksqlDB** queries, manage streams and tables, and visualize real-time data flows. The **ksqlDB UI** simplifies the process of developing and managing stream processing applications by offering features like inline autocompletion, schema inspection, and query visualization.
+- **ksqlDB UI** is accessible via the **Confluent Control Center** and provides a GUI for interacting with **ksqlDB**. This UI allows users to write and execute **ksqlDB** queries, manage streams and tables, and visualize real-time data flows. The **ksqlDB UI** simplifies the process of developing and managing stream processing applications by offering features like inline autocompletion, schema inspection, and query visualization.
 
 - Setup:
   ```yml
@@ -478,5 +478,4 @@ services:
 3. [How To Set Up Apache Kafka With Docker?](https://codersee.com/how-to-set-up-apache-kafka-with-docker/)
 4. [Kafka Listeners – Explained](https://www.confluent.io/blog/kafka-listeners-explained/)
 5. [avro.apache.org/docs](https://avro.apache.org/docs/1.11.1/specification/_print/)
-6. [developer.confluent.io/Schema compatibility](https://developer.confluent.io/courses/schema-registry/schema-compatibility/)
-7. [https://towardsdev.com/implementing-change-data-capture-cdc-with-docker-postgresql-mongodb-kafka-and-debezium-a-c49b2b38a88c](https://towardsdev.com/implementing-change-data-capture-cdc-with-docker-postgresql-mongodb-kafka-and-debezium-a-c49b2b38a88c)
+6. [https://towardsdev.com/implementing-change-data-capture-cdc-with-docker-postgresql-mongodb-kafka-and-debezium-a-c49b2b38a88c](https://towardsdev.com/implementing-change-data-capture-cdc-with-docker-postgresql-mongodb-kafka-and-debezium-a-c49b2b38a88c)
