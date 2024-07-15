@@ -58,6 +58,17 @@
       retries: 5
   ```
 
+### Step 1.1: Connect to a Postgres Docker Container
+
+- To connect to a **PostgreSQL** instance running within a **Docker container**, you can use the `docker exec` command combined with the `psql` command:
+- Example:
+  ```bash
+    #accessing postgres docker container
+    docker exec -it postgres psql -U admin -d test_db
+  ```
+- Remarks:
+  - Check my [GitHub Repo](https://github.com/nyangweso-rodgers/My-Databases/blob/main/02-Transactional-Databases/01-postgresql/02-connect-to-postgresql/01-psql-commands/Readme.md) for a list of `psql` commands
+
 ### Step 1.2: Create Publications in PostgreSQL
 
 - Create **publications** for the respective tables in **PostgreSQL**.
