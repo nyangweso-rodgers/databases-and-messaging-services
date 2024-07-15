@@ -312,14 +312,14 @@ services:
   {
     "type": "service_account",
     "project_id": "confluent-243016",
-    "private_key_id": "c386effb7fadb7bce56c249b28e0a9865ca3c595",
-    "private_key": "-----BEGIN PRIVATE  deleted for brevity =\n-----END PRIVATE KEY-----\n",
-    "client_email": "confluent2@confluent-243016.iam.gserviceaccount.com",
-    "client_id": "111348633408307923943",
+    "private_key_id": "<>",
+    "private_key": "<>",
+    "client_email": "<>",
+    "client_id": "<>",
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://oauth2.googleapis.com/token",
-    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/confluent2%40confluent-243016.iam.gserviceaccount.com"
+    "token_uri": "<>",
+    "auth_provider_x509_cert_url": "<>",
+    "client_x509_cert_url": "<>"
   }
   ```
 
