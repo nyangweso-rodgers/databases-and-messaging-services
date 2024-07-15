@@ -2,6 +2,18 @@
 
 ## Table Of Contents
 
+# What is Change data capture?
+
+# How Debezium Achieves CDC with PostgreSQL
+
+- This how **Debezium** implements Change Data Capture (CDC) with **PostgreSQL**.
+  1. **Debezium** connects to **PostgreSQL** as a **replication client**, which involves setting up a **Debezium connector** for **PostgreSQL**. This requires **PostgreSQL** to be configured with `wal_level` set to `logical`.
+  2. When set up, **Debezium** creates a **logical replication slot** in **PostgreSQL**. This slot ensures that relevant WAL entries are retained until Debezium processes them, preventing data loss even if the Debezium connector goes offline temporarily.
+  3. **Debezium** reads changes from the `WAL` through the **replication slot**. It decodes these changes from their binary format into a structured format (e.g., JSON) that represents the SQL operations.
+  4. Each decoded change is then emitted as a separate event. These events contain all necessary information about the database changes, such as the type of operation (INSERT, UPDATE, DELETE), the affected table, and the old and new values of the modified rows.
+  5. **Debezium** acts as a NATS producer, publishing each change event to a NATS topic (usually one topic per table).
+  6. **Consumers** can subscribe to these NATS topics to receive real-time updates about database changes. This enables applications and microservices to react to data changes as they happen.
+
 # Setting up Debezium with PostgreSQL
 
 - Setting up the **Debezium connector** for **Postgres** with all the changes required to allow **Debezium** to capture the changes.
@@ -173,7 +185,9 @@
         ["delegates_surveys-pg-connector","register-customers-pg-connector"]
       ```
 
-## Step 3: List Kafka Topics
+## Step 3: Test The Connector
+
+### Step 3.1: List Kafka Topics
 
 - If there was no issue running the above steps we could confirm that our **connector** is working fine by checking if the **topic** is created for `customers` table by the **connector**.
   ```sh
@@ -181,7 +195,7 @@
   ```
 - Sample output:
 
-## Step 4: Reading the data
+### Step 3.2: Reading (Viewing) Data
 
 - We can check that the data availability on the **topic**.
 - There would be data present in the **topic** because when the **connector** starts it takes an initial snapshot of the database table. This is a default `config` named `snapshot.mode` which we didn't configure but is set to `initial` which means that the **connector** will do a snapshot on the initial run when it doesn't find the last known **offset** from the transaction log available for the database server.
@@ -189,43 +203,7 @@
     #kafka bash
     kafka-console-consumer --bootstrap-server localhost:29092 --topic test_db.public.customer --from-beginning
   ```
-
-# Step 4: Configure Sink Connector
-
-- We create a `JSON` file to configure the **sink connector**.
-  ```json
-  {
-    "name": "jdbc-sink",
-    "config": {
-      "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
-      "tasks.max": "1",
-      "topics": "fullfillment.public.customers",
-      "dialect.name": "PostgreSqlDatabaseDialect",
-      "table.name.format": "customers",
-      "connection.url": "jdbc:postgresql://pgsql:5432/customers?user=postgres&password=debezium",
-      "transforms": "unwrap",
-      "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
-      "transforms.unwrap.drop.tombstones": "false",
-      "auto.create": "true",
-      "insert.mode": "upsert",
-      "pk.fields": "id",
-      "pk.mode": "record_key",
-      "delete.enabled": "true"
-    }
-  }
-  ```
-- **Note**:
-  - Kafka JDBC sink defaults to creating the destination table with the same name as the topic which in this case is fullfillment.public.customers I’m not sure of other databases but in PostgreSQL this creates a table which needs to be double quoted to use. I tend to avoid these so I added the "table.name.format": "customers" to force it to create a table named customers.
-- And similarly we enable the connector with:
-  ```sh
-    curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d @jdbc-sink.json
-  ```
-
-## Step : Viewing the Data
-
-```sh
-  kafka-console-consumer --bootstrap-server kafka:29092 --topic postgres.public.delegates_surveys --from-beginning
-```
+  ep 4: Configure BigQuery Sink Connector (`com.wepay.kafka.connect.bigquery.BigQuerySinkConnector`)
 
 ## Register Schema
 
@@ -240,6 +218,385 @@
     curl -X DELETE http://localhost:8083/connectors/customer-postgresdb-connector
   ```
 
+# Step 4: Implement Sink Connector From Apache Kafka to Google BigQuery
+
+- Implementation of a sink connetor from **Apache Kafka** to **Google BigQuery**.
+
+## Step 4.1: Setup
+
+- Create a `plugins/` directory.
+- [Download BigQuery plugin](https://www.confluent.io/hub/wepay/kafka-connect-bigquery) put the contents into the `plugins/` directory
+- Now your plugins directory should look like this:
+  ```sh
+    ls plugins
+  ```
+- Output:
+  ```sh
+    #output
+  ```
+
+## Step 4.1: Setting Up GCP BigQuery
+
+- Example service account key file:
+  ```json
+  {
+    "type": "service_account",
+    "project_id": "confluent-243016",
+    "private_key_id": "c386effb7fadb7bce56c249b28e0a9865ca3c595",
+    "private_key": "-----BEGIN PRIVATE  deleted for brevity =\n-----END PRIVATE KEY-----\n",
+    "client_email": "confluent2@confluent-243016.iam.gserviceaccount.com",
+    "client_id": "111348633408307923943",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/confluent2%40confluent-243016.iam.gserviceaccount.com"
+  }
+  ```
+
+## Step 4.2.: BigQuery Sink Connector Configurations
+
+- Create a file, `register-sink-bigquery.json` to store the connector configuration.
+  ```json
+  {
+    "name": "bigquery-sink-connector",
+    "config": {
+      "connector.class": "com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
+      "defaultDataset": "kafka_dataset",
+      "project": "general-364419"
+    }
+  }
+  ```
+- The **BigQuery Sink connector** can be configured using a variety of configuration **properties**:
+  1. `defaultDataset`
+     - The default dataset to be used
+     - Typs is `string`
+  2. `project`
+     - The BigQuery project to write to.
+     - Type: string
+  3. `topics`:
+     - A list of **Kafka topics** to read from.
+  4. `autoCreateTables`:
+     - Create **BigQuery** tables if they don’t already exist. This property should only be enabled for Schema Registry-based inputs: **Avro**, **Protobuf**, or **JSON Schema** (JSON_SR). Table creation is not supported for **JSON** input.
+     - Type: boolean
+     - Default: `false`
+  5. `gcsBucketName`
+     - The name of the bucket where **Google Cloud Storage** (GCS) blobs are located. These blobs are used to batch-load to **BigQuery**. This is applicable only if `enableBatchLoad` is configured.
+     - Type: string
+     - Default: “”
+  6. `queueSize`:
+     - The maximum size (or -1 for no maximum size) of the worker queue for **BigQuery** write requests before all topics are paused. This is a soft limit; the size of the queue can go over this before topics are paused. All topics resume once a flush is triggered or the size of the queue drops under half of the maximum size.
+     - Type: long
+     - Default: -1
+     - Valid Values: [-1,…]
+     - Importance: high
+  7. `bigQueryRetry`:
+     - The number of retry attempts made for a BigQuery request that fails with a backend error or a quota exceeded error.
+     - Type: int
+     - Default: 0
+     - Valid Values: [0,…]
+  8. `bigQueryRetryWait`
+     - The minimum amount of time, in milliseconds, to wait between retry attempts for a **BigQuery** backend or quota exceeded error.
+     - Type: long
+     - Default: 1000
+     - Valid Values: [0,…]
+  9. `bigQueryMessageTimePartitioning`
+     - Whether or not to use the message time when inserting records. Default uses the connector processing time.
+     - Type: boolean
+     - Default: false
+  10. `bigQueryPartitionDecorator`
+      - Whether or not to append partition decorator to BigQuery table name when inserting records. Default is true. Setting this to true appends partition decorator to table name (e.g. table$yyyyMMdd depending on the configuration set for bigQueryPartitionDecorator). Setting this to false bypasses the logic to append the partition decorator and uses raw table name for inserts.
+      - Type: boolean
+      - Default: true
+  11. `timestampPartitionFieldName`
+      - The name of the field in the value that contains the timestamp to partition by in BigQuery and enable timestamp partitioning for each table. Leave this configuration blank, to enable ingestion time partitioning for each table.
+      - Type: string
+      - Default: null
+  12. `clusteringPartitionFieldNames`
+      - Comma-separated list of fields where data is clustered in BigQuery.
+      - Type: list
+      - Default: null
+  13. `timePartitioningType`
+      - The time partitioning type to use when creating tables. Existing tables will not be altered to use this partitioning type.
+      - Type: string
+      - Default: DAY
+      - Valid Values: (case insensitive) [MONTH, YEAR, HOUR, DAY]
+  14. `keySource`
+      - Determines whether the keyfile configuration is the path to the credentials JSON file or to the JSON itself. Available values are `FILE` and `JSON`. This property is available in BigQuery sink connector version 1.3 (and later).
+      - Type: string
+      - Default: FILE
+  15. `keyfile`
+      - `keyfile` can be either a string representation of the Google credentials file or the path to the Google credentials file itself. The string representation of the Google credentials file is supported in BigQuery sink connector version 1.3 (and later).
+      - Type: string
+      - Default: null
+  16. `sanitizeTopics`
+      - Designates whether to automatically sanitize topic names before using them as table names. If not enabled, topic names are used as table names.
+      - Type: boolean
+      - Default: false
+  17. `schemaRetriever`
+      - A class that can be used for automatically creating tables and/or updating schemas. Note that in version 2.0.0, SchemaRetriever API changed to retrieve the schema from each SinkRecord, which will help support multiple schemas per topic. `SchemaRegistrySchemaRetriever` has been removed as it retrieves schema based on the topic.
+      - Type: class
+      - Default: `com.wepay.kafka.connect.bigquery.retrieve.IdentitySchemaRetriever`
+  18. `threadPoolSize`
+      - The size of the BigQuery write thread pool. This establishes the maximum number of concurrent writes to BigQuery.
+      - Type: int
+      - Default: 10
+      - Valid Values: [1,…]
+  19. `allBQFieldsNullable`
+      - If true, no fields in any produced BigQuery schema are REQUIRED. All non-nullable Avro fields are translated as NULLABLE (or REPEATED, if arrays).
+      - Type: boolean
+      - Default: false
+  20. `avroDataCacheSize`
+      - The size of the cache to use when converting schemas from Avro to Kafka Connect.
+      - Type: int
+      - Default: 100
+      - Valid Values: [0,…]
+  21. `batchLoadIntervalSec`
+      - The interval, in seconds, in which to attempt to run GCS to BigQuery load jobs. Only relevant if `enableBatchLoad` is configured.
+      - Type: int
+      - Default: 120
+  22. `convertDoubleSpecialValues`
+      - Designates whether +Infinity is converted to Double.MAX_VALUE and whether -Infinity and NaN are converted to Double.MIN_VALUE to ensure successfull delivery to BigQuery.
+      - Type: boolean
+      - Default: false
+  23. `enableBatchLoad`
+      - **Beta Feature** Use with caution. The sublist of topics to be batch loaded through GCS.
+      - Type: list
+      - Default: “”
+  24. `includeKafkaData`
+      - Whether to include an extra block containing the Kafka source topic, offset, and partition information in the resulting BigQuery rows.
+      - Type: boolean
+      - Default: false
+  25. `upsertEnabled`
+      - Enable upsert functionality on the connector through the use of record keys, intermediate tables, and periodic merge flushes. Row-matching will be performed based on the contents of record keys. This feature won’t work with SMTs that change the name of the topic and doesn’t support JSON input.
+      - Type: boolean
+      - Default: false
+  26. `deleteEnabled`
+      - Enable delete functionality on the connector through the use of record keys, intermediate tables, and periodic merge flushes. A delete will be performed when a record with a null value (that is–a tombstone record) is read. This feature will not work with SMTs that change the name of the topic and doesn’t support JSON input.
+      - Type: boolean
+      - Default: false
+  27. `intermediateTableSuffix`
+      - A suffix that will be appended to the names of destination tables to create the names for the corresponding intermediate tables. Multiple intermediate tables may be created for a single destination table, but their names will always start with the name of the destination table, followed by this suffix, and possibly followed by an additional suffix.
+      - Type: string
+      - Default: “tmp”
+  28. `mergeIntervalMs`
+      - How often (in milliseconds) to perform a merge flush, if upsert/delete is enabled. Can be set to -1 to disable periodic flushing.
+      - Type: long
+      - Default: 60_000L
+  29. `mergeRecordsThreshold`
+      - How many records to write to an intermediate table before performing a merge flush, if upsert/delete is enabled. Can be set to `-1` to disable record count-based flushing.
+      - Type: long
+      - Default: -1
+  30. `autoCreateBucket`
+      - Whether to automatically create the given bucket, if it does not exist.
+      - Type: boolean
+      - Default: true
+  31. `allowNewBigQueryFields`
+      - If true, new fields can be added to BigQuery tables during subsequent schema updates.
+      - Type: boolean
+      - Default: false
+  32. `allowBigQueryRequiredFieldRelaxation`
+      - If true, fields in BigQuery Schema can be changed from `REQUIRED` to `NULLABLE`. Note that `allowNewBigQueryFields` and `allowBigQueryRequiredFieldRelaxation` replaced the `autoUpdateSchemas` parameter of older versions of this connector.
+        - Type: boolean
+        - Default: false
+  33. `allowSchemaUnionization`
+      - If true, the existing table schema (if one is present) will be unionized with new record schemas during schema updates. If false, the record of the last schema in a batch will be used for any necessary table creation and schema update attempts.
+      - Type: boolean
+      - Default: false
+  34. `kafkaDataFieldName`
+      - The **Kafka data field name**. The default value is null, which means the **Kafka Data** field will not be included.
+      - Type: `string`
+      - Default: `null`
+  35. `kafkaKeyFieldName`
+      - The Kafka key field name. The default value is `null`, which means the **Kafka Key** field will not be included.
+      - Type: `string`
+      - Default: `null`
+  36. `topic2TableMap`
+      - Map of **topics** to **tables** (optional). Format: comma-separated tuples, e.g. <topic-1>:<table-1>,<topic-2>:<table-2>,.. Note that **topic name** should not be modified using regex SMT while using this option. Also note that `SANITIZE_TOPICS_CONFIG` would be ignored if this config is set. Lastly, if the `topic2table` map doesn’t contain the topic for a record, a table with the same name as the topic name would be created.
+      - Type: string
+      - Default: “”
+- **Remarks**:
+  - If your **kafka connect** is deployed in **kubernetes** or a **compute engine**, you can remove the attribute `“keyfile”` and use directly workload identity.
+
+## Step 4.3: Register BigQuery Sink Connector
+
+- **Register the Bigquery sink** by:
+  ```sh
+    #register bigquery sink connector
+    curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-bigquery-sink-connector-for-customer-v3.json
+  ```
+- Sample output:
+  ```json
+  {
+    "name": "customer-bigquery-sink-connector",
+    "config": {
+      "connector.class": "com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
+      "tasks.max": "1",
+      "consumer.auto.offset.reset": "earliest",
+      "topics": "test_db.public.customer",
+      "keyfile": "/etc/debezium/bigquery-keyfile.json",
+      "project": "general-364419",
+      "defaultDataset": "kafka_dataset",
+      "allBQFieldsNullable": "true",
+      "allowNewBigQueryFields": "true",
+      "errors.tolerance": "all",
+      "errors.log.enabled": "true",
+      "errors.log.include.messages": "true",
+      "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "value.converter.schemas.enable": "false",
+      "topicsToTables": "test_db.public.customer=test_db_public_customer",
+      "name": "customer-bigquery-sink-connector"
+    },
+    "tasks": [],
+    "type": "sink"
+  }
+  ```
+
+## Step 4.4: Check Status Of The BigQuery Sink Connector
+
+- Verify the status of the **connector** to ensure it is running without errors:
+  ```sh
+    curl -X GET http://localhost:8083/connectors/customer-bigquery-sink-connector/status
+  ```
+- **Sample output** (**successful** connection):
+  ```json
+  {
+    "name": "customer_bigquery_sink_connector",
+    "connector": { "state": "RUNNING", "worker_id": "172.22.0.7:8083" },
+    "tasks": [{ "id": 0, "state": "RUNNING", "worker_id": "172.22.0.7:8083" }],
+    "type": "sink"
+  }
+  ```
+- **Sample output** (**FAILED** connection)
+  ```json
+  {
+    "name": "customer-bigquery-sink-connector",
+    "connector": { "state": "RUNNING", "worker_id": "172.22.0.5:8083" },
+    "tasks": [
+      {
+        "id": 0,
+        "state": "FAILED",
+        "worker_id": "172.22.0.5:8083",
+        "trace": "org.apache.kafka.connect.errors.ConnectException: Exiting WorkerSinkTask due to unrecoverable exception.\n\tat org.apache.kafka.connect.runtime.WorkerSinkTask.deliverMessages(WorkerSinkTask.java:632)\n\tat org.apache.kafka.connect.runtime.WorkerSinkTask.poll(WorkerSinkTask.java:350)\n\tat org.apache.kafka.connect.runtime.WorkerSinkTask.iteration(WorkerSinkTask.java:250)\n\tat org.apache.kafka.connect.runtime.WorkerSinkTask.execute(WorkerSinkTask.java:219)\n\tat org.apache.kafka.connect.runtime.WorkerTask.doRun(WorkerTask.java:204)\n\tat org.apache.kafka.connect.runtime.WorkerTask.run(WorkerTask.java:259)\n\tat org.apache.kafka.connect.runtime.isolation.Plugins.lambda$withClassLoader$1(Plugins.java:236)\n\tat java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)\n\tat java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)\n\tat java.base/java.lang.Thread.run(Thread.java:829)\nCaused by: com.google.cloud.bigquery.BigQueryException: Invalid table ID \"test_db.public.customer\".\n\tat com.google.cloud.bigquery.spi.v2.HttpBigQueryRpc.translate(HttpBigQueryRpc.java:115)\n\tat com.google.cloud.bigquery.spi.v2.HttpBigQueryRpc.getTable(HttpBigQueryRpc.java:286)\n\tat com.google.cloud.bigquery.BigQueryImpl$18.call(BigQueryImpl.java:761)\n\tat com.google.cloud.bigquery.BigQueryImpl$18.call(BigQueryImpl.java:758)\n\tat com.google.api.gax.retrying.DirectRetryingExecutor.submit(DirectRetryingExecutor.java:103)\n\tat com.google.cloud.RetryHelper.run(RetryHelper.java:76)\n\tat com.google.cloud.RetryHelper.runWithRetries(RetryHelper.java:50)\n\tat com.google.cloud.bigquery.BigQueryImpl.getTable(BigQueryImpl.java:757)\n\tat com.wepay.kafka.connect.bigquery.BigQuerySinkTask.retrieveTable(BigQuerySinkTask.java:395)\n\tat java.base/java.util.HashMap.computeIfAbsent(HashMap.java:1134)\n\tat com.wepay.kafka.connect.bigquery.BigQuerySinkTask.retrieveCachedTable(BigQuerySinkTask.java:390)\n\tat com.wepay.kafka.connect.bigquery.BigQuerySinkTask.getRecordTable(BigQuerySinkTask.java:235)\n\tat com.wepay.kafka.connect.bigquery.BigQuerySinkTask.writeSinkRecords(BigQuerySinkTask.java:268)\n\tat com.wepay.kafka.connect.bigquery.BigQuerySinkTask.put(BigQuerySinkTask.java:321)\n\tat org.apache.kafka.connect.runtime.WorkerSinkTask.deliverMessages(WorkerSinkTask.java:601)\n\t... 11 more\nCaused by: com.google.api.client.googleapis.json.GoogleJsonResponseException: 400 Bad Request\nGET https://www.googleapis.com/bigquery/v2/projects/general-364419/datasets/kafka_dataset/tables/test_db.public.customer?prettyPrint=false\n{\n  \"code\" : 400,\n  \"errors\" : [ {\n    \"domain\" : \"global\",\n    \"message\" : \"Invalid table ID \\\"test_db.public.customer\\\".\",\n    \"reason\" : \"invalid\"\n  } ],\n  \"message\" : \"Invalid table ID \\\"test_db.public.customer\\\".\",\n  \"status\" : \"INVALID_ARGUMENT\"\n}\n\tat com.google.api.client.googleapis.json.GoogleJsonResponseException.from(GoogleJsonResponseException.java:146)\n\tat com.google.api.client.googleapis.services.json.AbstractGoogleJsonClientRequest.newExceptionOnError(AbstractGoogleJsonClientRequest.java:118)\n\tat com.google.api.client.googleapis.services.json.AbstractGoogleJsonClientRequest.newExceptionOnError(AbstractGoogleJsonClientRequest.java:37)\n\tat com.google.api.client.googleapis.services.AbstractGoogleClientRequest$1.interceptResponse(AbstractGoogleClientRequest.java:428)\n\tat com.google.api.client.http.HttpRequest.execute(HttpRequest.java:1111)\n\tat com.google.api.client.googleapis.services.AbstractGoogleClientRequest.executeUnparsed(AbstractGoogleClientRequest.java:514)\n\tat com.google.api.client.googleapis.services.AbstractGoogleClientRequest.executeUnparsed(AbstractGoogleClientRequest.java:455)\n\tat com.google.api.client.googleapis.services.AbstractGoogleClientRequest.execute(AbstractGoogleClientRequest.java:565)\n\tat com.google.cloud.bigquery.spi.v2.HttpBigQueryRpc.getTable(HttpBigQueryRpc.java:284)\n\t... 24 more\n"
+      }
+    ],
+    "type": "sink"
+  }
+  ```
+
+## Step 4.5: BigQuery Sink Connector Configuration Validation
+
+- Validate the connector configuration to see if there are any misconfigurations:
+  ```sh
+    curl -X PUT -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @register-bigquery-sink-connector-for-customer-v3.json
+  ```
+- Sample output
+  ```json
+  {
+    "error_code": 500,
+    "message": "Cannot deserialize value of type `java.lang.String` from Object value (token `JsonToken.START_OBJECT`)\n at [Source: (org.glassfish.jersey.message.internal.ReaderInterceptorExecutor$UnCloseableInputStream); line: 1, column: 59] (through reference chain: java.util.LinkedHashMap[\"config\"])"
+  }
+  ```
+
+## Step 4.6: Delete BigQuery Sink Connector
+
+- Delete the existing **connector** by:
+  ```sh
+    #delete sink connector
+    curl -X DELETE http://localhost:8083/connectors/customer-bigquery-sink-connector-v1
+  ```
+
+## Step 4.4: Debugging BigQuery Sink Connector
+
+### Step 4.4.1: Verify Plugin Detection
+
+- Check if the **connector** is detected by listing the available plugins:
+  ```sh
+    curl -X GET http://localhost:8083/connector-plugins
+  ```
+- Sample output:
+  ```json
+  [
+    {
+      "class": "com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
+      "type": "sink",
+      "version": "unknown"
+    },
+    {
+      "class": "io.debezium.connector.jdbc.JdbcSinkConnector",
+      "type": "sink",
+      "version": "2.5.0.Final"
+    },
+    {
+      "class": "io.debezium.connector.db2.Db2Connector",
+      "type": "source",
+      "version": "2.5.0.Final"
+    },
+    {
+      "class": "io.debezium.connector.informix.InformixConnector",
+      "type": "source",
+      "version": "2.5.0.Final"
+    },
+    {
+      "class": "io.debezium.connector.mongodb.MongoDbConnector",
+      "type": "source",
+      "version": "2.5.0.Final"
+    },
+    {
+      "class": "io.debezium.connector.mysql.MySqlConnector",
+      "type": "source",
+      "version": "2.5.0.Final"
+    },
+    {
+      "class": "io.debezium.connector.oracle.OracleConnector",
+      "type": "source",
+      "version": "2.5.0.Final"
+    },
+    {
+      "class": "io.debezium.connector.postgresql.PostgresConnector",
+      "type": "source",
+      "version": "2.5.0.Final"
+    },
+    {
+      "class": "io.debezium.connector.spanner.SpannerConnector",
+      "type": "source",
+      "version": "2.5.0.Final"
+    },
+    {
+      "class": "io.debezium.connector.sqlserver.SqlServerConnector",
+      "type": "source",
+      "version": "2.5.0.Final"
+    },
+    {
+      "class": "io.debezium.connector.vitess.VitessConnector",
+      "type": "source",
+      "version": "2.5.0.Final"
+    },
+    {
+      "class": "org.apache.kafka.connect.mirror.MirrorCheckpointConnector",
+      "type": "source",
+      "version": "3.6.1"
+    },
+    {
+      "class": "org.apache.kafka.connect.mirror.MirrorHeartbeatConnector",
+      "type": "source",
+      "version": "3.6.1"
+    },
+    {
+      "class": "org.apache.kafka.connect.mirror.MirrorSourceConnector",
+      "type": "source",
+      "version": "3.6.1"
+    }
+  ]
+  ```
+
+### Step 4.4.2: Inspect Logs
+
+- If the **connector** is still not detected, inspect the logs of the **Debezium** container for any errors related to **plugin** loading:
+  ```sh
+    docker logs debezium
+  ```
+
 # PostgreSQL connector limitations
 
 1. The connector relies on PostgreSQL’s logical decoding feature. Therefore, it does not capture **DDL** changes and is unable to reflect these events in topics.
@@ -250,3 +607,4 @@
 
 1. [runchydata.com/blog - postgresql-change-data-capture-with-debezium](https://www.crunchydata.com/blog/postgresql-change-data-capture-with-debezium)
 2. [www.iamninad.com - docker-compose-for-your-next-debezium-and-postgres-project](https://www.iamninad.com/posts/docker-compose-for-your-next-debezium-and-postgres-project/)
+3. [docs.confluent.io/kafka-connectors - bigquery/current/kafka_connect_bigquery_config](https://docs.confluent.io/kafka-connectors/bigquery/current/kafka_connect_bigquery_config.html)
