@@ -207,7 +207,7 @@ services:
 - To **register** debezium **connector**, run the below `curl` commands:
 
   ```sh
-    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @register-customer-postgresdb-connector.json
+    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @register-postgresdb-source-connector-for-customer-v1.json
   ```
 
 - **Sample Output**:
@@ -249,12 +249,17 @@ services:
 - We can check that the upload is successful and the **connector** is running by:
 
 ```sh
-  curl -X GET "http://localhost:8083/connectors/customer-postgresdb-connector/status"
+  curl -X GET "http://localhost:8083/connectors/postgresdb-connector-for-customer-v1/status"
 ```
 
 - Sample Output:
   ```json
-  {}
+  {
+    "name": "postgresdb-connector-for-customer-v1",
+    "connector": { "state": "RUNNING", "worker_id": "172.22.0.7:8083" },
+    "tasks": [{ "id": 0, "state": "RUNNING", "worker_id": "172.22.0.7:8083" }],
+    "type": "source"
+  }
   ```
 - The status message indicates that your **Kafka connector** is successfully running. Both the connector and its task are in the "`RUNNING`" state, which means it has been properly configured and is currently active.
 - **Remarks**:
