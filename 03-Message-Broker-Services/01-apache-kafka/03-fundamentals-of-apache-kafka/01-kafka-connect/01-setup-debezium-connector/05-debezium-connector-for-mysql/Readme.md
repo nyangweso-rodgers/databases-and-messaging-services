@@ -4,6 +4,8 @@
 
 - **Debezium** and **Kafka Connect** are open-source platforms that provide a powerful solution for streaming data changes in real-time between systems. That real-time interaction allows you to keep your data in sync and easily accessible for various use cases such as real-time analytics, data warehousing, and data pipeline integrations.
 
+# 
+
 ## Step:
 
 - Below our **docker-compose** file to deploy all the required services locally:

@@ -26,7 +26,9 @@
   6. Debezium UI
   7. Rest-Proxy - This is optional, but helps with checking cluster metadata, topics etc
 
-## Step 1: Start Docker Compose
+# Steps
+
+## Step 1: Define Postgres Docker Configuration
 
 - Below is the `docker-compose` file to start the stack:
   ```yml
@@ -55,42 +57,107 @@
       timeout: 5s
       retries: 5
   ```
+
+### Step 1.2: Create Publications in PostgreSQL
+
+- Create **publications** for the respective tables in **PostgreSQL**.
+
+  ```sql
+    -- Connect to your PostgreSQL database
+    psql -h localhost -U admin -d test_db
+
+    -- Create a publication for the customer table
+    CREATE PUBLICATION debezium_customer_publication FOR TABLE public.customer;
+
+    -- Create a publication for the delegates_survey table
+    CREATE PUBLICATION debezium_delegates_survey_publication FOR TABLE public.delegates_survey;
+  ```
+
+### Step 1.3: Verifying Postgres Docker Container Setup
+
+1. **Check Replication Slot Status**: Ensure both replication slots are correctly configured and active.
+   ```sql
+    SELECT * FROM pg_replication_slots;
+   ```
+2. **Check Publications**: Verify that the publications include the correct tables.
+   ```sql
+    -- Check the publications
+    SELECT * FROM pg_publication;
+    -- Check the tables associated with each publication
+    SELECT * FROM pg_publication_tables;
+   ```
+3. **Check Kafka Topics**: Ensure that Kafka topics are created and data is being streamed correctly.
+
+### Step 1.4: Remove the Unused debezium Slot
+
+1. Drop the Unused **Slot**:
+   ```sql
+    SELECT pg_drop_replication_slot('debezium');
+   ```
+2. Verify **Slots** After Dropping:
+   ```sql
+    SELECT * FROM pg_replication_slots;
+   ```
+
+## Step 2: Define Debezium Docker Configurations
+
+```yml
+version: "2"
+services:
+  debezium:
+```
+
 - Where:
+
   - The **kafka-connect** service is created from `debezium/connect` **Docker image** and exposes port `8083`. It is linked to the **kafka service**, and the following Kafka Connect-related environment variables have also been configured:
     1. `BOOTSTRAP_SERVERS: kafka:29092` - The Kafka broker to connect to.
     2. `GROUP_ID: 1`- Consumer group ID assigned to Kafka Connect consumer.
     3. `CONFIG_STORAGE_TOPIC: connect_configs`- Topic to store connector configuration.
     4. `OFFSET_STORAGE_TOPIC: connect_offsets` - Topic to store connector offsets.
     5. `STATUS_STORAGE_TOPIC: connect_statuses` - Topic to store connector status.
-- Remarks:
+
+- **Remarks**:
 
   - For **Debezium** to work with **Postgres**, **Postgres** needs to have the **logical replication** enabled and if you observe the line command: `["postgres", "-c", "wal_level=logical"]` we are configuring the **Postgres DB** to start with `wal_level` as logical.
   - If we don't do this step, then **debezium** would not be able to capture the changes happening on **Postgres**. The default `wal_level` is `replica`.
 
-## Step 2: Configure Postgres Connector
+- **Remarks**:
+  - You can use `docker exec -it debezium sh` command to enter the **Debezium container** and verify the content of any mounted file. E.g.,
+    ```bash
+      docker exec -it debezium sh
+    ```
+  - Then, using the `cat /etc/debezium/bigquery-keyfile.json` command
+    ```bash
+      cat /etc/debezium/bigquery-keyfile.json
+    ```
 
-### Step 2.1: Register Postgres connector using HTTP API
+## Step 3: Define Zookeeper Docker Configurations
 
-- We need to register the **Postgres connector** using **HTTP API** so that **debezium** could read the transaction logs from the server.
-- To create a **source connector**, We require a bit of `JSON` to send to the **REST API** to configure the **source connector**:
+## Step 4: Define Kafka Docker Configurations
+
+## Step 5: Define a Debezium Source Connector Configuration File
+
+- Create a configuration file named `debezium_source_pg.json` with the following connector **configurations**:
 
   ```json
   {
-    "name": "delegates-survey-db-connector",
+    "name": "postgresdb-connector-for-customer",
     "config": {
       "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
-      "plugin.name": "pgoutput",
       "tasks.max": "1",
+      "plugin.name": "pgoutput",
       "database.hostname": "postgres",
       "database.port": "5432",
-      "database.user": "rodgers",
-      "database.password": "Rodgy@01",
+      "database.user": "admin",
+      "database.password": "<password>",
       "database.dbname": "test_db",
       "database.server.name": "postgres",
-      "table.include.list": "public.delegates_survey",
-      "database.history.kafka.bootstrap.servers": "kafka:9092",
-      "database.history.kafka.topic": "schema-changes.delegates_survey",
-      "topic.prefix": "postgres",
+      "table.include.list": "public.customer",
+      "heartbeat.interval.ms": "5000",
+      "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "value.converter.schemas.enable": false,
+      "topic.prefix": "test_db",
       "topic.creation.enable": "true",
       "topic.creation.default.replication.factor": "1",
       "topic.creation.default.partitions": "1",
@@ -101,81 +168,90 @@
   ```
 
 - Where:
+  1. `name` is the **name** of the connector that uses the configuration above; this `name` is later used for interacting with the connector (i.e., viewing the status/restarting/updating the configuration) via the Kafka Connect REST API;
+  2. `connector.class`: is the DBMS connector class to be used by the connector being configured;
+  3. `plugin.name` is the name of the plugin for the logical decoding of WAL data. The `wal2json`, `decoderbuffs`, and `pgoutput` plugins are available for selection. The first two require the installation of the appropriate DBMS extensions; `pgoutput` for PostgreSQL (version 10+) does not require additional actions;
+  4. `database.*` — options for connecting to the database, where database.server.name is the name of the PostgreSQL instance used to generate the topic name in the Kafka cluster;
+  5. `table.include.list` is the list of tables to track changes in; it has the `schema.table_name` format and cannot be used together with the `table.exclude.list`;
+  6. `heartbeat.interval.ms` — the interval (in milliseconds) at which the **connector** sends heartbeat messages to a **Kafka topic**;
+  7. `heartbeat.action.query` is a query that the **connector** executes on the source database at each heartbeat message (this option was introduced in version 1.1);
+  8. `slot.name` is the name of the **PostgreSQL logical decoding slot**. The server streams events to the **Debezium connector** using this slot;
+  9. `publication.name` is the name of the **PostgreSQL publication** that the **connector** uses. If it doesn’t exist, **Debezium** will attempt to create it. The **connector** will fail with an error if the connector user does not have the necessary privileges (thus, you better create the publication as a superuser before starting the connector for the first time).
+  10. `transforms` defines the way the name of the target topic is changed:
+      - `transforms.AddPrefix.type` specifies that regular expressions are used;
+      - `transforms.AddPrefix.regex` specifies the mask used to rename the target topic;
+      - `transforms.AddPrefix.replacement` contains the replacing string.
+  11. `topic.creation.default.cleanup.policy: "delete`
+  - Possible values inclide:
+    - `delete`
+    - `compact`
+  12. `publication.autocreate.mode`
+      - Example: `"publication.autocreate": "filtered"`
+      - Setting `publication.autocreate.mode` property to `"filtered"` instructs **Debezium** to automatically create a **publication** that includes only the tables listed in `table.include.list`. It doesn't specify the exact tables or schema you want to include. However, if you'll be defining your own **publication** explicitly (using `CREATE PUBLICATION` command ), this property is not necessary. Removing it from both connector configurations will streamline your setup.
+  -
 
-  - `name` is the **name** of the connector that uses the configuration above; this `name` is later used for interacting with the connector (i.e., viewing the status/restarting/updating the configuration) via the Kafka Connect REST API;
-  - `connector.class`: is the DBMS connector class to be used by the connector being configured;
-  - `plugin.name` is the name of the plugin for the logical decoding of WAL data. The `wal2json`, `decoderbuffs`, and `pgoutput` plugins are available for selection. The first two require the installation of the appropriate DBMS extensions; `pgoutput` for PostgreSQL (version 10+) does not require additional actions;
-  - `database.*` — options for connecting to the database, where database.server.name is the name of the PostgreSQL instance used to generate the topic name in the Kafka cluster;
-  - `table.include.list` is the list of tables to track changes in; it has the `schema.table_name` format and cannot be used together with the `table.exclude.list`;
-  - `heartbeat.interval.ms` — the interval (in milliseconds) at which the connector sends heartbeat messages to a Kafka topic;
-  - `heartbeat.action.query` is a query that the connector executes on the source database at each heartbeat message (this option was introduced in version 1.1);
-  - `slot.name` is the name of the PostgreSQL logical decoding slot. The server streams events to the Debezium connector using this slot;
-  - `publication.name` is the name of the PostgreSQL publication that the connector uses. If it doesn’t exist, Debezium will attempt to create it. The connector will fail with an error if the connector user does not have the necessary privileges (thus, you better create the publication as a superuser before starting the connector for the first time).
-  - `transforms` defines the way the name of the target topic is changed:
-    - `transforms.AddPrefix.type` specifies that regular expressions are used;
-    - `transforms.AddPrefix.regex` specifies the mask used to rename the target topic;
-    - `transforms.AddPrefix.replacement` contains the replacing string.
+### Step 5.2: Register Postgres connector using HTTP API (Register Debezium Connector(s) using `curl` Commands)
 
-- This provides a name for the connector, how to connect to the database and which table to read.
-
-- To **register** the above **connector**, run the below `curl` commands:
+- We need to register the **Postgres connector** using **HTTP API** so that **debezium** could read the transaction logs from the server.
+- To **register** debezium **connector**, run the below `curl` commands:
 
   ```sh
     curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @register-customer-postgresdb-connector.json
   ```
 
-  - **Sample Output**:
-    ```json
-    {
-      "name": "register-pg-connector",
-      "config": {
-        "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
-        "tasks.max": "1",
-        "plugin.name": "pgoutput",
-        "database.hostname": "postgres",
-        "database.port": "5432",
-        "database.user": "admin",
-        "database.password": "<password>",
-        "database.dbname": "test_db",
-        "database.server.name": "postgres",
-        "table.include.list": "test_db.customers",
-        "heartbeat.interval.ms": "5000",
-        "publication.autocreate.mode": "filtered",
-        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
-        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-        "value.converter.schemas.enable": "false",
-        "topic.prefix": "test_db",
-        "topic.creation.enable": "true",
-        "topic.creation.default.replication.factor": "1",
-        "topic.creation.default.partitions": "1",
-        "topic.creation.default.cleanup.policy": "delete",
-        "topic.creation.default.retention.ms": "604800000",
-        "name": "register-pg-connector"
-      },
-      "tasks": [],
-      "type": "source"
-    }
-    ```
+- **Sample Output**:
 
-- Both of these commands will start a **connector** which will read the **postgres** table out of the **postgres database**.
+  ```json
+  {
+    "name": "register-pg-connector",
+    "config": {
+      "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+      "tasks.max": "1",
+      "plugin.name": "pgoutput",
+      "database.hostname": "postgres",
+      "database.port": "5432",
+      "database.user": "admin",
+      "database.password": "<password>",
+      "database.dbname": "test_db",
+      "database.server.name": "postgres",
+      "table.include.list": "test_db.customers",
+      "heartbeat.interval.ms": "5000",
+      "publication.autocreate.mode": "filtered",
+      "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "value.converter.schemas.enable": "false",
+      "topic.prefix": "test_db",
+      "topic.creation.enable": "true",
+      "topic.creation.default.replication.factor": "1",
+      "topic.creation.default.partitions": "1",
+      "topic.creation.default.cleanup.policy": "delete",
+      "topic.creation.default.retention.ms": "604800000",
+      "name": "register-pg-connector"
+    },
+    "tasks": [],
+    "type": "source"
+  }
+  ```
 
+### Step 5.3: Validate the Status of the Source Connector
+
+- We can check that the upload is successful and the **connector** is running by:
+
+```sh
+  curl -X GET "http://localhost:8083/connectors/customer-postgresdb-connector/status"
+```
+
+- Sample Output:
+  ```json
+  {
+    "name": "register-customers-pg-connector",
+    "connector": { "state": "RUNNING", "worker_id": "172.25.0.11:8083" },
+    "tasks": [{ "id": 0, "state": "RUNNING", "worker_id": "172.25.0.11:8083" }],
+    "type": "source"
+  }
+  ```
+- The status message indicates that your **Kafka connector** is successfully running. Both the connector and its task are in the "`RUNNING`" state, which means it has been properly configured and is currently active.
 - **Remarks**:
-  - We can check that the upload is successful and the **connector** is running by:
-    ```sh
-      curl -X GET "http://localhost:8083/connectors/customer-postgresdb-connector/status"
-    ```
-    - Sample Output:
-      ```json
-      {
-        "name": "register-customers-pg-connector",
-        "connector": { "state": "RUNNING", "worker_id": "172.25.0.11:8083" },
-        "tasks": [
-          { "id": 0, "state": "RUNNING", "worker_id": "172.25.0.11:8083" }
-        ],
-        "type": "source"
-      }
-      ```
-    - The status message indicates that your **Kafka connector** is successfully running. Both the connector and its task are in the "RUNNING" state, which means it has been properly configured and is currently active.
   - **Kafka connect** has a **REST** endpoint which we can use to find out things like what connectors are enabled in the container.
     ```sh
       curl -H "Accept:application/json" localhost:8083/connectors/
@@ -185,9 +261,9 @@
         ["delegates_surveys-pg-connector","register-customers-pg-connector"]
       ```
 
-## Step 3: Test The Connector
+### Step 5.4: Test the Source Connector
 
-### Step 3.1: List Kafka Topics
+#### Step 5.4.1: List Kafka Topics
 
 - If there was no issue running the above steps we could confirm that our **connector** is working fine by checking if the **topic** is created for `customers` table by the **connector**.
   ```sh
@@ -195,7 +271,7 @@
   ```
 - Sample output:
 
-### Step 3.2: Reading (Viewing) Data
+#### Step 5.4.2: Reading (Viewing) Data
 
 - We can check that the data availability on the **topic**.
 - There would be data present in the **topic** because when the **connector** starts it takes an initial snapshot of the database table. This is a default `config` named `snapshot.mode` which we didn't configure but is set to `initial` which means that the **connector** will do a snapshot on the initial run when it doesn't find the last known **offset** from the transaction log available for the database server.
@@ -205,24 +281,18 @@
   ```
   ep 4: Configure BigQuery Sink Connector (`com.wepay.kafka.connect.bigquery.BigQuerySinkConnector`)
 
-## Register Schema
+### Step 5.5: Cleanup (Delete the Source Connector)
 
-```sh
-  curl -X POST -H "Content-Type: application/json" -d @schema.json http://localhost:8081/subjects/postgres.public.delegates_surveys/versions
-```
-
-## Step : Cleanup
-
-- Remove the connectors by:
+- Remove the **connectors** by:
   ```sh
     curl -X DELETE http://localhost:8083/connectors/customer-postgresdb-connector
   ```
 
-# Step 4: Implement Sink Connector From Apache Kafka to Google BigQuery
+## Step 7: Implement Sink Connector From Apache Kafka to Google BigQuery
 
 - Implementation of a sink connetor from **Apache Kafka** to **Google BigQuery**.
 
-## Step 4.1: Setup
+### Step 7.1: Setup
 
 - Create a `plugins/` directory.
 - [Download BigQuery plugin](https://www.confluent.io/hub/wepay/kafka-connect-bigquery) put the contents into the `plugins/` directory
@@ -235,7 +305,7 @@
     #output
   ```
 
-## Step 4.1: Setting Up GCP BigQuery
+### Step 7.2: Setting Up GCP BigQuery
 
 - Example service account key file:
   ```json
@@ -253,7 +323,7 @@
   }
   ```
 
-## Step 4.2.: BigQuery Sink Connector Configurations
+### Step 7.3.: BigQuery Sink Connector Configurations
 
 - Create a file, `register-sink-bigquery.json` to store the connector configuration.
   ```json
@@ -417,12 +487,12 @@
 - **Remarks**:
   - If your **kafka connect** is deployed in **kubernetes** or a **compute engine**, you can remove the attribute `“keyfile”` and use directly workload identity.
 
-## Step 4.3: Register BigQuery Sink Connector
+### Step 7.4: Register BigQuery Sink Connector
 
 - **Register the Bigquery sink** by:
   ```sh
     #register bigquery sink connector
-    curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-bigquery-sink-connector-for-customer-v3.json
+    curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-bigquery-sink-connector-for-customer-v1.json
   ```
 - Sample output:
   ```json
@@ -452,11 +522,11 @@
   }
   ```
 
-## Step 4.4: Check Status Of The BigQuery Sink Connector
+### Step 7.5: Check Status Of The BigQuery Sink Connector
 
 - Verify the status of the **connector** to ensure it is running without errors:
   ```sh
-    curl -X GET http://localhost:8083/connectors/customer-bigquery-sink-connector/status
+    curl -X GET http://localhost:8083/connectors/customer-bigquery-sink-connector-v1/status
   ```
 - **Sample output** (**successful** connection):
   ```json
@@ -488,7 +558,7 @@
 
 - Validate the connector configuration to see if there are any misconfigurations:
   ```sh
-    curl -X PUT -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @register-bigquery-sink-connector-for-customer-v3.json
+    curl -X PUT -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @register-bigquery-sink-connector-for-customer-v1.json
   ```
 - Sample output
   ```json
@@ -608,3 +678,7 @@
 1. [runchydata.com/blog - postgresql-change-data-capture-with-debezium](https://www.crunchydata.com/blog/postgresql-change-data-capture-with-debezium)
 2. [www.iamninad.com - docker-compose-for-your-next-debezium-and-postgres-project](https://www.iamninad.com/posts/docker-compose-for-your-next-debezium-and-postgres-project/)
 3. [docs.confluent.io/kafka-connectors - bigquery/current/kafka_connect_bigquery_config](https://docs.confluent.io/kafka-connectors/bigquery/current/kafka_connect_bigquery_config.html)
+
+```
+
+```
