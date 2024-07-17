@@ -13,6 +13,19 @@
 - **Debezium** is a set of **source connectors** for **Kafka Connect**. We can use it to capture changes in our databases so that your applications can respond to them in real-time.
 - **Debezium** is built upon the **Apache Kafka** project and uses **Kafka** to transport the changes from one system to another. The most interesting aspect of **Debezium** is that at the core it is using **Change Data Capture** (CDC) to capture the data and push it into **Kafka**. The advantage of this is that the source database remains untouched in the sense that we don’t have to add triggers or log tables. This is a huge advantage as triggers and log tables degrade performance.
 
+# Difference Between Debezium and JDBC Connector
+
+1. **Debezium** is used only as a **Kafka source** and **JDBC Connector** can be used as **Kafka source** and **sink**.
+2. **JDBC Connector** doesn't support syncing deleted records, while **Debezium** does.
+3. **JDBC Connector** queries the database every fixed interval, which is not very scalable solution, while **CDC** has higher frequency, streaming from the database transaction log.
+4. **Debezium** provides records with more information about the database changes, and **JDBC Connector** provides records which are more focused about converting the database changes into simple insert/upsert commands.
+
+# Debezium Concepts
+
+## Debezium Concept 1. Snapshots
+
+- **Debezium** stores the **snapshots** of the database to provide high fault tolerance. In order to perform a **snapshot**, the connector first tries to get the global read lock that blocks the writes by the other clients and then reads the schema of all the tables and releases the lock. Acquiring a lock is very important because it helps in maintaining consistency as it blocks writes during that period. In case the global read lock is not possible, then it acquires table-level locks.
+
 # Run Debezium Kafka Connector Using Docker
 
 ```yml
@@ -275,10 +288,6 @@ schema-registry:
      - `initial` used when you need the schema changes and the row level changes from the beginning. Schema changes are written to schema history and schema change topics and the data changes are written to `<topic.prefix>.<table_name>`
      - `schema_only` takes the **snapshot** of only schema. This is useful if you don't want the entire data of the tables instead you only need the data from the moment you deployed. This mode is used if your tables contain dynamic data in an OLTP system.
      - `when_needed` takes the **snapshot** whenever it's necessary i.e. when the binlogs are deleted or the schema history topic is deleted etc...
-
-# Snapshots
-
-- **Debezium** stores the **snapshots** of the database to provide high fault tolerance. In order to perform a snapshot, the connector first tries to get the global read lock that blocks the writes by the other clients and then reads the schema of all the tables and releases the lock. Acquiring a lock is very important because it helps in maintaining consistency as it blocks writes during that period. In case the global read lock is not possible, then it acquires table-level locks.
 
 # Resources and Further Reading
 

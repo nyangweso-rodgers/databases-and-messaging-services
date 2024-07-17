@@ -314,6 +314,7 @@ services:
 - Output:
   ```sh
     #output
+    debezium-scripting-2.5.0.Final.jar@  wepay-kafka-connect-bigquery-2.5.6/
   ```
 
 ### Step 7.2: Setting Up GCP BigQuery
