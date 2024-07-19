@@ -37,25 +37,40 @@
 - **Logical replication** uses a **publish** and **subscribe** model with one or more **subscribers** subscribing to one or more publications on a publisher node. **Subscribers** pull data from the publications they subscribe to and may subsequently re-publish data to allow cascading replication or more complex configurations.
   - **Logical replication** of a table typically starts with taking a snapshot of the data on the publisher database and copying that to the **subscriber**. Once that is done, the changes on the **publisher** are sent to the **subscriber** as they occur in real-time. The subscriber applies the data in the same order as the publisher so that transactional consistency is guaranteed for publications within a single subscription. This method of data replication is sometimes referred to as transactional replication.
 
-# ACID (Atomicity, Consistency, Isolation, & Durability) Properties in DMS (Database Management Systems)
+# ACID Properties in Databases
 
+- **ACID** Stands for **Atomicity**, **Consistency**, **Isolation**, **Durability**.
 - **ACID** properties ensure that a set of database operations (grouped together in a transaction) leave the database in a valid state even in the event of unexpected errors.
-- **ACID** properties:
-  - **Atomicity**
-    - **Atomicity** guarantees that all of the commands that make up a transaction are treated as a single unit and either succeed or fail together.
-    - This is important as in the case of an unwanted event, like a crash or power outage, we can be sure of the state of the database. The transaction would have either completed successfully or been rollbacked if any part of the transaction failed.
-    - Example
-      - money is deducted from the source and if any anomaly occurs, the changes are discarded and the transaction fails.
-  - **Consistency**
-    - **Consistency** guarantees that changes made within a transaction are consistent with database constraints. This includes all rules, constraints, and triggers. If the data gets into an illegal state, the whole transaction fails.
-    - Example:
-      - let’s say there is a constraint that the balance should be a positive integer. If we try to overdraw money, then the balance won’t meet the constraint. Because of that, the consistency of the ACID transaction will be violated and the transaction will fail.
-  - **Isolation**
-    - **Isolation** ensures that all transactions run in an isolated environment. That enables running transactions concurrently because transactions don’t interfere with each other.
-    - Example:
-      - let’s say that our account balance is $200. Two transactions for a $100 withdrawal start at the same time. The transactions run in isolation which guarantees that when they both complete, we’ll have a balance of $0 instead of $100.
-  - **Durability**
-    - **Durability** guarantees that once the transaction completes and changes are written to the database, they are persisted. This ensures that data within the system will persist even in the case of system failures like crashes or power outages.
+
+## 1. Atomicity
+
+- **Atomicity** guarantees that all of the commands that make up a transaction are treated as a single unit and either succeed or fail together.
+- This means that a transaction either happens entirely or doesn’t happen at all. If any part of the transaction fails, the entire transaction is canceled, and the database remains unchanged.
+- This is important as in the case of an unwanted event, like a crash or power outage, we can be sure of the state of the database. The transaction would have either completed successfully or been rollbacked if any part of the transaction failed.
+- Example
+  - money is deducted from the source and if any anomaly occurs, the changes are discarded and the transaction fails.
+  - Consider a banking transaction where $100 is transferred from Account A to Account B. This transaction involves two operations:
+    - Debiting $100 from Account A.
+    - Crediting $100 to Account B.
+    - **Atomicity** ensures that either both operations are completed successfully, or neither operation is performed, preventing any partial updates to the database.
+
+## 2. Consistency
+
+- **Consistency** guarantees that changes made within a transaction are consistent with database constraints. This includes all rules, constraints, and triggers. If the data gets into an illegal state, the whole transaction fails.
+- Example:
+  - let’s say there is a constraint that the balance should be a positive integer. If we try to overdraw money, then the balance won’t meet the constraint. Because of that, the consistency of the ACID transaction will be violated and the transaction will fail.
+
+## 3. Isolation
+
+- **Isolation** ensures that all transactions run in an isolated environment. That enables running transactions concurrently because transactions don’t interfere with each other.
+- Example:
+  - let’s say that our account balance is $200. Two transactions for a $100 withdrawal start at the same time. The transactions run in isolation which guarantees that when they both complete, we’ll have a balance of $0 instead of $100.
+
+## 4. Durability
+
+- **Durability** guarantees that once the transaction completes and changes are written to the database, they are persisted. This ensures that data within the system will persist even in the case of system failures like crashes or power outages.
+- Example:
+  - After successfully transferring $100 from account A to account B, the changes are saved to the database. If the system crashes immediately after, durability ensures that the $100 transfer is still recorded and not lost.
 
 # Resources
 
