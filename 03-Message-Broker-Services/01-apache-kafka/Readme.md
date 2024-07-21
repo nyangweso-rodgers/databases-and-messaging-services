@@ -7,6 +7,14 @@
   - their real-time processing,
   - and their ordered storage
 
+# How does Kafka work?
+
+- **Data Ingestion**: **Producers** send messages to **Kafka brokers**. **Producers** can choose to send messages **synchronously** or **asynchronously**.
+- **Storage**: **Messages** are stored in **partitions** within **Kafka brokers**. Each **partition** is an **ordered**, **immutable** sequence of messages.
+- **Replication**: **Kafka** provides fault tolerance through data **replication**. Each **partition** has **one leader** and **multiple replicas**. The **leader** handles **read** and **write operations**, while the **replicas** act as backups. If a broker fails, one of its replicas can be promoted as the new leader.
+- **Retention**: Kafka allows you to configure a retention period for each topic, determining how long messages are retained in the system. Older messages are eventually purged, making Kafka suitable for both real-time and historical data processing.
+- **Consumption**: Consumers subscribe to one or more topics and read messages from **partitions**. Consumers can process data in real time or store it in a database for later analysis.
+
 # Use Cases of Kafka
 
 1. Real-time data processing and analytics
@@ -30,6 +38,30 @@
 ## Kafka Concept 3: Consumers
 
 - **Consumers** are **applications** that read data from **Kafka topics**. They **subscribe** to one or more **topics** and receive messages from the **partitions** of those **topics**.
+
+### Kafka Concept 3.1: Consumer Groups
+
+- **Consumers** can be organized into **consumer groups**, where each group consists of one or more **consumers** who work together to consume messages from one or more topics. Each message in a **partition** is delivered to only one **consumer** within a group, allowing parallel processing of data.
+- Example:
+  - Let’s consider an example where we have a **Kafka topic** named `orders` with three partitions. We create a **consumer group** named `orderProcessors` with two **consumer** instances (`consumer-1` and `consumer-2`). **Kafka** automatically assigns partitions to these consumers as follows:
+    - `consumer-1` -> partitions 0, 2
+    - `consumer-2` -> partition 1
+  - Now, each **consumer** instance within the `orderProcessors` group processes messages from its assigned partitions concurrently, allowing efficient and parallel message processing.
+
+### Kafka Concept 3.2: `GroupId`
+
+- The `GroupId` identifies a **consumer group**, which is a logical collection of **consumer** instances that work together to consume messages from one or more topics.
+- **Consumers** within the same `GroupId` coordinate to process messages from assigned partitions, ensuring parallelism and fault tolerance.
+
+### Kafka Concept 3.3: `ConsumerId`
+
+- The `ConsumerId` uniquely identifies an individual **consumer** instance within a **consumer group**.
+- Each **consumer** instance in a group has a distinct `ConsumerId`, which helps Kafka track its progress and state in consuming messages.
+
+### Kafka Concept 3.4: `ClientId`
+
+- The `ClientId` is an identifier assigned to a **Kafka client application** (**producer** or **consumer**).
+  - Multiple **consumer** instances or **producers** can share the same `ClientId` if they belong to the same application
 
 ## Kafka Concept 4: Topics
 
@@ -56,10 +88,6 @@
 - **Offsets** start at `0` and are incremented every time **Kafka** writes a message to a **partition**. This means that each message in a given **partition** has a unique **offset**.
 - **Offsets** are not reused, even when older messages get deleted. They continue to increment, giving each new message in the **partition** a unique id.
 - When data is read from a **partition**, it is read in order from the lowest existing **offset** upwards.
-
-## Kafka Concept 7: Consumer Groups
-
-- **Consumers** can be organized into **consumer groups**, where each group consists of one or more consumers. Each message in a **partition** is delivered to only one consumer within a group, allowing parallel processing of data.
 
 # Resources and Further Reading
 
