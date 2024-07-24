@@ -2,18 +2,6 @@
 
 # Schema Commands
 
-## List schema types currently registered in Schema Registry
-
-```sh
-  curl http://localhost:8081/schemas/types
-```
-
-- The response will be one or more of the following. If additional **schema** format plugins are installed, these will also be available.
-
-  ```sh
-    ["JSON", "PROTOBUF", "AVRO"]
-  ```
-
 ## Register a new version of a schema under the subject "`Kafka-key`"
 
 ```sh
