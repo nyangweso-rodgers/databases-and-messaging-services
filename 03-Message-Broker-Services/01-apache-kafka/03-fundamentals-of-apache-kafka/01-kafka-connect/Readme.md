@@ -2,16 +2,6 @@
 
 ## Table of Contents
 
-# What is Kafka Connect
-
-- **Kafka Connect** is a framework to enable streaming between **Kafka** and other systems. It makes it simple to quickly define **connectors** that move large data sets in and out of **Kafka**.
-- **Kafka Connect** can ingest entire databases or collect metrics from all your application servers into **Kafka topics**, making the data available for **stream processing** with low latency.
-
-# How Kafka Connect Works
-
-- The **Kafka Connect** framework allows you to ingest entire databases or collect metrics from all your application servers into **Kafka topics**, making the data available for stream processing with low latency.
-- You can deploy **Kafka Connect** as a standalone process that runs jobs on a single machine (for example, log collection), or as a distributed, scalable, fault-tolerant service supporting an entire organization. **Kafka Connect** provides a low barrier to entry and low operational overhead. You can start small with a standalone environment for development and testing, and then scale up to a full production environment to support the data pipeline of a large organization.
-
 # Kafka Connect Concepts
 
 ## Kafka Connect Concept 1. Connectors
@@ -44,5 +34,5 @@
 
 # Resources and Further Reading
 
-1. [docs.confluent.io - Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html)
+1. 
 2. [support.etlworks.com/articles - Real-time-change-replication-with-Kafka-and-Debezium](https://support.etlworks.com/hc/en-us/articles/360020461693-Real-time-change-replication-with-Kafka-and-Debezium)

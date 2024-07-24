@@ -290,7 +290,6 @@ services:
     #kafka bash
     kafka-console-consumer --bootstrap-server localhost:29092 --topic test_db.public.customer --from-beginning
   ```
-  ep 4: Configure BigQuery Sink Connector (`com.wepay.kafka.connect.bigquery.BigQuerySinkConnector`)
 
 ### Step 5.5: Cleanup (Delete the Source Connector)
 
@@ -307,11 +306,11 @@ services:
 
 - Create a `plugins/` directory.
 - [Download BigQuery plugin](https://www.confluent.io/hub/wepay/kafka-connect-bigquery) put the contents into the `plugins/` directory
-- Now your plugins directory should look like this:
+- Now your **plugins directory** should look like this:
   ```sh
     ls plugins
   ```
-- Output:
+- **Output**:
   ```sh
     #output
     debezium-scripting-2.5.0.Final.jar@  wepay-kafka-connect-bigquery-2.5.6/
