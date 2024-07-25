@@ -47,40 +47,20 @@
         KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
   ```
 - Where:
+
   - `depends_on` will make sure to start the **zookeeper** container before the **kafka**.
 
-## Kafka Environment Variables
+- **Kafka** Environment Variables include:
 
-### Kafka Environment Variables 1: Kafka Broker ID
-
-- `KAFKA_BROKER_ID`: Unique identifier for the **Kafka broker** within the **cluster**. Each broker must have a unique ID.
-
-### Kafka Environment Variables 2: Zookeeper Connection
-
-- `KAFKA_ZOOKEEPER_CONNECT`: Specifies the **Zookeeper** connection string, listing the **Zookeeper** instances that manage **Kafka** metadata and coordinate brokers. i.e., `KAFKA_ZOOKEEPER_CONNECT` instructs **Kafka** where it can find the **Zookeeper**.
-
-### Kafka Environment Variables 3: Listeners
-
-- `KAFKA_ADVERTISED_LISTENERS`: Defines how **Kafka brokers** communicate with **clients**. In this case, it uses **plaintext** communication over ports `29092`.
-
-### Kafka Environment Variables 4: Replication Factors
-
-- `KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR`: Sets the replication factor for the internal **offsets** topic, which tracks **consumer offsets**. A higher replication factor increases fault tolerance.
-- `KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR`: Sets the **replication factor** for the transaction state log, ensuring that transaction data is replicated for durability.
-- `KAFKA_TRANSACTION_STATE_LOG_MIN_ISR`: Minimum in-sync replicas required for the transaction state log, ensuring high availability.
-
-### Kafka Environment Variables 5: `KAFKA_DEFAULT_REPLICATION_FACTOR: '2'`
-
-- In **Kafka**, a **topic** can be replicated across multiple **brokers** for redundancy and fault tolerance. The **replication factor** specifies the number of replicas for each **partition** of the **topic**. In this case, with a replication factor of `2`, each **partition** will be copied to two **brokers**.
-- The common default value for this configuration is `2`. This ensures some level of redundancy for user-created topics.
-
-#### Kafka Environment Variables 6: `KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1`
-
-- This configuration specifically targets the **replication factor** for the internal **Kafka offsets topic**. This **topic** is used by **Kafka** to store information about consumer offsets (positions within topics). The default value for this configuration is usually `1`. Since the **offsets topic** stores metadata and is less critical for data integrity compared to user topics, a single replica might be sufficient.
-
-#### Kafka Environment Variables 7: `KAFKA_LISTENER_SECURITY_PROTOCOL_MAP`
-
-- `KAFKA_LISTENER_SECURITY_PROTOCOL_MAP`: Defines `key/value` pairs for the security protocol to use, per listener name.
+  1.  `KAFKA_BROKER_ID`: Unique identifier for the **Kafka broker** within the **cluster**. Each broker must have a unique ID.
+  2.  `KAFKA_ZOOKEEPER_CONNECT`: Specifies the **Zookeeper** connection string, listing the **Zookeeper** instances that manage **Kafka** metadata and coordinate brokers. i.e., `KAFKA_ZOOKEEPER_CONNECT` instructs **Kafka** where it can find the **Zookeeper**.
+  3.  `KAFKA_ADVERTISED_LISTENERS`: Defines how **Kafka brokers** communicate with **clients**. In this case, it uses **plaintext** communication over ports `29092`.
+  4.  `KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR`: Sets the replication factor for the internal **offsets** topic, which tracks **consumer offsets**. A higher replication factor increases fault tolerance.
+  5.  `KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR`: Sets the **replication factor** for the transaction state log, ensuring that transaction data is replicated for durability.
+  6.  `KAFKA_TRANSACTION_STATE_LOG_MIN_ISR`: Minimum in-sync replicas required for the transaction state log, ensuring high availability
+  7.  `KAFKA_DEFAULT_REPLICATION_FACTOR: '2'`" In **Kafka**, a **topic** can be replicated across multiple **brokers** for redundancy and fault toleranc. The **replication factor** specifies the number of replicas for each **partition** of the **topic**. In this case, with a replication factor of `2`, each **partition** will be copied to two **brokers**.The common default value for this configuration is `2`. This ensures some level of redundancy for user-created topics.
+  8.  `KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1`: This configuration specifically targets the **replication factor** for the internal **Kafka offsets topic**. This **topic** is used by **Kafka** to store information about consumer offsets (positions within topics). The default value for this configuration is usually `1`. Since the **offsets topic** stores metadata and is less critical for data integrity compared to user topics, a single replica might be sufficient.
+  9.  `KAFKA_LISTENER_SECURITY_PROTOCOL_MAP`: Defines `key/value` pairs for the security protocol to use, per listener name.
 
 #### Kafka Environment Variables 8: `KAFKA_ADVERTISED_LISTENERS`
 
@@ -121,12 +101,6 @@
 
 # 3. Schema Registry
 
-- **Schema Registry** is a service that provides a RESTful interface for managing and validating **Avro schemas**. It serves as a central repository for schemas and ensures that data produced and consumed in **Kafka topics** adhere to a consistent format. This helps in maintaining data compatibility and evolution.
-- Key Components include:
-  - **Schemas**: Define the structure of data records. **Avro schemas** are the most commonly used format.
-  - **Subjects**: Logical groupings of schemas, usually corresponding to **Kafka topics**.
-  - **Compatibility Checks**: Ensures new schema versions are compatible with previous versions according to defined compatibility rules.
-
 ## How to Configure Schema Registry
 
 - Add configurations for `schema-registry` service
@@ -154,21 +128,12 @@
         test: curl --user superUser:superUser --fail --silent --insecure http://localhost:8081/subjects --output /dev/null || exit 1
   ```
 
-## Schema Registry Configuration Explanation
-
-### 3.1 Dependencies
-
-- `depends_on`: Specifies that the **Schema Registry** service depends on **Zookeeper** and **Kafka** services to be up and running. This ensures that **Schema Registry** starts only after its dependencies are available.
-
-### 3.2 Ports
-
-- `8081:8081`: Exposes port `8081`, which is the default port for the Schema Registry’s RESTful API.
-
-### 3.3 Environment Variables
-
-- `SCHEMA_REGISTRY_HOST_NAME`: Sets the hostname for the Schema Registry service.
-- `SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL`: Defines the connection URL for **Zookeeper** instances that the **Schema Registry** will use to manage **Kafka** metadata.
-- `SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS`: Lists the **Kafka bootstrap servers** for the **Schema Registry** to connect to.
+- **Schema Registry Environment Variables** incldue:
+  1.  `depends_on`: Specifies that the **Schema Registry** service depends on **Zookeeper** and **Kafka** services to be up and running. This ensures that **Schema Registry** starts only after its dependencies are available.
+  2.  `8081:8081`: Exposes port `8081`, which is the default port for the Schema Registry’s RESTful API.
+  3.  `SCHEMA_REGISTRY_HOST_NAME`: Sets the hostname for the Schema Registry service.
+  4.  `SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL`: Defines the connection URL for **Zookeeper** instances that the **Schema Registry** will use to manage **Kafka** metadata.
+  5.  `SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS`: Lists the **Kafka bootstrap servers** for the **Schema Registry** to connect to.
 
 # 4. Web UIs for managing Apache Kafka
 
@@ -477,5 +442,5 @@ services:
 2. [github.com/provectus - kafka-ui](https://github.com/provectus/kafka-ui/tree/master?tab=readme-ov-file)
 3. [How To Set Up Apache Kafka With Docker?](https://codersee.com/how-to-set-up-apache-kafka-with-docker/)
 4. [Kafka Listeners – Explained](https://www.confluent.io/blog/kafka-listeners-explained/)
-5. [avro.apache.org/docs](https://avro.apache.org/docs/1.11.1/specification/_print/)
+5.
 6. [https://towardsdev.com/implementing-change-data-capture-cdc-with-docker-postgresql-mongodb-kafka-and-debezium-a-c49b2b38a88c](https://towardsdev.com/implementing-change-data-capture-cdc-with-docker-postgresql-mongodb-kafka-and-debezium-a-c49b2b38a88c)
