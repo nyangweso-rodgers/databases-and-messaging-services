@@ -6,12 +6,12 @@
 
 - With **Docker**, we don't have to install various tools manually, instead, we write a `docker-compose.yml` to manage **containers**.
 
-# 1. Zookeeper
+# Configure Zookeeper Docker Container
 
 - [Zookeeper](https://zookeeper.apache.org/) is a **service** for managing and synchronizing distributed systems. It is a service used to manage **Kafka clusters**.
 - **Kafka** uses **Zookeeper** to manage the **brokers** in a **cluster**, and requires **Zookeeper** even if you're running a **Kafka cluster** with only one **broker**.
 
-## How to Configure Zookeeper
+## Step 1: Configure Zookeeper
 
 - Add configurations for `zookeeper` service
 
@@ -28,9 +28,9 @@
   - `ZOOKEEPER_CLIENT_PORT`: instructs `Zookeeper` where it should listen for connections by clients- **Kafka** in our case.
   - `ZOOKEEPER_SERVER_ID`: When running in **clustered mode**, we have to set the `ZOOKEEPER_SERVER_ID`.
 
-# 2. Kafka
+# Configure Kafka Docker Container
 
-## How to Configure Kafka
+## Step 1: How to Configure Kafka
 
 - Add configurations for `kafka` service
   ```yml
@@ -99,9 +99,9 @@
     - `PLAINTEXT` on port `29092` with a custom name "`kafka`" (internal, might not be discoverable by other services).
     - Why? This setup might be useful if you primarily need to access the broker from the host machine (external) and only use internal components for specific tasks. However, the internal listener with a custom name might require additional configuration for other services to connect using "`kafka:29092`".
 
-# 3. Schema Registry
+# Configure Schema Registry Docker Container
 
-## How to Configure Schema Registry
+## Step 1: How to Configure Schema Registry
 
 - Add configurations for `schema-registry` service
 
@@ -135,13 +135,13 @@
   4.  `SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL`: Defines the connection URL for **Zookeeper** instances that the **Schema Registry** will use to manage **Kafka** metadata.
   5.  `SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS`: Lists the **Kafka bootstrap servers** for the **Schema Registry** to connect to.
 
-# 4. Web UIs for managing Apache Kafka
+# Web UIs for managing Apache Kafka
 
-## 4.1 Web UIs for managing Apache Kafka: UI for Apache Kafka
+## 1. UI for Apache Kafka
 
 - **Kafka UI** —or, as its developer **Provectus** calls it, **UI for Apache Kafka** — is a free, open source web UI that stands out for being lightweight and easy to use.
 
-## How to Configure Kafka UI
+## Step 1: How to Configure Kafka UI
 
 - [provectuslabs/kafka-ui](https://hub.docker.com/r/provectuslabs/kafka-ui) is a Free, open-source web UI to monitor and manage Apache Kafka **clusters**.
 - `kafka-ui` is an application that will give us a UI to view our **cluster**.
@@ -156,13 +156,13 @@
   - `KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS:` is the Address where to connect
   - `KAFKA_CLUSTERS_0_SCHEMAREGISTRY`: for SchemaRegistry's address
 
-## 4.2 Web UIs for managing Apache Kafka: Conduktor
+## 2. Conduktor
 
 - **Conduktor** for Apache Kafka is a comprehensive platform that enables users to easily manage, monitor, and analyze their Kafka clusters. It provides a powerful user interface to manage Kafka resources, perform analytics, and monitor tasks with built-in tools. Furthermore, Conduktor includes enterprise-grade features such as **data masking**, cold storage, multitenancy, audit logs, message encryption, and many other features that make it an excellent solution for large enterprises that must meet strict compliance and governance regulations.
 
-## 4.3 Web UIs for managing Apache Kafka: Redpanda Console
+## 3. Redpanda Console
 
-# 5. Kafka REST Proxy
+# Configure Kafka REST Proxy Docker Container
 
 - **Kafka REST Proxy** provides a RESTful interface to interact with **Apache Kafka clusters**, allowing applications to produce and consume messages via HTTP. This is particularly useful for clients that do not have a native Kafka library or require an HTTP-based interface for simplicity.
 
@@ -186,93 +186,12 @@ services:
       KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
 ```
 
-## Kafka REST Proxy Configuration Explanation
-
-### 5.1 Dependencies:
-
-- `depends_on`: Specifies that the Kafka **REST Proxy service** depends on **Zookeeper**, **Kafka**, and **Schema Registry** services to be up and running. This ensures that the **REST Proxy** starts only after its dependencies are available.
-
-### 5.2 Ports
-
-- `8082:8082`: Exposes port `8082`, which is the default port for the Kafka REST Proxy’s RESTful API.
-
-### 5.3 Environment Variables
-
-- `KAFKA_REST_HOST_NAME`: Sets the **hostname** for the **Kafka REST Proxy** service.
-- `KAFKA_REST_BOOTSTRAP_SERVERS`: Lists the **Kafka bootstrap servers** for the **REST Proxy** to connect to. This enables the proxy to communicate with the Kafka cluster.
-- `KAFKA_REST_LISTENERS`: Defines the address and port on which the REST Proxy will listen for HTTP requests. In this case, it listens on all network interfaces (0.0.0.0) on port 8082.
-
-# 6. Kafka Connect(debezium)
-
-- **Kafka Connect** is a framework for integrating **Kafka** with various data sources and **sinks**. It enables you to stream data between **Kafka** and other systems, such as **databases**, key-value stores, search indexes, and file systems, without writing any code. **Kafka Connect** is highly scalable and fault-tolerant, making it ideal for building robust data pipelines.
-
-## Kafka Connect Service Configurations
-
-```yml
-services:
-  connect:
-    image: debezium/connect:latest
-    restart: always
-    container_name: connect
-    depends_on:
-      - kafka
-    ports:
-      - "8083:8083"
-    environment:
-      BOOTSTRAP_SERVERS: kafka:9092
-      GROUP_ID: 1
-      CONFIG_STORAGE_TOPIC: connect_configs
-      OFFSET_STORAGE_TOPIC: connect_offsets
-      STATUS_STORAGE_TOPIC: connect_statuses
-      CONFIG_STORAGE_REPLICATION_FACTOR: 2
-      OFFSET_STORAGE_REPLICATION_FACTOR: 2
-      STATUS_STORAGE_REPLICATION_FACTOR: 2
-      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
-      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
-      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      ENABLE_DEBEZIUM_SCRIPTING: "true"
-      healthcheck:
-        test:
-          [
-            "CMD",
-            "curl",
-            "--silent",
-            "--fail",
-            "-X",
-            "GET",
-            "http://localhost:8083/connectors",
-          ]
-        start_period: 10s
-        interval: 10s
-        timeout: 5s
-        retries: 5
-```
-
-## Kafka Connect Configuration Explanation
-
-### 6.1 Dependencies
-
-- `depends_on`: Specifies that the **Kafka Connect service** depends on **Kafka brokers** (kafka). This ensures **Kafka Connect** starts only after the brokers are available.
-
-### 6.2 Ports
-
-- `8083:8083`: Exposes port `8083`, which is the default port for the Kafka Connect REST API.
-
-### 6.3 Environment Variables
-
-- `BOOTSTRAP_SERVERS`: Lists the Kafka bootstrap servers for Kafka Connect to communicate with.
-- `GROUP_ID`: Sets the consumer group ID for Kafka Connect.
-- `CONFIG_STORAGE_TOPIC`: The **topic** where connector configurations are stored.
-- `OFFSET_STORAGE_TOPIC`: The **topic** where **offsets** are stored, tracking the progress of each connector.
-- `STATUS_STORAGE_TOPIC`: The topic where the status of connectors and tasks are stored.
-- `CONFIG_STORAGE_REPLICATION_FACTOR`, `OFFSET_STORAGE_REPLICATION_FACTOR`, `STATUS_STORAGE_REPLICATION_FACTOR`: Set the replication factors for the respective **topics**, ensuring fault tolerance.
-- `CONNECT_KEY_CONVERTER` and `CONNECT_VALUE_CONVERTER`: Specify the converters used for keys and values. In this case, the JsonConverter is used.
-- `CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE` and `CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE`: Disable schema support for the converters, using plain JSON instead.
-- `KEY_CONVERTER` and `VALUE_CONVERTER`: Set the converters for keys and values.
-- `ENABLE_DEBEZIUM_SCRIPTING`: Enables scripting support for Debezium connectors, allowing custom transformations.
+- List of the configurations include:
+  1. `depends_on`: Specifies that the Kafka **REST Proxy service** depends on **Zookeeper**, **Kafka**, and **Schema Registry** services to be up and running. This ensures that the **REST Proxy** starts only after its dependencies are available.
+  2. `8082:8082`: Exposes port `8082`, which is the default port for the Kafka REST Proxy’s RESTful API.
+  3. `KAFKA_REST_HOST_NAME`: Sets the **hostname** for the **Kafka REST Proxy** service.
+  4. `KAFKA_REST_BOOTSTRAP_SERVERS`: Lists the **Kafka bootstrap servers** for the **REST Proxy** to connect to. This enables the proxy to communicate with the Kafka cluster.
+  5. `KAFKA_REST_LISTENERS`: Defines the address and port on which the REST Proxy will listen for HTTP requests. In this case, it listens on all network interfaces (0.0.0.0) on port 8082.
 
 # 7. ksqlDB Server
 
@@ -348,57 +267,7 @@ services:
 
 # 8. Graphical user interfaces
 
-## 8.1 Debezium UI
 
-- **Debezium UI** is a graphical user interface for managing **Debezium connectors**. It simplifies the configuration, deployment, and monitoring of CDC (Change Data Capture) connectors, providing an intuitive way to handle data streaming from various databases to **Kafka**.
-- Setup:
-  ```yml
-  services:
-    debezium-ui:
-      image: debezium/debezium-ui:latest
-      restart: always
-      container_name: debezium-ui
-      hostname: debezium-ui
-      depends_on:
-        - connect
-      ports:
-        - "8181:8080"
-      environment:
-        KAFKA_CONNECT_URIS: http://connect:8083
-  ```
-- Alternatives
-  - Kafka Connect UI (Open Source): A web-based interface to manage and monitor Kafka Connect connectors. (old)
-  - Confluent Control Center (Enterprise): A comprehensive monitoring and management tool for Kafka clusters and connectors, including support for Debezium.
-
-## 8.2 AKHQ
-
-- **AKHQ** (formerly known as **KafkaHQ**) is an open-source web interface for managing and monitoring **Apache Kafka** clusters. It provides features like topic inspection, consumer group management, and real-time data browsing.
-
-- Setup:
-  ```yml
-  services:
-    akhq:
-      image: tchiotludo/akhq:latest
-      depends_on:
-        - kafka
-      ports:
-        - "8080:8080"
-      environment:
-        AKHQ_CONFIGURATION: |
-          akhq:
-          connections:
-            kafka-cluster:
-              properties:
-                bootstrap.servers: "kafka1:9092,kafka2:9092"
-              schema-registry:
-                url: "http://schema-registry:8081"
-              connect:
-                - name: "connect"
-                  url: "http://connect:8083"
-  ```
-- Alternatives
-  - **Kafka Manager** (Open Source): A web-based management tool for Kafka clusters, providing insights into broker stats, topics, and partitions.
-  - **Confluent Control Center** (Enterprise): An enterprise-grade monitoring and management solution for **Kafka**, offering advanced features like end-to-end monitoring, client performance metrics, and more.
 
 ## 8.3 ksqlDB UI
 
@@ -442,5 +311,4 @@ services:
 2. [github.com/provectus - kafka-ui](https://github.com/provectus/kafka-ui/tree/master?tab=readme-ov-file)
 3. [How To Set Up Apache Kafka With Docker?](https://codersee.com/how-to-set-up-apache-kafka-with-docker/)
 4. [Kafka Listeners – Explained](https://www.confluent.io/blog/kafka-listeners-explained/)
-5.
 6. [https://towardsdev.com/implementing-change-data-capture-cdc-with-docker-postgresql-mongodb-kafka-and-debezium-a-c49b2b38a88c](https://towardsdev.com/implementing-change-data-capture-cdc-with-docker-postgresql-mongodb-kafka-and-debezium-a-c49b2b38a88c)
