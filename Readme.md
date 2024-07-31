@@ -94,6 +94,11 @@
 - The trade-offs are as follows:
   1. Extra disk space for each indexed column
   2. More work during write operations to update the index.
+- **Remarks**:
+  - _When to use Indexing?_: Always remember Indexing should be only applied to the column which is frequently being used in the where clause.
+  - Indexing works great on columns which contain numeric data.
+  - Indexing on primary key columns is not required because most modern databases implicitly apply indexing to them.
+  - Don't apply it on every column, otherwise, this will degrade the write and update operation on DB. As every write and update operation also updates the Index.
 
 ## 2. Materialized Views
 
