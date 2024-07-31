@@ -1,5 +1,7 @@
 # Apache Kafka Shell Commands
 
+## Table Of Contents
+
 # Kafka Shell
 
 - **Kafka shell** currently supports a lot of most popular Kafka command line tools, such as `Kafka-topics`, `kafka-console-consumer`, and more.
