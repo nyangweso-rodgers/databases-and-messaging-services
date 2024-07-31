@@ -57,16 +57,7 @@
     ["Kafka-key","Kafka-value"]
   ```
 
-## Fetch a schema by globally unique ID
 
-```sh
-    curl -X GET http://localhost:8081/schemas/ids/10
-```
-
-- Example output:
-  ```sh
-    {"schema":"\"string\""}
-  ```
 
 # Register a Schema for a New Kafka Topic
 
