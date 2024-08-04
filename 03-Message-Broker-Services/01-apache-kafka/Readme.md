@@ -25,11 +25,17 @@
 4. **Database Replication**:
    - Database Commit log is piped to a Kafka topic.
 
+# Kafka Architecture
+
+## 1. Kafka Cluster
+
+- **Kafka Cluster** is a collection of **Kafka brokers**.
+
+## 2. Kafka Broker
+
+- **Kafka Brokers** store data that is sent from the **producer** and keep data in both **cache** and **disk**. The default data retention on **disk** is **7 days** but we can configure for more or less.
+
 # Kafka Concepts
-
-## Kafka Concept 1: Broker
-
-- A single **Kafka Cluster** is made of **Brokers**. They handle **producers** and **consumers** and keeps data replicated in the **cluster**.
 
 ## Kafka Concept 2: Producers
 
