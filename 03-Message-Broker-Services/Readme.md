@@ -1,5 +1,11 @@
 # Message Broker Services
 
+# Introduction to Event Driven Architecture
+
+- In an Event Driven Architecture, systems reacts based on the event instead of the regular making request and waiting for a response sequence. This allows systems to communicate with one another asynchronously and reliably. Even when the system is down it’s still able to process the request when it comes back online.
+- In order to implement this architecture, we have to use **Message Broker** or **Messaging Oriented Middleware** aka **MOM**. There are many message brokers out there in the market but ActiveMQ, RabbitMQ and Apache Kafka are the most popular.
+- What separates **Apache Kafka** from the rest of message brokers is that Apache Kafka is massively scalable because it allows data to be distributed across multiple servers, and it’s extremely fast because it decouples data streams, which results in low latency. Let’s dive into more detail.
+
 # Synchronous vs. Asynchronous Microservice Communication
 
 - In a **Synchronous communication**, the **caller** waits for a **response** before sending the next message, and it operates as a **REST protocol** on top of **HTTP**. On the contrary, in **Asynchronous communication**, the **messages** are sent without waiting for a **response**. This is suited for distributed systems and usually requires a **message broker** to manage the messages.
