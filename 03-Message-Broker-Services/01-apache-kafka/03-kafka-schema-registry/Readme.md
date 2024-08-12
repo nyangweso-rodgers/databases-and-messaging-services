@@ -27,6 +27,10 @@
   2. JSON
   3. Google Protobuf
 
+# What are Subjects
+
+- **Subjects**: Logical groupings of **schemas**, usually corresponding to **Kafka topics**.
+
 # How to use the schema registry
 
 ## Schema Registry and Protobuf
@@ -37,7 +41,7 @@
 
 # `curl` Commands For Schema Registry
 
-## 1. Verify registered schema types.
+## 1. Verify Registered schema types.
 
 - verify which schema types are currently registered with Schema Registry by:
   ```sh
@@ -49,7 +53,18 @@
     ["JSON","PROTOBUF","AVRO"]
   ```
 
+## 2. Fetch a schema by globally unique ID
+
+```sh
+    curl -X GET http://localhost:8081/schemas/ids/10
+```
+
+- Example output:
+  ```sh
+    {"schema":"\"string\""}
+  ```
+
 # Resources and Further Reading
 
 1. [docs.confluent.io - schema-registry](https://docs.confluent.io/platform/current/schema-registry/index.html)
-2. 
+2.
