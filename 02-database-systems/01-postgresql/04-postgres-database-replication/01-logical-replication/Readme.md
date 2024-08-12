@@ -32,7 +32,7 @@
 - To connect to a **PostgreSQL** instance running within a **Docker container**, you can use the `docker exec` command combined with the `psql` command:
 - Example:
   ```sh
-    docker exec -it postgres psql -U admin -d test_db
+    docker exec -it postgres psql -U admin -d users
   ```
 
 ## 2. Check Active Replication Slots
