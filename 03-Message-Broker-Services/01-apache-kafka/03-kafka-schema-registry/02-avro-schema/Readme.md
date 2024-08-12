@@ -8,9 +8,7 @@
 - One of **Avro's** strengths lies in its ecosystem, especially around languages like Java, where it offers extensive libraries and tools that integrate seamlessly with Java applications.
 - Another advantage of **Avro** is its human-readable schema format, which significantly aids in debugging and maintaining the codebase by making it easier to understand the data structures in use. Avro supports native Remote Procedure Call (RPC) mechanisms, enabling efficient and direct communication between different components in a distributed system without needing an additional layer for RPC handling.
 
-# How to Register an Avro Schema
-
-## Step 1: Define Avro Schema
+# Define Avro Schema
 
 - Create an **Avro schema** file (e.g., `schema.avsc`):
   ```avsc
@@ -28,7 +26,9 @@
 - **Remarks**:
   - In **Avro schema** definitions, the **namespace** attribute is used to organize and uniquely identify the **schemas** within a larger system. It is similar to the concept of **namespaces** in programming languages like Java or C#. The **namespace** helps to avoid naming conflicts by providing a context for the schema name.
 
-## Step 2.1: Register Avro Schema Using `curl` Command
+# How to Register an Avro Schema
+
+## Method 1: Register Avro Schema Using `curl` Command
 
 - Example:
 
@@ -36,7 +36,7 @@
     curl -v -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{"schema": "{\"type\": \"record\", \"name\": \"delegatesSurvey\", \"namespace\": \"com.example\", \"fields\": [{ \"name\": \"id\", \"type\": \"string\" }] }"}' http://localhost:8081/subjects/Delegates-Survey/versions
   ```
 
-## Step 2.2: Register Avro Schema Using Python Script
+## Method 2: Register Avro Schema Using Python Script
 
 - If your **schema** is very complex, using a Python script can be more manageable:
 
@@ -70,3 +70,5 @@
   ```
 
 # Resources and Further Reading
+
+1. [avro.apache.org/docs](https://avro.apache.org/docs/1.11.1/specification/_print/)

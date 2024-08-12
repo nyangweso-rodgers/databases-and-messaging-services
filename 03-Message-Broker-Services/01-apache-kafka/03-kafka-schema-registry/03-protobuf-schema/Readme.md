@@ -43,6 +43,8 @@
     }
   ```
 
+# Register Protobuf Schema Using Python Script
+
 # Resources and Further Reading
 
 1. [Protobuf Documentation](https://protobuf.dev/overview/#scalar)
