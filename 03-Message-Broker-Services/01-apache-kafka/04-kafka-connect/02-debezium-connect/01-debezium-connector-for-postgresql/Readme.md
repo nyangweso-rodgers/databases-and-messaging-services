@@ -282,9 +282,9 @@
 
 - Use `curl` to make a **POST** request to your **Kafka Connect REST API** to register the connector.
 - Syntax:
-- Example 1: (For `customer`)
+- Example 1: (For `customers`)
   ```sh
-    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @users.customers.avsc.json
+    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @users.customers.json
   ```
 - Example 2: (For `delegates-survey`)
   ```sh
