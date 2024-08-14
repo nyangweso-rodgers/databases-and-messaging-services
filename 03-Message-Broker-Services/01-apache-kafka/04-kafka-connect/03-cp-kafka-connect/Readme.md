@@ -2,10 +2,24 @@
 
 ## Table Of Contents
 
-#
+# Kafka Connect Images on Docker Hub
 
+- You can get **kafka-connect image** from [confluentinc/cp-kafka-connect](https://hub.docker.com/r/confluentinc/cp-kafka-connect).
+- **Confluent** maintains its own image for **Kafka Connect**, `cp-kafka-connect-base`, which provides a basic **Connect** worker to which you can add your desired JAR files for sink and source connectors, single message transforms, and converters.
+- For example, these are the bare minimum variables necessary to get a Connect Distributed Server running, but assumes it is connected to **Kafka** cluster with at least three brokers (replication factor for the three Connect topics). Additional variables for replication factor of the three Connect topics can be added, as described below for testing against less than three brokers.
+  1. `CONNECT_BOOTSTRAP_SERVERS`
+  2. `CONNECT_GROUP_ID`
+  3. `CONNECT_KEY_CONVERTER`
+  4. `CONNECT_VALUE_CONVERTER`
+  5. `CONNECT_CONFIG_STORAGE_TOPIC`
+  6. `CONNECT_OFFSET_STORAGE_TOPIC`
+  7. `CONNECT_STATUS_STORAGE_TOPIC`
+
+# Connectors For Kafka Connect
+
+- According to the [Confluent documentation](), this docker image comes with pre-installed **connector plugins** including:
+  1. Elastic
 - [Since Confluent Platform 6.0 connectors are no longer bundled](https://docs.confluent.io/platform/current/release-notes/index.html#connectors), and need to be installed separately. You can [build your own image](https://docs.confluent.io/platform/current/installation/docker/development.html#create-a-docker-image-containing-c-hub-connectors) based on **cp-kafka-connect-base**, or install connectors at runtime by overwriding the image command.
-- You can get **kafka-connect image** from [confluentinc/cp-kafka-connect](https://hub.docker.com/r/confluentinc/cp-kafka-connect). According to the [Confluent documentation](), this docker image comes with pre-installed connector plugins including Elastic.
 
 ```yml
 cp-kafka-connect:
@@ -174,5 +188,10 @@ services:
 ```sh
   curl localhost:8084/connector-plugins | json_pp
 ```
+
+- If you need to check the list of available **plugins** you should hit `localhost:8083/connector-plugins`
+  ```sh
+      curl localhost:8084/connector-plugins
+  ```
 
 # Resources and Further Reading
