@@ -197,28 +197,6 @@
       cat /etc/debezium/bigquery-keyfile.json
     ```
 
-## Step 8: Configure Debezium UI
-
-- **Debezium UI** is a graphical user interface for managing **Debezium connectors**. It simplifies the configuration, deployment, and monitoring of CDC (Change Data Capture) connectors, providing an intuitive way to handle data streaming from various databases to **Kafka**.
-- Setup:
-  ```yml
-  services:
-    debezium-ui:
-      image: debezium/debezium-ui:latest
-      restart: always
-      container_name: debezium-ui
-      hostname: debezium-ui
-      depends_on:
-        - connect
-      ports:
-        - "8181:8080"
-      environment:
-        KAFKA_CONNECT_URIS: http://connect:8083
-  ```
-- Alternatives
-  - Kafka Connect UI (Open Source): A web-based interface to manage and monitor Kafka Connect connectors. (old)
-  - Confluent Control Center (Enterprise): A comprehensive monitoring and management tool for Kafka clusters and connectors, including support for Debezium.
-
 ## Step 9: Define Debezium Source Connector Configuration File
 
 - Create a configuration file named `register-postgresdb-source-connector-for-customer.json` with the following connector **configurations**:
@@ -276,53 +254,6 @@
     }
   }
   ```
-- Remarks:
-
-## Step 9: Register Source Connector with Kafka Connect
-
-- Use `curl` to make a **POST** request to your **Kafka Connect REST API** to register the connector.
-- Syntax:
-- Example 1: (For `customers`)
-  ```sh
-    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @users.customers.json
-  ```
-- Example 2: (For `delegates-survey`)
-  ```sh
-    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @register-postgresdb-source-connector-for-delegates-survey-v1.json
-  ```
-- **Sample Output**:
-
-  ```json
-  {
-    "name": "postgresdb-connector-for-delegates-surveys-v1",
-    "config": {
-      "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
-      "tasks.max": "1",
-      "plugin.name": "pgoutput",
-      "database.hostname": "postgres",
-      "database.port": "5432",
-      "database.user": "admin",
-      "database.password": "<password>",
-      "database.dbname": "test_db",
-      "database.server.name": "postgres",
-      "table.include.list": "test_db.customers",
-      "heartbeat.interval.ms": "5000",
-      "publication.autocreate.mode": "filtered",
-      "key.converter": "org.apache.kafka.connect.json.JsonConverter",
-      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-      "value.converter.schemas.enable": "false",
-      "topic.prefix": "test_db",
-      "topic.creation.enable": "true",
-      "topic.creation.default.replication.factor": "1",
-      "topic.creation.default.partitions": "1",
-      "topic.creation.default.cleanup.policy": "delete",
-      "topic.creation.default.retention.ms": "604800000",
-      "name": "register-pg-connector"
-    },
-    "tasks": [],
-    "type": "source"
-  }
-  ```
 
 ## Step 10: Validate the Status of the Source Connector
 
@@ -351,36 +282,6 @@
       ```sh
         ["delegates_surveys-pg-connector","register-customers-pg-connector"]
       ```
-
-## Step 10: Test the Debezium Source Connector
-
-### Step 10.1: Test the Source Connector By Listing Kafka Topics
-
-- If there was no issue running the above steps we could confirm that our **connector** is working fine by checking if the **topic** is created for `customers` table by the **connector**.
-  ```sh
-    kafka-topics --bootstrap-server localhost:29092 --list
-  ```
-- Sample output:
-
-### Step 10.2: Test the Source Connector By Reading (Viewing) Data
-
-- We can check that the data availability on the **topic**.
-- There would be data present in the **topic** because when the **connector** starts it takes an initial snapshot of the database table. This is a default `config` named `snapshot.mode` which we didn't configure but is set to `initial` which means that the **connector** will do a snapshot on the initial run when it doesn't find the last known **offset** from the transaction log available for the database server.
-  ```bash
-    #kafka bash
-    kafka-console-consumer --bootstrap-server localhost:29092 --topic test_db.public.customer --from-beginning
-  ```
-
-## Step 11: Delete the Debezium Source Connector
-
-- Remove the **connectors** by:
-  ```sh
-    curl -X DELETE http://localhost:8083/connectors/customer-postgresdb-connector
-  ```
-- Example 1: (For `delegates-survey`)
-  ```sh
-    curl -X DELETE http://localhost:8083/connectors/postgresdb-source-connector-for-delegates-survey-v1
-  ```
 
 # Next Steps
 
