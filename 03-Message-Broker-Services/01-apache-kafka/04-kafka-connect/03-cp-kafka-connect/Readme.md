@@ -2,24 +2,37 @@
 
 ## Table Of Contents
 
+#
+
+- [Since Confluent Platform 6.0 connectors are no longer bundled](https://docs.confluent.io/platform/current/release-notes/index.html#connectors), and need to be installed separately. You can [build your own image](https://docs.confluent.io/platform/current/installation/docker/development.html#create-a-docker-image-containing-c-hub-connectors) based on **cp-kafka-connect-base**, or install connectors at runtime by overwriding the image command.
+- You can get **kafka-connect image** from [confluentinc/cp-kafka-connect](https://hub.docker.com/r/confluentinc/cp-kafka-connect). According to the [Confluent documentation](), this docker image comes with pre-installed connector plugins including Elastic.
+
 ```yml
 cp-kafka-connect:
-  image: confluentinc/cp-server-connect:${KAFKA_VERSION}
-  container_name: connect
+  #image: confluentinc/cp-server-connect:${KAFKA_VERSION}
+  image: confluentinc/cp-kafka-connect-base:6.0.0
+  container_name: cp-kafka-connect
+  ports:
+    - "8083:8083"
   depends_on:
     - kafka
     - schema-registry
   environment:
-    CONNECT_BOOTSTRAP_SERVERS: "kafka:9092"
+    CONNECT_BOOTSTRAP_SERVERS: "kafka:29092"
     CONNECT_REST_ADVERTISED_HOST_NAME: connect
     CONNECT_GROUP_ID: compose-connect-group
-    CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+    # kafka
+    CONNECT_CONFIG_STORAGE_TOPIC: _kafka-connect-group-configs
+    CONNECT_OFFSET_STORAGE_TOPIC: _kafka-connect-offsets
+    CONNECT_STATUS_STORAGE_TOPIC: _kafka-connect-status
     CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
-    CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
-    CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
     CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
-    CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
     CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+
+    CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+
+    CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+
     CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-7.2.1.jar
     CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
     CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
@@ -60,3 +73,106 @@ cp-kafka-connect:
       sleep infinity &
       /etc/confluent/docker/run
 ```
+
+- If you need install a **Connector**, you can go to the [confluent.io/hub/](https://www.confluent.io/hub) select your specific **connector**. Then, you can create your **DockerImage** of specific **Kafka Connect** server.
+
+# kafka-connect-jdbc library with Dockerfile
+
+```Dockerfile
+    FROM docker.arvancloud.ir/confluentinc/cp-kafka-connect:latest
+
+    RUN confluent-hub install confluentinc/kafka-connect-jdbc:10.7.6 --no-prompt
+```
+
+## Step 1: Write `Dockerfile`
+
+```Dockerfile
+  FROM confluentinc/cp-kafka-connect
+```
+
+## Step 2: Add **connector** "example JDBC" from [Confluent Hub](https://www.confluent.io/hub)
+
+```Dockerfile
+  FROM confluentinc/cp-kafka-connect
+  ENV MYSQL_DRIVER_VERSION 5.1.39
+  RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.5.0
+  RUN curl -k -SL "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-${MYSQL_DRIVER_VERSION}.tar.gz" \
+      | tar -xzf - -C /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib \
+      --strip-components=1 mysql-connector-java-5.1.39/mysql-connector-java-${MYSQL_DRIVER_VERSION}-bin.jar
+```
+
+## Step 3: Build the docker image
+
+```sh
+  docker build . -t my-kafka-connect-jdbc:1.0.0
+```
+
+## Step 4: Edit `docker-compose.yml` File Configuration
+
+```yml
+#docker-compose.yml
+image: my-kafka-connect-jdbc:1.0.0
+```
+
+## Step 5: Stop and Start your Confluent Platform local environment
+
+```sh
+  docker-compose down
+  docker-compose up
+```
+
+## Step 6: Test your Connect server:
+
+```sh
+  curl --location --request GET 'http://localhost:8083/connectors'
+```
+
+# How to install connectors to the docker image of apache kafka connect
+
+## Solution without using Confluent Hub
+
+### Step 1.1: Build your own Kafka-Connect image
+
+- Your directory should look like this:
+  - my-directory /
+    - Dockerfile
+    - plugins /
+      - my-connector /
+        - <connector-jars>
+- `Dockerfile`
+  ```Dockerfile
+    FROM confluentinc/cp-kafka-connect-base:latest
+    USER root:root
+    COPY ./plugins/ /opt/kafka/plugins/
+    ENV CONNECT_PLUGIN_PATH="/opt/kafka/plugins"
+    USER 1001
+  ```
+- Run the following
+  ```sh
+    cd /my-directory
+    docker build . -t my-connector-image-name
+  ```
+
+### Step 1.2: Use the created image for your kafka-connect container
+
+```yml
+#docker-compose.yml
+version: "3"
+services:
+  zookeeper:
+  kafka:
+  cp-kafka-connect:
+    image: "my-connector-image-name:latest"
+    container_name: "kafka-connect"
+    ports:
+      - "8083:8083"
+    environment: CONNECT_BOOTSTRAP_SERVERS=kafka:29092
+```
+
+### Step 1.3: Get available Connector Plugins
+
+```sh
+  curl localhost:8084/connector-plugins | json_pp
+```
+
+# Resources and Further Reading
