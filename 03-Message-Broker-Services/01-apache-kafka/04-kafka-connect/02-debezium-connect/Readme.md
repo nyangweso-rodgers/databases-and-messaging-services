@@ -22,6 +22,30 @@
 - **Debezium** is an open-source, distributed system that enables users to capture real-time changes so that applications can notice such changes and react to them. It consists of **connectors** that record all real-time data changes and store them as events in **Kafka topics**.
 - **Debezium** supports various databases, including **PostgreSQL**, **MySQL**, and **MongoDB**, making it a versatile choice for change data capture (CDC) needs.
 
+# Docker Compose Setup
+
+## Configure Debezium UI
+
+- **Debezium UI** is a graphical user interface for managing **Debezium connectors**. It simplifies the configuration, deployment, and monitoring of CDC (Change Data Capture) connectors, providing an intuitive way to handle data streaming from various databases to **Kafka**.
+- Setup:
+  ```yml
+  services:
+    debezium-ui:
+      image: debezium/debezium-ui:latest
+      restart: always
+      container_name: debezium-ui
+      hostname: debezium-ui
+      depends_on:
+        - connect
+      ports:
+        - "8181:8080"
+      environment:
+        KAFKA_CONNECT_URIS: http://connect:8083
+  ```
+- Alternatives
+  - Kafka Connect UI (Open Source): A web-based interface to manage and monitor Kafka Connect connectors. (old)
+  - Confluent Control Center (Enterprise): A comprehensive monitoring and management tool for Kafka clusters and connectors, including support for Debezium.
+
 # Remarks:
 
 1. From version 2.0, **Confluent Avro converters** was removed from Docker image. Here is the ticket https://issues.redhat.com/browse/DBZ-4952
@@ -54,6 +78,42 @@
   21. slf4j-api
   22. snakeyaml
   23. swagger-annotations
+
+# Steps
+
+## Step 9: Register Source Connector with Kafka Connect
+
+- Use `curl` to make a **POST** request to your **Kafka Connect REST API** to register the connector.
+- Syntax:
+- Example 1: (For `customers`)
+  ```sh
+    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @users.customers.json
+  ```
+
+## Step 10: Test the Debezium Source Connector
+
+### Step 10.1: Test the Source Connector By Listing Kafka Topics
+
+- If there was no issue running the above steps we could confirm that our **connector** is working fine by checking if the **topic** is created for `customers` table by the **connector**.
+  ```sh
+    kafka-topics --bootstrap-server localhost:29092 --list
+  ```
+
+### Step 10.2: Test the Source Connector By Reading (Viewing) Data
+
+- We can check that the data availability on the **topic**.
+- There would be data present in the **topic** because when the **connector** starts it takes an initial snapshot of the database table. This is a default `config` named `snapshot.mode` which we didn't configure but is set to `initial` which means that the **connector** will do a snapshot on the initial run when it doesn't find the last known **offset** from the transaction log available for the database server.
+  ```bash
+    # kafka bash
+    kafka-console-consumer --bootstrap-server localhost:29092 --topic users.public.customers --from-beginning
+  ```
+
+## Step : Delete the Debezium Source Connector
+
+- Remove the **connectors** by:
+  ```sh
+    curl -X DELETE http://localhost:8083/connectors/postgresdb-connector-for-customers-v1
+  ```
 
 # Resources and Further Reading
 
