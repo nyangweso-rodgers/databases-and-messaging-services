@@ -1,5 +1,7 @@
 # PostgreSQL Change Data Capture With Debezium
 
+## Streaming PostgreSQL Changes to Kafka with Debezium
+
 # Debezium Connector for postgresql
 
 ## Table Of Contents
@@ -282,6 +284,8 @@
       ```sh
         ["delegates_surveys-pg-connector","register-customers-pg-connector"]
       ```
+
+# Deploying Debezium Connect with PostgreSQL Connection
 
 # Next Steps
 

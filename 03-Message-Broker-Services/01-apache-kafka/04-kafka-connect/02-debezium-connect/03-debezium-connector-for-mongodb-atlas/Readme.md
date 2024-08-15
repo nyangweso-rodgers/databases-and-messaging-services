@@ -1,5 +1,7 @@
 # Debezium connector for MongoDB Atlas
 
+## Streaming MongoDB Atlas Changes to Kafka with Debezium
+
 ## Use a Debezium Connector Running on Docker to capture changes from MongoDB Atlas and stream them to a Kafka topic
 
 ## Table Of Contents

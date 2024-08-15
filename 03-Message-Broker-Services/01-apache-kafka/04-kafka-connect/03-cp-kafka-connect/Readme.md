@@ -195,3 +195,5 @@ services:
   ```
 
 # Resources and Further Reading
+
+1. [docs.confluent.io - How to Use Kafka Connect - Get Started](https://docs.confluent.io/platform/current/connect/userguide.html#configuring-key-and-value-converters)

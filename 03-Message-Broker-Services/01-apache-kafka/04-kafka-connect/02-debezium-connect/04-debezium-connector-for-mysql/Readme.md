@@ -1,5 +1,7 @@
 # Debezium Connector for MySQL
 
+## Streaming MySQL Changes to Kafka with Debezium
+
 # Why use Debezium and Kafka Connect?
 
 - **Debezium** and **Kafka Connect** are open-source platforms that provide a powerful solution for streaming data changes in real-time between systems. That real-time interaction allows you to keep your data in sync and easily accessible for various use cases such as real-time analytics, data warehousing, and data pipeline integrations.
