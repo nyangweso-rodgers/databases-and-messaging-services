@@ -6,20 +6,6 @@
 
 - **Kafka Connect** is a component of **Apache Kafka** that’s used to perform streaming integration between **Kafka** and other systems such as **databases**, **cloud services**, **search indexes**, **file systems**, and **key-value stores**. It makes it simple to quickly define **connectors** that move large data sets in and out of **Kafka**.
 
-# How Kafka Connect Works
-
-- **Kafka Connect** runs in its own process, separate from the **Kafka brokers**. It is distributed, scalable, and fault tolerant, giving you the same features you know and love about Kafka itself.
-
-# Types of Connectors
-
-- **Kafka Connect** provides two types of connectors.
-
-  1. **Source connectors**: poll data from external sources such as databases, message queues, or other applications. For instance, a Source Connector for a MySQL database reads changes in the database table and converts them into Connect Records, which are then sent to the Kafka cluster.
-  2. **Sink connectors**: save data to the destination or sink, such as Hadoop Distributed File System (HDFS), Amazon Simple Storage Service (S3), or Elasticsearch.
-
-- **Remarks**:
-  - **Confluent** offers several [pre-built connectors](https://www.confluent.io/product/connectors/?_ga=2.113725121.770498573.1720359767-234518971.1709664712&_gl=1*1owcoes*_gcl_au*OTIxNjA2MDMuMTcxNzYxMTg4NA..*_ga*MjM0NTE4OTcxLjE3MDk2NjQ3MTI.*_ga_D2D3EGKSGD*MTcyMDM1OTc2Ny45NS4xLjE3MjAzNjAyMDAuNTkuMC4w) that can be used to stream data to or from commonly used systems, such as relational databases or HDFS. In order to efficiently discuss the inner workings of Kafka Connect, it is helpful to establish a few major concepts.
-
 # Configuring Converters (`key` and `value` Converters)
 
 - **Converters** are responsible for the **serialization** and **deserialization** of data flowing between **Kafka Connect** and **Kafka** itself.

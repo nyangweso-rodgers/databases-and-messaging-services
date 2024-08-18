@@ -53,7 +53,13 @@
   1.  `depends_on` will make sure to start the **zookeeper** container before the **kafka**.
   2.  `KAFKA_BROKER_ID`: Unique identifier for the **Kafka broker** within the **cluster**. Each broker must have a unique ID.
   3.  `KAFKA_ZOOKEEPER_CONNECT`: Specifies the **Zookeeper** connection string, listing the **Zookeeper** instances that manage **Kafka** metadata and coordinate brokers. i.e., `KAFKA_ZOOKEEPER_CONNECT` instructs **Kafka** where it can find the **Zookeeper**.
-  4.  `KAFKA_ADVERTISED_LISTENERS`:
+  4.  `KAFKA_LISTENERS`: defines the actual network interfaces and ports on which the **Kafka broker** will listen for incoming connections.
+      - Examples:
+        1. `KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092`
+           - Binds the **Kafka** broker to all available network interfaces (0.0.0.0) on port 29092
+           - This configuration allows connections from both within the Docker network and from external clients.
+        2. `KAFKA_LISTENERS: PLAINTEXT://kafka:29092, PLAINTEXT_HOST://localhost:9101`
+  5.  `KAFKA_ADVERTISED_LISTENERS`:
       - Specifies the listeners that the **Kafka broker** advertises to other components in the **cluster**. These listeners define the network interfaces and ports on which the broker listens for communication. i.e., `ADVERTISED_LISTENERS` are how **clients** can connect.
       - Why this is Important?
         - **Client Discovery**: When other components like **producers**, **consumers**, **Schema Registry**, or **Kafka UI** need to connect to the **Kafka broker**, they rely on the **advertised listeners** to discover the broker's address.
@@ -61,19 +67,33 @@
       - For configuring this correctly, you need to understand that **Kafka brokers** can have multiple **listeners**. A **listener** is a combination of: **Host/IP**, **Port**, and **Protocol**
       - **Example**: `KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092` - In this case, it uses **plaintext** communication over ports `29092`.
       - Defines how **Kafka brokers** communicate with **clients**.
-  5.  `KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR`: Sets the replication factor for the internal **offsets** topic, which tracks **consumer offsets**. A higher replication factor increases fault tolerance.
-  6.  `KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR`: Sets the **replication factor** for the transaction state log, ensuring that transaction data is replicated for durability.
-  7.  `KAFKA_TRANSACTION_STATE_LOG_MIN_ISR`: Minimum in-sync replicas required for the transaction state log, ensuring high availability
-  8.  `KAFKA_DEFAULT_REPLICATION_FACTOR: '2'`" In **Kafka**, a **topic** can be replicated across multiple **brokers** for redundancy and fault toleranc. The **replication factor** specifies the number of replicas for each **partition** of the **topic**. In this case, with a replication factor of `2`, each **partition** will be copied to two **brokers**.The common default value for this configuration is `2`. This ensures some level of redundancy for user-created topics.
-  9.  `KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1`: This configuration specifically targets the **replication factor** for the internal **Kafka offsets topic**. This **topic** is used by **Kafka** to store information about consumer offsets (positions within topics). The default value for this configuration is usually `1`. Since the **offsets topic** stores metadata and is less critical for data integrity compared to user topics, a single replica might be sufficient.
-  10. `KAFKA_LISTENER_SECURITY_PROTOCOL_MAP`: Defines `key/value` pairs for the security protocol to use, per listener name.
-  11. `CONFLUENT_METRICS_ENABLE`
+  6.  `KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR`: Sets the replication factor for the internal **offsets** topic, which tracks **consumer offsets**. A higher replication factor increases fault tolerance.
+  7.  `KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR`: Sets the **replication factor** for the transaction state log, ensuring that transaction data is replicated for durability.
+  8.  `KAFKA_TRANSACTION_STATE_LOG_MIN_ISR`: Minimum in-sync replicas required for the transaction state log, ensuring high availability
+  9.  `KAFKA_DEFAULT_REPLICATION_FACTOR: '2'`" In **Kafka**, a **topic** can be replicated across multiple **brokers** for redundancy and fault toleranc. The **replication factor** specifies the number of replicas for each **partition** of the **topic**. In this case, with a replication factor of `2`, each **partition** will be copied to two **brokers**.The common default value for this configuration is `2`. This ensures some level of redundancy for user-created topics.
+  10. `KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1`: This configuration specifically targets the **replication factor** for the internal **Kafka offsets topic**. This **topic** is used by **Kafka** to store information about consumer offsets (positions within topics). The default value for this configuration is usually `1`. Since the **offsets topic** stores metadata and is less critical for data integrity compared to user topics, a single replica might be sufficient.
+  11. `KAFKA_LISTENER_SECURITY_PROTOCOL_MAP`: Defines `key/value` pairs for the security protocol to use, per listener name.
+  12. `CONFLUENT_METRICS_ENABLE`
       - **Enables metrics collection**: This configuration turns on the collection of metrics for the **Kafka cluster**. These metrics provide insights into the Kafka cluster's performance, such as **throughput**, **latency**, and **error rates**.
       - **Confluent Platform**: This configuration is typically used in Confluent Platform environments, where it enables the collection of metrics for Confluent-specific components.
       - Example: `CONFLUENT_METRICS_ENABLE: "true"`
-  12. `CONFLUENT_SUPPORT_CUSTOMER_ID`
+  13. `CONFLUENT_SUPPORT_CUSTOMER_ID`
       - **Use Case**: This should be used if you have a support subscription with Confluent and need to specify your customer ID. This allows Confluent to provide better support and track usage associated with your account.
       - Example: `CONFLUENT_SUPPORT_CUSTOMER_ID: "anonymous"`
+
+- Recommendations:
+  - For most use cases within a Docker environment, the following configuration is sufficient:
+    ```yml
+    KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092
+    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+    ```
+  - This configuration ensures:
+    - **Kafka** listens on all available interfaces for internal connections.
+    - Clients within the Docker network can connect using the "kafka" hostname.
+  - If you need to expose **Kafka** to external clients, you can add the `PLAINTEXT_HOST` listener and configure appropriate port mappings and firewall rules.
+- Remark:
+  - The `KAFKA_LISTENERS` setting defines where **Kafka** will listen for connections.
+  - The `KAFKA_ADVERTISED_LISTENERS` setting tells clients how to connect to the **Kafka** broker.
 
 # Configure Schema Registry Docker Container
 
