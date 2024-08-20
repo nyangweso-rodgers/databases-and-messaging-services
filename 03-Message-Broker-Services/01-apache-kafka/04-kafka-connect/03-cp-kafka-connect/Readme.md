@@ -6,7 +6,15 @@
 
 - **Kafka Connect** is a tool for scalably and reliably streaming data between **Apache Kafka** and other data systems. It makes it simple to quickly define **connectors** that move large data sets in and out of **Kafka**. **Kafka Connect** can ingest entire databases or collect metrics from all your application servers into **Kafka topics**, making the data available for stream processing with low latency. An export **connector** can deliver data from **Kafka topics** into secondary indexes like Elasticsearch, or into batch systems–such as Hadoop for offline analysis.
 
-# Benefits of Kafka Connect
+# Benefits of cp-kafka-connect
+
+# Modes Of Execution
+
+- **Kafka Connect** currently supports two modes of execution:
+  1. standalone (single process) and
+  2. distributed.
+- In **standalone mode**, all work is performed in a single process it's simpler to get started with and may be useful in situations where only one worker makes sense (e.g. collecting log files), but it does not benefit from some of the features of **Kafka Connect** such as fault tolerance.
+- **Distributed mode** handles automatically the balancing of work, allows you to scale up (or down) dynamically, and offers fault tolerance both in the active tasks and for configuration and offset commit data.
 
 # kafka Connect Concepts
 
@@ -20,7 +28,44 @@
 
 ## 2. Task
 
+- **Tasks** are independent units of work that enable parallel data processing in **Kafka Connect**. When a **connector** is created, **Kafka Connect** divides its work into multiple **tasks** based on the configured level of parallelism.
+
+### Task assignment
+
+- Each **task** processes a subset of the data for a **connector**. For example, if the source system is a database table, you may assign each task a partition of the table data based on some criteria like a column value.
+- Some ways in which **tasks** can be assigned partitions:
+  1. Round-robin for non-partitioned tables
+  2. Hash partitioning based on the hash of the primary key column
+  3. Time-based date or timestamp ranges
+  4. Custom like any application-specific logic
+- If there are no natural partitions, **Kafka Connect** distributes partitions across tasks randomly using round-robin.
+
+### Task configuration
+
+- **Tasks** inherit most configurations from their parent connector but also allow some custom settings such as:
+  1. **transforms** - Data manipulation logic
+  2. **converters** - Serialization formats
+- Examples:
+
+  - MySQL Connector (This MySQL source connector with four tasks inserts a "topic" field to records using a transformation before publishing to Kafka)
+
+    ```json
+    {
+      "connector.class": "MySqlSourceConnector",
+
+      "tasks.max": "4",
+
+      "transforms": "insertTopic",
+
+      "transforms.insertTopic.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+
+      "transforms.insertTopic.topic.field": "topic"
+    }
+    ```
+
 ## 3. Workers
+
+- A **worker** denotes a server capable of executing **connectors** and **tasks**, overseeing their lifecycle, and offering scalability.
 
 ## 4. Converters
 
@@ -57,52 +102,6 @@
     errors.deadletterqueue.context.headers.enable=true
   ```
 
-# Running Kafka Connect in Docker
-
-## Kafka Connect Images on Docker Hub
-
-- [Confluent]() maintains its own image for **Kafka Connect**,[confluentinc/cp-kafka-connect](https://hub.docker.com/r/confluentinc/cp-kafka-connect), which provides a basic Connect worker to which you can add your desired **JAR files** for **sink** and **source connectors**, single message **transforms**, and **converters**.
-
-## Adding Connectors to a Container
-
-- You can use [Confluent Hub]() to add your desired **JARs**, either by installing them at runtime or by creating a new Docker image. Of course, there are pros and cons to either of these options, and you should choose based on your individual needs.
-
-## Adding Connectors to a Container (By Build a New Container Image)
-
-- One opton to add dependencies, and the option probably most often used in production deployments, is to build a new image.
-- Make sure to use the correct Confluent base image version and also check the specific documentation for each of your **connectors**.
-  ```Dockerfile
-    FROM confluentinc/cp-kafka-connect:7.1.0-1-ubi8
-    ENV CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
-    RUN confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:2.0.2
-  ```
-
-## Adding Connectors to a Container (Add Connector Instance at Container Launch)
-
-- Typically, you will add **connector** instances once the worker process is running by manually submitting the configuration or via an external automation. However, you may find—perhaps for demo purposes—that you want a self-sufficient container that also adds the connector instance when it starts. To do this, you can use a launch script that looks like this:
-
-# How to Use Kafka Connect
-
-## Step 1: Install a Connect plugin
-
-- A **Kafka Connect plugin** is a set of **JAR files** containing the implementation of one or more **connectors**, **transforms**, or **converters**. **Connect** isolates each **plugin** from one another so libraries in one **plugin** are not affected by the libraries in any other **plugins**. This is very important when mixing and matching **connectors** from multiple providers.
-- A **Kafka Connect plugin** can be any one of the following:
-  1. A directory on the file system that contains all required **JAR files** and third-party dependencies for the **plugin**. This is most common and is preferred.
-  2. A single uber JAR containing all the class files for a plugin and its third-party dependencies.
-- To install a **plugin**, you must place the **plugin directory** in a directory already listed in the plugin path.
-- To find the components that fit your needs, check out the [Confluent Hub](https://www.confluent.io/hub/?session_ref=https://www.google.com/&_gl=1*1sogvi8*_gcl_au*OTIxNjA2MDMuMTcxNzYxMTg4NA..*_ga*MjM0NTE4OTcxLjE3MDk2NjQ3MTI.*_ga_D2D3EGKSGD*MTcyMzk5MDkzNi4xNDQuMS4xNzIzOTkzMjEzLjYwLjAuMA..&_ga=2.28774524.1350022208.1723832910-234518971.1709664712) page-it has an ecosystem of connectors,transforms, and converters. For a full list of supported connectors, see [Supported Self-Managed Connectors](https://docs.confluent.io/platform/current/connect/supported.html)
-
-# Introduction to Confluent's `cp-kafka-connect` Image
-
-- Confluent's `cp-kafka-connect`, [confluentinc/cp-kafka-connect](https://hub.docker.com/r/confluentinc/cp-kafka-connect), is a **Docker image** that provides a scalable and distributed data integration tool to stream data between **Kafka** and other systems in real-time. The image includes essential components like:
-  1. Kafka Connect,
-  2. Schema Registry, and other dependencies.
-- **Kafka Connect** (which is part of **Apache Kafka**) supports pluggable [connectors](https://www.confluent.io/hub/), enabling you to stream data between **Kafka** and numerous types of system, including to mention just a few:
-  1. Databases
-  2. Message Queues
-  3. Flat files
-  4. Object stores
-
 # Setup
 
 - We will set up:
@@ -116,15 +115,17 @@
   5. JMX metrics exported and scraped by Prometheus for monitoring
   6. **Grafana** dashboard to visualize & alert Connector status
 
-## Step 1: Set up Postgres database
+# Running Kafka Connect in Docker
 
-## Step 2: Set up local Kafka Cluster
+- [Confluent]() maintains its own image for **Kafka Connect**,[confluentinc/cp-kafka-connect](https://hub.docker.com/r/confluentinc/cp-kafka-connect), which provides a basic Connect worker to which you can add your desired **JAR files** for **sink** and **source connectors**, single message **transforms**, and **converters**.
+- Note:
+  - Starting with Confluent Platform version 6.0 release, many **connectors** previously bundled with Confluent Platform are now available for download from [Confluent Hub](https://www.confluent.io/hub/?_ga=2.262009677.1350022208.1723832910-234518971.1709664712&_gl=1*11la3pl*_gcl_au*OTIxNjA2MDMuMTcxNzYxMTg4NA..*_ga*MjM0NTE4OTcxLjE3MDk2NjQ3MTI.*_ga_D2D3EGKSGD*MTcyNDE1OTU2My4xNDcuMS4xNzI0MTYwNTU1LjM1LjAuMA..). For more information, see the [6.0 Connector Release Notes](https://docs.confluent.io/platform/current/release-notes/index.html#connectors).
 
-## Step 3: Confluent Schema Registry
+## Step 1: Set up Postgres Database, Local Kafka Cluster,and Confluent Schema Registry
 
-## Step 4: Kafka Connect
+## Step 2: Configure Kafka Connect
 
-- **Confluent** maintains its own image for **Kafka Connect**, `cp-kafka-connect-base`, which provides a basic **Connect** worker to which you can add your desired **JAR files** for **sink** and **source connectors**, **single message transforms**, and **converters**.
+- Setup Kafka Connect.
 - For example:
 
   ```yml
@@ -149,6 +150,46 @@
   5. `CONNECT_CONFIG_STORAGE_TOPIC`
   6. `CONNECT_OFFSET_STORAGE_TOPIC`
   7. `CONNECT_STATUS_STORAGE_TOPIC`
+
+## Step 3: Adding Connectors to a Container
+
+- You can use [Confluent Hub]() to add your desired **JARs**, either by installing them at runtime or by creating a new Docker image. Of course, there are pros and cons to either of these options, and you should choose based on your individual needs.
+
+## Step 3.1: Create a Docker Image containing Confluent Hub Connectors
+
+- Add connectors from [Confluent Hub](https://www.confluent.io/hub/?_ga=2.263155916.1350022208.1723832910-234518971.1709664712&_gl=1*1ttjnnz*_gcl_au*OTIxNjA2MDMuMTcxNzYxMTg4NA..*_ga*MjM0NTE4OTcxLjE3MDk2NjQ3MTI.*_ga_D2D3EGKSGD*MTcyNDE1OTU2My4xNDcuMS4xNzI0MTYyNjA2LjEuMC4w)
+
+- Write a `Dockerfile` -
+
+  - Example 1():
+    ```Dockerfile
+      FROM confluentinc/cp-server-connect-base:7.7.0
+      RUN   confluent-hub install --no-prompt hpgrahsl/kafka-connect-mongodb:1.1.0 && confluent-hub install --no-prompt microsoft/kafka-connect-iothub:0.6 && confluent-hub install --no-prompt wepay/kafka-connect-bigquery:1.1.0
+    ```
+  - Example 2 ():
+    ```Dockerfile
+      FROM confluentinc/cp-kafka-connect:7.1.0-1-ubi8
+      ENV CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      RUN confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:2.0.2
+    ```
+
+- Build a `Dockerfile`
+
+- Remarks:
+  1. [Kafka Connect Neo4j Connector](https://neo4j.com/docs/kafka/current/quickstart-connect/)
+
+## Step 3.2: Adding Connectors to a Container (Add Connector Instance at Container Launch)
+
+- Typically, you will add **connector** instances once the worker process is running by manually submitting the configuration or via an external automation. However, you may find—perhaps for demo purposes—that you want a self-sufficient container that also adds the connector instance when it starts. To do this, you can use a launch script that looks like this:
+
+## Step 1: Install a Connect plugin
+
+- A **Kafka Connect plugin** is a set of **JAR files** containing the implementation of one or more **connectors**, **transforms**, or **converters**. **Connect** isolates each **plugin** from one another so libraries in one **plugin** are not affected by the libraries in any other **plugins**. This is very important when mixing and matching **connectors** from multiple providers.
+- A **Kafka Connect plugin** can be any one of the following:
+  1. A directory on the file system that contains all required **JAR files** and third-party dependencies for the **plugin**. This is most common and is preferred.
+  2. A single uber JAR containing all the class files for a plugin and its third-party dependencies.
+- To install a **plugin**, you must place the **plugin directory** in a directory already listed in the plugin path.
+- To find the components that fit your needs, check out the [Confluent Hub](https://www.confluent.io/hub/?session_ref=https://www.google.com/&_gl=1*1sogvi8*_gcl_au*OTIxNjA2MDMuMTcxNzYxMTg4NA..*_ga*MjM0NTE4OTcxLjE3MDk2NjQ3MTI.*_ga_D2D3EGKSGD*MTcyMzk5MDkzNi4xNDQuMS4xNzIzOTkzMjEzLjYwLjAuMA..&_ga=2.28774524.1350022208.1723832910-234518971.1709664712) page-it has an ecosystem of connectors,transforms, and converters. For a full list of supported connectors, see [Supported Self-Managed Connectors](https://docs.confluent.io/platform/current/connect/supported.html)
 
 ## Connectors and Plugins
 
@@ -276,6 +317,43 @@
   docker build . -t my-kafka-connect-jdbc:1.0.0
 ```
 
+## Connector Configuration
+
+- To set up a **connector**, you need to create a JSON configuration file that specifies details such as:
+  1. Connector class name
+  2. External system connection parameters
+  3. Topics to publish data to or consume data from
+  4. Number of tasks
+  5. Converters for serialization
+  6.
+- Example:
+
+  - MySQL Connector:
+
+    ```json
+    {
+      "name": "mysql-source-connector",
+
+      "config": {
+        "connector.class": "MySqlSourceConnector",
+
+        "connection.url": "jdbc:mysql://localhost:3306/mydatabase",
+
+        "table.whitelist": "users",
+
+        "tasks.max": 2,
+
+        "topic.prefix": "mysql-topic-",
+
+        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter"
+      }
+    }
+    ```
+
+  - PostgreSQL Connector
+
 ## Step 6: Test your Connect server:
 
 ```sh
@@ -296,3 +374,5 @@
 # Resources and Further Reading
 
 1. [docs.confluent.io - Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html)
+2. [docs.confluent.ion - How to Use Kafka Connect - Get Started](https://docs.confluent.io/platform/current/connect/userguide.html)
+3. [redpanda - Understanding Apache Kafka](https://www.redpanda.com/guides/kafka-tutorial-what-is-kafka-connect)
