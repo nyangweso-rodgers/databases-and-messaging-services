@@ -188,6 +188,8 @@
       RUN confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:2.0.2
     ```
 
+- Remarks:
+  - The `CONNECT_PLUGIN_PATH` environment variable is set to `/usr/share/java,/usr/share/confluent-hub-components`, which are the paths where **Kafka Connect** looks for **plugins**.
 - Build a `Dockerfile`
 
 - Remarks:
@@ -255,6 +257,46 @@
   ```sh
       curl localhost:8083/connector-plugins
   ```
+- The `curl` command you ran is querying the **Kafka Connect** REST API to list the available **connector plugins** on your **Kafka Connect** instance.
+- Sample Output:
+  ```json
+  [
+    {
+      "class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+      "type": "sink",
+      "version": "10.7.6"
+    },
+    {
+      "class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+      "type": "source",
+      "version": "10.7.6"
+    },
+    {
+      "class": "org.apache.kafka.connect.mirror.MirrorCheckpointConnector",
+      "type": "source",
+      "version": "1"
+    },
+    {
+      "class": "org.apache.kafka.connect.mirror.MirrorHeartbeatConnector",
+      "type": "source",
+      "version": "1"
+    },
+    {
+      "class": "org.apache.kafka.connect.mirror.MirrorSourceConnector",
+      "type": "source",
+      "version": "1"
+    }
+  ]
+  ```
+- Here, The response indicates that several **connector plugins** are available, each identified by its class, type, and version.
+  1. JdbcSinkConnector and JdbcSourceConnector:
+     - `io.confluent.connect.jdbc.JdbcSinkConnector` (version 10.7.6): A **sink connector** that allows data to be written from **Kafka topics** into a relational database using **JDBC**.
+     - `io.confluent.connect.jdbc.JdbcSourceConnector` (version 10.7.6): A **source connector** that allows data to be ingested from a relational database into **Kafka topics** using **JDBC**
+  2. MirrorMaker 2 Connectors:
+     - `org.apache.kafka.connect.mirror.MirrorCheckpointConnector` (version 1): Part of **MirrorMaker 2**, this **connector** helps manage the **offsets** in the target cluster, allowing **consumers** to pick up where they left off after a failover.
+     - `org.apache.kafka.connect.mirror.MirrorHeartbeatConnector` (version 1): Also part of **MirrorMaker 2**, this **connector** is used for monitoring and ensuring the health and consistency of the data replication process.
+     - `org.apache.kafka.connect.mirror.MirrorSourceConnector` (version 1): This **connector** is responsible for replicating data from one **Kafka cluster** to another (cross-cluster mirroring).
+  3. x
 
 ## Step 5: Connector Configuration
 
