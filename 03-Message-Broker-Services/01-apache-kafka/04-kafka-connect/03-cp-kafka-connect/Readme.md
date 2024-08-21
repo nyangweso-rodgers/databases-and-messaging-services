@@ -16,7 +16,7 @@
 - In **standalone mode**, all work is performed in a single process it's simpler to get started with and may be useful in situations where only one worker makes sense (e.g. collecting log files), but it does not benefit from some of the features of **Kafka Connect** such as fault tolerance.
 - **Distributed mode** handles automatically the balancing of work, allows you to scale up (or down) dynamically, and offers fault tolerance both in the active tasks and for configuration and offset commit data.
 
-# kafka Connect Concepts
+# Kafka Connect Concepts
 
 ## 1. Connectors
 
@@ -102,6 +102,21 @@
     errors.deadletterqueue.context.headers.enable=true
   ```
 
+## 7. Kafka Connect Plugin
+
+- A **Kafka Connect plugin** is a set of **JAR files** containing the implementation of one or more **connectors**, **transforms**, or **converters**. **Connect** isolates each **plugin** from one another so libraries in one **plugin** are not affected by the libraries in any other **plugins**. This is very important when mixing and matching **connectors** from multiple providers.
+- A **Kafka Connect plugin** can be any one of the following:
+  1. A directory on the file system that contains all required **JAR files** and third-party dependencies for the **plugin**. This is most common and is preferred.
+  2. A single uber JAR containing all the class files for a plugin and its third-party dependencies.
+- To install a **plugin**, you must place the **plugin directory** in a directory already listed in the plugin path.
+- To find the components that fit your needs, check out the [Confluent Hub](https://www.confluent.io/hub/?session_ref=https://www.google.com/&_gl=1*1sogvi8*_gcl_au*OTIxNjA2MDMuMTcxNzYxMTg4NA..*_ga*MjM0NTE4OTcxLjE3MDk2NjQ3MTI.*_ga_D2D3EGKSGD*MTcyMzk5MDkzNi4xNDQuMS4xNzIzOTkzMjEzLjYwLjAuMA..&_ga=2.28774524.1350022208.1723832910-234518971.1709664712) page-it has an ecosystem of **connectors**,**transforms**, and **converters**. For a full list of supported **connectors**, see [Supported Self-Managed Connectors](https://docs.confluent.io/platform/current/connect/supported.html)
+
+### 7.1: Avro Plugin
+
+- The **Avro converter** is a **plugin** that allows **Kafka Connect** to handle data in the **Avro format**. It's typically included in pre-built **Kafka Connect** images like `confluentinc/cp-kafka-connect`.
+- Remark:
+  - If you're using a pre-built image, you generally don't need to install the Avro plugin separately. The image should already contain the necessary components.
+
 # Setup
 
 - We will set up:
@@ -118,7 +133,7 @@
 # Running Kafka Connect in Docker
 
 - [Confluent]() maintains its own image for **Kafka Connect**,[confluentinc/cp-kafka-connect](https://hub.docker.com/r/confluentinc/cp-kafka-connect), which provides a basic Connect worker to which you can add your desired **JAR files** for **sink** and **source connectors**, single message **transforms**, and **converters**.
-- Note:
+- **Note**:
   - Starting with Confluent Platform version 6.0 release, many **connectors** previously bundled with Confluent Platform are now available for download from [Confluent Hub](https://www.confluent.io/hub/?_ga=2.262009677.1350022208.1723832910-234518971.1709664712&_gl=1*11la3pl*_gcl_au*OTIxNjA2MDMuMTcxNzYxMTg4NA..*_ga*MjM0NTE4OTcxLjE3MDk2NjQ3MTI.*_ga_D2D3EGKSGD*MTcyNDE1OTU2My4xNDcuMS4xNzI0MTYwNTU1LjM1LjAuMA..). For more information, see the [6.0 Connector Release Notes](https://docs.confluent.io/platform/current/release-notes/index.html#connectors).
 
 ## Step 1: Set up Postgres Database, Local Kafka Cluster,and Confluent Schema Registry
@@ -155,7 +170,7 @@
 
 - You can use [Confluent Hub]() to add your desired **JARs**, either by installing them at runtime or by creating a new Docker image. Of course, there are pros and cons to either of these options, and you should choose based on your individual needs.
 
-## Step 3.1: Create a Docker Image containing Confluent Hub Connectors
+## Step 3.1: Create a Docker Image Containing Confluent Hub Connectors
 
 - Add connectors from [Confluent Hub](https://www.confluent.io/hub/?_ga=2.263155916.1350022208.1723832910-234518971.1709664712&_gl=1*1ttjnnz*_gcl_au*OTIxNjA2MDMuMTcxNzYxMTg4NA..*_ga*MjM0NTE4OTcxLjE3MDk2NjQ3MTI.*_ga_D2D3EGKSGD*MTcyNDE1OTU2My4xNDcuMS4xNzI0MTYyNjA2LjEuMC4w)
 
@@ -178,69 +193,9 @@
 - Remarks:
   1. [Kafka Connect Neo4j Connector](https://neo4j.com/docs/kafka/current/quickstart-connect/)
 
-## Step 3.2: Adding Connectors to a Container (Add Connector Instance at Container Launch)
+## Step 3.2: Adding Connectors to a Container (Install using Docker at Runtime)
 
-- Typically, you will add **connector** instances once the worker process is running by manually submitting the configuration or via an external automation. However, you may find—perhaps for demo purposes—that you want a self-sufficient container that also adds the connector instance when it starts. To do this, you can use a launch script that looks like this:
-
-## Step 1: Install a Connect plugin
-
-- A **Kafka Connect plugin** is a set of **JAR files** containing the implementation of one or more **connectors**, **transforms**, or **converters**. **Connect** isolates each **plugin** from one another so libraries in one **plugin** are not affected by the libraries in any other **plugins**. This is very important when mixing and matching **connectors** from multiple providers.
-- A **Kafka Connect plugin** can be any one of the following:
-  1. A directory on the file system that contains all required **JAR files** and third-party dependencies for the **plugin**. This is most common and is preferred.
-  2. A single uber JAR containing all the class files for a plugin and its third-party dependencies.
-- To install a **plugin**, you must place the **plugin directory** in a directory already listed in the plugin path.
-- To find the components that fit your needs, check out the [Confluent Hub](https://www.confluent.io/hub/?session_ref=https://www.google.com/&_gl=1*1sogvi8*_gcl_au*OTIxNjA2MDMuMTcxNzYxMTg4NA..*_ga*MjM0NTE4OTcxLjE3MDk2NjQ3MTI.*_ga_D2D3EGKSGD*MTcyMzk5MDkzNi4xNDQuMS4xNzIzOTkzMjEzLjYwLjAuMA..&_ga=2.28774524.1350022208.1723832910-234518971.1709664712) page-it has an ecosystem of connectors,transforms, and converters. For a full list of supported connectors, see [Supported Self-Managed Connectors](https://docs.confluent.io/platform/current/connect/supported.html)
-
-## Connectors and Plugins
-
-## Avro Plugin
-
-- The **Avro converter** is a **plugin** that allows **Kafka Connect** to handle data in the **Avro format**. It's typically included in pre-built **Kafka Connect** images like `confluentinc/cp-kafka-connect`.
-- Remark:
-  - If you're using a pre-built image, you generally don't need to install the Avro plugin separately. The image should already contain the necessary components.
-
-## Step 5: Installing Connectors
-
-- [Since Confluent Platform 6.0 connectors are no longer bundled](https://docs.confluent.io/platform/current/release-notes/index.html#connectors), and need to be installed separately. You can [build your own image](https://docs.confluent.io/platform/current/installation/docker/development.html#create-a-docker-image-containing-c-hub-connectors) based on **cp-kafka-connect-base**, or install **connectors** at runtime by overwriding the image command.
-- Understanding the process:
-  1. **Choose a connector**: **Connectors** can easily be installed through [the Connector Hub](https://www.confluent.io/hub/)
-     - Example:
-       - For **Postgres** to **Kafka**, the **Debezium Postgres connector** is a popular choice.
-  2. **Obtain the JAR**: Download the connector's JAR file from the respective repository or build it from source if necessary.
-  3. **Configure the Connector**: Create a JSON configuration file specifying the connector's properties (e.g., database connection details, target topic).
-  4. **Mount the JAR**: Add the **JAR** file to a directory on your local machine and mount it to the container's plugin path.
-  5. **Set the Plugin Path**: Configure the `CONNECT_PLUGIN_PATH` environment variable to point to the mounted directory.
-
-## Step 5.1: JDBC Source Connector
-
-- We will use [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) that publishes any new table rows onto a **Kafka Topic**.
-- We add both the [Avro Converter](https://www.confluent.io/hub/confluentinc/kafka-connect-avro-converter) and [JDBC Source/Sink](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) plugins to our **Docker image**.
-- `Dockerfile` for **Kafka Connect** with **plugins**:
-
-  ```Dockerfile
-    FROM confluentinc/cp-kafka-connect-base:6.2.1
-
-    # Install Avro & JDBC plugins
-    RUN confluent-hub install --no-prompt confluentinc/kafka-connect-avro-converter:5.5.4
-    RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.1.1
-  ```
-
-- Once all the above is up and running we’re ready to create our new **JDBC Source connector** to produce database records onto **Kafka**.
-
-# How to Install Connector Plugins in Kafka Connect
-
-## 1. Manual Installation
-
-- Download the **JAR** file (usually from [Confluent Hub](https://www.confluent.io/hub/)) and place it in a folder on your **Kafka Connect** worker (directory specified by the CONNECT_PLUGIN_PATH environment variable). This method offers granular control but requires manual intervention on each node.
-
-- Your directory should look like this:
-
-## 2. Install Connector Plugin using Docker
-
-- With **Docker** it can be a bit more tricky because you need to install the **plugin** before the worker starts. If you try to install it in the **Docker container** and then restart the worker, the **container** restarts and you lose the **JAR** that you installed. There are two approaches to use.
-
-## 2.1: Install using Docker at Runtime
-
+- Typically, you will add **connector** instances once the worker process is running by manually submitting the configuration or via an external automation.
 - When a **Docker container** is run, it uses the `Cmd` or `EntryPoint` that was defined when the image was built. [Confluent’s Kafka Connect image](https://hub.docker.com/r/confluentinc/cp-kafka-connect-base) will—as you would expect—launch the **Kafka Connect** worker.
   ```sh
     docker inspect --format='{{.Config.Cmd}}' confluentinc/cp-kafka-connect-base:5.5.0
@@ -264,60 +219,44 @@
       sleep infinity
   ```
 
-## 2.2: Install using `Dockerfile`
+## Step 3.3: Manual Installation
 
-- For any non-trivial **Docker** deployment you’re going to want to build and curate your own **Docker image** with the **connector plugin**(s) that you require for your environment.
-- Best for production environments where you need reproducibility, version control, and consistent deployments.
-- To do this:
+- Download the **JAR** file (usually from [Confluent Hub](https://www.confluent.io/hub/)) and place it in a folder on your **Kafka Connect** worker (directory specified by the CONNECT_PLUGIN_PATH environment variable). This method offers granular control but requires manual intervention on each node.
+- Key Components of the downloaded folder are:
+  1.  `lib/`: This directory holds the core JAR file containing the connector implementation. This is the essential part for your **Docker image**.
+  2.  `assets/`, `doc/`, `etc/`: These directories contain additional resources like configuration examples, documentation, and other supporting files. While not strictly required for the connector to function, they can be useful for reference and troubleshooting.
+- Step 2: Create a `cp-kafka-connect/` for the downloaded connectors. Here is how my directory looks like:
+  - cp-kafka-connect/
+    - Dockerfile
+    - plugins
+      - debezium-debezium-connector-postgres-2.5.4
+        - assets/
+        - doc/
+        - etc/
+        - lib/
+        - manifest.json
+- Step 3: create a `Dockerfile` and configure the files:
+  - **Example** (for debezium Postgres CDC Source Connector):
+    `Dockerfile
+  #FROM confluentinc/cp-kafka-connect-base:5.5.0
+  FROM confluentinc/cp-kafka-connect:7.7.0
+  ENV CONNECT_PLUGIN_PATH="/usr/share/java,/usr/share/confluent-hub-components"
+  RUN confluent-hub install --no-prompt jcustenborder/kafka-connect-spooldir:2.0.43
+`
+    ######################### ----------------------------------- #############################################
 
-1. Step 1: Download connector from [https://www.confluent.io/hub/](https://www.confluent.io/hub/)
-   - Example:
-     - Download [Debezium PostgreSQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-postgresql)
-   - Key Components of the downloaded folder are:
-     1. `lib/`: This directory holds the core JAR file containing the connector implementation. This is the essential part for your **Docker image**.
-     2. `assets/`, `doc/`, `etc/`: These directories contain additional resources like configuration examples, documentation, and other supporting files. While not strictly required for the connector to function, they can be useful for reference and troubleshooting.
-2. Step 2: Create a `cp-kafka-connect/` for the downloaded connectors. Here is how my directory looks like:
-   - cp-kafka-connect/
-     - Dockerfile
-     - plugins
-       - debezium-debezium-connector-postgres-2.5.4
-         - assets/
-         - doc/
-         - etc/
-         - lib/
-         - manifest.json
-3. Step 2: create a `Dockerfile` and configure the files:
-   - **Example** (for debezium Postgres CDC Source Connector):
-   ```Dockerfile
-     #FROM confluentinc/cp-kafka-connect-base:5.5.0
-     FROM confluentinc/cp-kafka-connect:7.7.0
-     ENV CONNECT_PLUGIN_PATH="/usr/share/java,/usr/share/confluent-hub-components"
-     RUN confluent-hub install --no-prompt jcustenborder/kafka-connect-spooldir:2.0.43
-   ```
-
-- and then build it:
-  ```sh
-    docker build -t kafka-connect-spooldir .
-  ```
-
-## Step 2: Add **connector** "example JDBC" from [Confluent Hub](https://www.confluent.io/hub)
-
-```Dockerfile
-  FROM confluentinc/cp-kafka-connect
-  ENV MYSQL_DRIVER_VERSION 5.1.39
-  RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.5.0
-  RUN curl -k -SL "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-${MYSQL_DRIVER_VERSION}.tar.gz" \
-      | tar -xzf - -C /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib \
-      --strip-components=1 mysql-connector-java-5.1.39/mysql-connector-java-${MYSQL_DRIVER_VERSION}-bin.jar
-```
-
-## Step 3: Build the docker image
+## Step 4: Get Available Connector Plugins
 
 ```sh
-  docker build . -t my-kafka-connect-jdbc:1.0.0
+  curl localhost:8083/connector-plugins | json_pp
 ```
 
-## Connector Configuration
+- If you need to check the list of available **plugins** you should hit `localhost:8083/connector-plugins`
+  ```sh
+      curl localhost:8083/connector-plugins
+  ```
+
+## Step 5: Connector Configuration
 
 - To set up a **connector**, you need to create a JSON configuration file that specifies details such as:
   1. Connector class name
@@ -352,24 +291,53 @@
     }
     ```
 
-  - PostgreSQL Connector
+  - PostgreSQL Connector:
+    ```json
+    {
+      "name": "mysql-source-connector"
+    }
+    ```
 
-## Step 6: Test your Connect server:
+## Step 6: Test Your Connect Server
 
 ```sh
   curl --location --request GET 'http://localhost:8083/connectors'
 ```
 
-### Step 1.3: Get available Connector Plugins
+# Examples
 
-```sh
-  curl localhost:8084/connector-plugins | json_pp
-```
+- You can download connectors from [https://www.confluent.io/hub/](https://www.confluent.io/hub/)
 
-- If you need to check the list of available **plugins** you should hit `localhost:8083/connector-plugins`
-  ```sh
-      curl localhost:8084/connector-plugins
+## Example 1: [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc)
+
+- We will use [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) that publishes any new table rows onto a **Kafka Topic**.
+- We add both the [Avro Converter](https://www.confluent.io/hub/confluentinc/kafka-connect-avro-converter) and [JDBC Source/Sink](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) plugins to our **Docker image**.
+- `Dockerfile` for **Kafka Connect** with **plugins**:
+
+  ```Dockerfile
+    FROM confluentinc/cp-kafka-connect-base:6.2.1
+
+    # Install Avro & JDBC plugins
+    RUN confluent-hub install --no-prompt confluentinc/kafka-connect-avro-converter:5.5.4
+    RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.1.1
   ```
+
+- Once all the above is up and running we’re ready to create our new **JDBC Source connector** to produce database records onto **Kafka**.
+
+## Example 2: [Debezium PostgreSQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-postgresql)
+
+- Download [Debezium PostgreSQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-postgresql)
+
+## Step 2: Add **connector** "example JDBC" from [Confluent Hub](https://www.confluent.io/hub)
+
+```Dockerfile
+  FROM confluentinc/cp-kafka-connect
+  ENV MYSQL_DRIVER_VERSION 5.1.39
+  RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.5.0
+  RUN curl -k -SL "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-${MYSQL_DRIVER_VERSION}.tar.gz" \
+      | tar -xzf - -C /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib \
+      --strip-components=1 mysql-connector-java-5.1.39/mysql-connector-java-${MYSQL_DRIVER_VERSION}-bin.jar
+```
 
 # Resources and Further Reading
 
