@@ -88,8 +88,7 @@
 
 - Create a new **kafka topic**, `test-kafka-topic` with `docker exec` command
   ```sh
-    docker exec -it kafka bash
-    kafka-topics --create --bootstrap-server kafka:29092 --partitions 1 --replication-factor 1 --topic test-kafka-topic
+    kafka-topics --create --bootstrap-server kafka:29092 --partitions 1 --replication-factor 1 --topic users.customers
   ```
 - **Remarks**:
 

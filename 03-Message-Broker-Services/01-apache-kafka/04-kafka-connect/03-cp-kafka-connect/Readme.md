@@ -340,11 +340,27 @@
     }
     ```
 
-## Step 6: Test Your Connect Server
+## Step 6: Register Connector
 
-```sh
-  curl --location --request GET 'http://localhost:8083/connectors'
-```
+- Example:
+  1. Register Postgres Source Connector by:
+     ```sh
+      curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @postgresdb-customers-json-connector.json
+     ```
+  2. xx
+
+## Step 7: Test Your Connect Server
+
+- Test connector server by:
+
+  ```sh
+    curl --location --request GET 'http://localhost:8083/connectors'
+  ```
+
+- Example Output:
+  ```sh
+    ["postgresdb-connector-for-customers-v1"]
+  ```
 
 # Examples
 
@@ -352,7 +368,37 @@
 
 ## Example 1: [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc)
 
-- We will use [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) that publishes any new table rows onto a **Kafka Topic**.
+- The [Kafka Connect JDBC Source connector]() allows you to import data from any relational database with a **JDBC** driver into an **Apache Kafka topic**. This **connector** can support a wide variety of databases.
+- The JDBC Source connector includes the following features:
+  1. **At least once delivery**: This **connector** guarantees that records are delivered to the **Kafka topic** at least once. If the **connector** restarts, there may be some duplicate records in the **Kafka topic**.
+  2. **Supports one task**: The **JDBC Source connector** can read one or more tables from a single task. In query mode, the **connector** supports running only one task.
+  3. Incremental query modes
+  4. **Message keys**:
+     - Kafka messages are **key**/**value** pairs. For a **JDBC connector**, the **value** (payload) is the contents of the table row being ingested. However, the **JDBC connector** does not generate the **key** by default.
+     - Message **keys** are useful in setting up partitioning strategies. **Keys** can direct messages to a specific **partition** and can support downstream processing where joins are used. If no message **key** is used, messages are sent to partitions using round-robin distribution.
+     - To set a message **key** for the **JDBC connector**, you use two Single Message Transformations (SMTs): the [ValueToKey](https://docs.confluent.io/platform/current/connect/transforms/valuetokey.html) SMT and the [ExtractField](https://docs.confluent.io/platform/current/connect/transforms/extractfield.html) SMT. You add these two SMTs to the **JDBC connector** configuration.
+     - **Example** (the following shows a snippet added to a configuration that takes the `id` column of the `accounts` table to use as the message key).
+       ```json
+       {
+         "name": "jdbc_source_mysql_01",
+         "config": {
+           "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+           "connection.url": "jdbc:mysql://mysql:3306/test",
+           "connection.user": "connect_user",
+           "connection.password": "connect_password",
+           "topic.prefix": "mysql-01-",
+           "poll.interval.ms": 3600000,
+           "table.whitelist": "test.accounts",
+           "mode": "bulk",
+           "transforms": "createKey,extractInt",
+           "transforms.createKey.type": "org.apache.kafka.connect.transforms.ValueToKey",
+           "transforms.createKey.fields": "id",
+           "transforms.extractInt.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+           "transforms.extractInt.field": "id"
+         }
+       }
+       ```
+  5. Mapping column types
 - We add both the [Avro Converter](https://www.confluent.io/hub/confluentinc/kafka-connect-avro-converter) and [JDBC Source/Sink](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) plugins to our **Docker image**.
 - `Dockerfile` for **Kafka Connect** with **plugins**:
 
@@ -365,6 +411,12 @@
   ```
 
 - Once all the above is up and running we’re ready to create our new **JDBC Source connector** to produce database records onto **Kafka**.
+
+### Limitations Of JDBC Connector
+
+1. The geometry column type isn’t supported for the **JDBC Source connector**.
+2. The **connector** does not support the array data type.
+3. If the **connector** makes numerous parallel insert operations in a large source table, insert transactions can commit out of order; this is typical and means that a greater auto_increment ID (for example, 101) is committed earlier and a smaller ID (for example, 100) is committed later. The time difference may only be a few milliseconds, but the commits are out of order nevertheless.
 
 ## Example 2: [Debezium PostgreSQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-postgresql)
 
