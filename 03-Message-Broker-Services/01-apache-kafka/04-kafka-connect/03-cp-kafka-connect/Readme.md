@@ -80,10 +80,85 @@
 - Remark:
   - **Converters** are decoupled from **connectors** themselves to allow for the reuse of **converters** between **connectors**. For example, using the same **Avro converter**, the **JDBC Source Connector** can write **Avro** data to **Kafka**, and the HDFS Sink Connector can read Avro data from Kafka
 
+### 4.1: `AvroConverter`
+
+### 4.2:
+
+### 4.3:
+
 ## 5. Transforms
 
 - **Connectors** can be configured with **transformations** to make simple and lightweight modifications to individual messages.
 - A **transform** is a simple function that accepts one record as an input and outputs a modified record. All transforms provided by Kafka Connect perform simple but commonly useful modificationss
+
+### 5.1: Single Message Transforms (SMTs)
+
+- **SMTs** allow you to modify the records in real-time before they are sent to the **Kafka topic**.
+- Common **SMTs** include:
+  1. `ExtractField`: Extracts a specific field from the **Key** or **Value**.
+  2. `ReplaceField`: Removes or renames fields within a record.
+  3. `ValueToKey`: Promotes one or more fields from the Value to the Key.
+  4. `Cast`: Converts a field’s data type.
+  5. `InsertField`: Adds a field with a specified value to the record.
+  6. `MaskField`: Replaces a field’s value with a masked value (useful for sensitive data).
+  7. `Filter`: Filters records based on conditions.
+- Examles:
+  1. `transforms": "InsertKey, ExtractId, CastLong"`
+  2. `"transforms.InsertKey.type":`
+  3. `"transforms.InsertKey.fields": "id"`
+  4. `"transforms.ExtractId.type":`
+  5. `"transforms.ExtractId.field": "id"`
+  6. `"transforms.CastLong.type":`
+  7. `"transforms.CastLong.spec": "int64"`
+- Examle Scenario:
+  1. Promoting a Field from Value to Key
+     - You have a `customers` table, and each record has a `customer_id` in the **Value**. You want to use `customer_id` as the **Key** in **Kafka**.
+     - SMT: `ValueToKey`
+     - Configuration:
+       ```json
+       {
+         "transforms": "InsertKey",
+         "transforms.InsertKey.type": "org.apache.kafka.connect.transforms.ValueToKey",
+         "transforms.InsertKey.fields": "customer_id"
+       }
+       ```
+     - Outcome: The `customer_id` field is promoted from the Value to the Key of the record.
+  2. Removing Unnecessary Fields
+     - You want to remove sensitive fields like `ssn` from the **Value** before the data is published to **Kafka**.
+     - SMT: `ReplaceField`
+     - Configuration:
+       ```json
+       {
+         "transforms": "RemoveSSN",
+         "transforms.RemoveSSN.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+         "transforms.RemoveSSN.blacklist": "ssn"
+       }
+       ```
+     - Outcome: The ssn field is removed from the Value.
+  3. Converting a Field’s Data Type
+     - You have a `timestamp` field stored as a `string`, and you want to convert it to an `integer` (epoch time).
+     - SMT: `Cast`
+     - Configuration
+       ```json
+       {
+         "transforms": "CastTimestamp",
+         "transforms.CastTimestamp.type": "org.apache.kafka.connect.transforms.Cast$Value",
+         "transforms.CastTimestamp.spec": "timestamp:int64"
+       }
+       ```
+     - Outcome: The timestamp field is converted to a long integer representing epoch time.
+  4. Filtering Out Records
+     - You only want to send records where the status field is set to `active`.
+     - SMT: `Filter`
+     - Configuration
+       ```json
+       {
+         "transforms": "FilterInactive",
+         "transforms.FilterInactive.type": "org.apache.kafka.connect.transforms.Filter$Value",
+         "transforms.FilterInactive.condition": "status == 'active'"
+       }
+       ```
+     - Outcome: Only records with status set to active will be passed through; others will be filtered out.
 
 ## 6. Dead Letter Queues
 
@@ -298,7 +373,26 @@
      - `org.apache.kafka.connect.mirror.MirrorSourceConnector` (version 1): This **connector** is responsible for replicating data from one **Kafka cluster** to another (cross-cluster mirroring).
   3. x
 
-## Step 5: Connector Configuration
+## Step 5: Popular Kafka command
+
+1. List Kafka Topics:
+   ```sh
+      kafka-topics --bootstrap-server localhost:9092 --list
+   ```
+2. Create Kafka Topic
+
+   - To create a **topic** in Kafka, you can use the `kafka-topics` command with the `--create` option.
+   - Create a new **kafka topic**, `test-kafka-topic` with `docker exec` command
+     ```sh
+       kafka-topics --create --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic users.customers
+     ```
+
+3. Delete Kafka Topic by:
+   ```sh
+      kafka-topics --bootstrap-server localhost:9092 --delete --topic  users.customers
+   ```
+
+## Step 6: Connector Configuration
 
 - To set up a **connector**, you need to create a JSON configuration file that specifies details such as:
   1. Connector class name
@@ -306,50 +400,17 @@
   3. Topics to publish data to or consume data from
   4. Number of tasks
   5. Converters for serialization
-  6.
-- Example:
 
-  - MySQL Connector:
-
-    ```json
-    {
-      "name": "mysql-source-connector",
-
-      "config": {
-        "connector.class": "MySqlSourceConnector",
-
-        "connection.url": "jdbc:mysql://localhost:3306/mydatabase",
-
-        "table.whitelist": "users",
-
-        "tasks.max": 2,
-
-        "topic.prefix": "mysql-topic-",
-
-        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
-
-        "value.converter": "org.apache.kafka.connect.json.JsonConverter"
-      }
-    }
-    ```
-
-  - PostgreSQL Connector:
-    ```json
-    {
-      "name": "mysql-source-connector"
-    }
-    ```
-
-## Step 6: Register Connector
+## Step 7: Register Connector
 
 - Example:
   1. Register Postgres Source Connector by:
      ```sh
-      curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @postgresdb-customers-json-connector.json
+      curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @jdbc-json-connector-for-customers-postgresdb.json
      ```
   2. xx
 
-## Step 7: Test Your Connect Server
+## Step 8: Test Your Connect Server
 
 - Test connector server by:
 
@@ -362,14 +423,22 @@
     ["postgresdb-connector-for-customers-v1"]
   ```
 
-# Examples
+## Step : Delete Source Connector
+
+- Remove the **connectors** by:
+  ```sh
+    curl -X DELETE http://localhost:8083/connectors/postgresdb-connector-for-customers-v1
+  ```
+
+# Source Connectors
 
 - You can download connectors from [https://www.confluent.io/hub/](https://www.confluent.io/hub/)
 
-## Example 1: [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc)
+# 1. [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc)
 
 - The [Kafka Connect JDBC Source connector]() allows you to import data from any relational database with a **JDBC** driver into an **Apache Kafka topic**. This **connector** can support a wide variety of databases.
-- The JDBC Source connector includes the following features:
+
+- The **JDBC Source connector** includes the following features:
   1. **At least once delivery**: This **connector** guarantees that records are delivered to the **Kafka topic** at least once. If the **connector** restarts, there may be some duplicate records in the **Kafka topic**.
   2. **Supports one task**: The **JDBC Source connector** can read one or more tables from a single task. In query mode, the **connector** supports running only one task.
   3. Incremental query modes
@@ -410,28 +479,225 @@
     RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.1.1
   ```
 
+- Properties of **JDBC Source Connector**:
+  1. `"mode":` - The **Kafka JDBC Source Connector** supports several **modes** that determine how data is captured from a **relational database** and streamed to **Kafka topics**. Each **mode** serves a different purpose, depending on the nature of your data and the requirements of your streaming application.
+     1. `bulk` (**Bulk Mode**): In **bulk mode**, the **connector** loads the entire content of the specified tables at each poll interval.Use cases include:
+        - Suitable for use cases where the entire table data needs to be replicated periodically.
+        - Ideal when data is relatively small or when the table is static (rarely changes).
+        - Not efficient for large, frequently changing tables because it reloads all the data every time.
+        - Examle:
+          ```json
+          {
+            "mode": "bulk"
+          }
+          ```
+     2. `incrementing` (**Incrementing Mode**): The **connector** identifies new records based on an **incrementing column**, typically a **primary key** or auto-incrementing ID. It tracks the maximum value of this column seen so far and only fetches rows with a greater value. Use cases include:
+        - Suitable when records are only inserted, and the ID column is guaranteed to increment monotonically.
+        - Commonly used for tables with an auto-incremented primary key.
+        - Not suitable if rows can be updated, as updates won't be captured.
+        - Examle:
+          ```json
+          {
+            "mode": "incrementing",
+            "incrementing.column.name": "id"
+          }
+          ```
+     3. `timestamp` (**Timestamp Mode**): The **connector** tracks changes by monitoring a timestamp column. It queries only rows where the timestamp is greater than the last recorded timestamp. Use Cases include:
+        - Ideal for tables where records can be updated, and the timestamp column captures the last modified time.
+        - Suitable when records are inserted and updated, but no deletions occur.
+        - Requires a reliable timestamp column that is updated with every change.
+        - Example:
+          ```json
+          {
+            "mode": "timestamp",
+            "timestamp.column.name": "updated_at"
+          }
+          ```
+     4. `timestamp+incrementing` (**Timestamp + Incrementing Mode**): This **mode** combines **timestamp** and **incrementing modes**. It ensures that both new and updated records are captured. The **connector** uses the timestamp column to track updates and the incrementing column to ensure unique identification of records, especially in case of multiple updates within the same timestamp. Use Cases:
+        - Ideal for tables where both inserts and updates occur frequently.
+        - Ensures that no updates are missed, even if multiple updates happen within the same timestamp.
+        - Requires both a reliable timestamp and an incrementing column.
+        - Example:
+          ```json
+          {
+            "mode": "timestamp+incrementing",
+            "timestamp.column.name": "updated_at",
+            "incrementing.column.name": "id"
+          }
+          ```
+     5. `query` (**Custom Query Mode**): In this mode, you can define a custom SQL query to fetch data. The **connector** executes this query at each poll interval. It's useful when you need to filter or join tables in a specific way. Use Cases include:
+        - Best when you need more control over what data is captured, such as filtering specific rows, joining multiple tables, or using complex SQL logic.
+        - Allows for flexibility in handling various use cases that standard modes cannot cover.
+        - Requires manual management of change tracking within the query.
+        - Example:
+          ```json
+          {
+            "mode": "query",
+            "query": "SELECT * FROM customers WHERE updated_at > ?"
+          }
+          ```
+  2. Single Message Transforms (SMTs)
 - Once all the above is up and running we’re ready to create our new **JDBC Source connector** to produce database records onto **Kafka**.
+- **Remarks**:
+  - **Limitations** Of **JDBC Connector**:
+    1. The geometry column type isn’t supported for the **JDBC Source connector**.
+    2. The **connector** does not support the array data type.
+    3. If the **connector** makes numerous parallel insert operations in a large source table, insert transactions can commit out of order; this is typical and means that a greater auto_increment ID (for example, 101) is committed earlier and a smaller ID (for example, 100) is committed later. The time difference may only be a few milliseconds, but the commits are out of order nevertheless.
 
-### Limitations Of JDBC Connector
+## 1.1. JDBC source connector with with Single Message Transformations -> Key:Long and Value:JSON
 
-1. The geometry column type isn’t supported for the **JDBC Source connector**.
-2. The **connector** does not support the array data type.
-3. If the **connector** makes numerous parallel insert operations in a large source table, insert transactions can commit out of order; this is typical and means that a greater auto_increment ID (for example, 101) is committed earlier and a smaller ID (for example, 100) is committed later. The time difference may only be a few milliseconds, but the commits are out of order nevertheless.
+- Examles:
 
-## Example 2: [Debezium PostgreSQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-postgresql)
+  - For PostgreSQL:
+
+    ```json
+    {
+      "name": "postgresdb-connector-for-customers-v2",
+      "config": {
+        "_comment": "The JDBC connector class. Don't change this if you want to use the JDBC Source.",
+        "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+
+        "tasks.max": "1",
+        "connection.url": "jdbc:postgresql://postgres:5432/users",
+        "connection.user": "admin",
+        "connection.password": "mypassword",
+
+        "mode": "timestamp",
+        "timestamp.column.name": "updated_at",
+
+        "table.whitelist": "customers",
+        "topic.prefix": "users.",
+        "poll.interval.ms": "5000",
+        "validate.non.null": "true",
+
+        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "schema.registry.url": "http://your-schema-registry:8081"
+      }
+    }
+    ```
+
+  - MySQL Connector:
+
+    ```json
+    {
+      "name": "mysql-source-connector",
+
+      "config": {
+        "_comment": "The JDBC connector class. Don't change this if you want to use the JDBC Source.",
+        "connector.class": "MySqlSourceConnector",
+
+        "connection.url": "jdbc:mysql://localhost:3306/mydatabase",
+
+        "table.whitelist": "users",
+
+        "tasks.max": 2,
+
+        "topic.prefix": "mysql-topic-",
+
+        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter"
+      }
+    }
+    ```
+
+## 1.2. JDBC Source Connector with SpecificAvro -> Key:String(null) and Value:SpecificAvro
+
+- To (de)serialize messages using **Avro** by default, we add the following environment variables.
+  ```yml
+  # Default converter configuration
+  CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+  CONNECT_VALUE_CONVERTER: "io.confluent.connect.avro.AvroConverter"
+  CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081/"
+  ```
+- Example:
+  ```Dockerfile
+    # Dockerfile
+    # Install Avro plugins
+    RUN confluent-hub install --no-prompt confluentinc/kafka-connect-avro-converter:5.5.4
+  ```
+- Examples:
+
+  - PostgreSQL
+  - MySQL
+
+    ```json
+    {
+      "name": "jdbc_source_mysql_foobar_01",
+      "config": {
+        "_comment": "The JDBC connector class. Don't change this if you want to use the JDBC Source.",
+        "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+
+        "_comment": "How to serialise the value of keys - here use the Confluent Avro serialiser. Note: the JDBC Source Connector always returns null for the key ",
+        "key.converter": "io.confluent.connect.avro.AvroConverter".
+
+        "_comment": "Since we're using Avro serialisation, we need to specify the Confluent schema registry at which the created schema is to be stored.",
+        "_comment": "NB Schema Registry and Avro serialiser are both part of Confluent Platform.",
+        "key.converter.schema.registry.url": "http://localhost:8081",
+
+        "_comment": "As above, but for the value of the message. Note that these key/value serialisation settings can be set globally for Connect and thus omitted for individual connector configs to make them shorter and clearer",
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "value.converter.schema.registry.url": "http://localhost:8081",
+
+        "_comment": " --- JDBC-specific configuration below here  --- ",
+        "_comment": "JDBC connection URL. This will vary by RDBMS. Consult your manufacturer's handbook for more information",
+        "connection.url": "jdbc:mysql://localhost:3306/demo?user=rmoff&password=pw",
+
+         "_comment": "Which table(s) to include",
+          "table.whitelist": "foobar",
+
+         " _comment": "Pull all rows based on an timestamp column. You can also do bulk or incrementing column-based extracts.",
+         "_comment": "For more information, see http://docs.confluent.io/current/connect/connect-jdbc/docs/source_config_options.html#mode",
+          "mode": "timestamp",
+
+          "_comment": "Which column has the timestamp value to use?  ",
+          "timestamp.column.name": "update_ts",
+
+          "_comment": "If the column is not defined as NOT NULL, tell the connector to ignore this  ",
+          "validate.non.null": "false",
+
+          "_comment": "The Kafka topic will be made up of this prefix, plus the table name  ",
+          "topic.prefix": "mysql-",
+
+          "_comment": "---- Single Message Transforms ----",
+          "transforms":"createKey,extractInt",
+          "transforms.createKey.type":"org.apache.kafka.connect.transforms.ValueToKey",
+          "transforms.createKey.fields":"c1",
+          "transforms.extractInt.type":"org.apache.kafka.connect.transforms.ExtractField$Key",
+          "transforms.extractInt.field":"c1"
+      }
+    }
+    ```
+
+  - MongoDB
+
+# 2. [Debezium PostgreSQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-postgresql)
 
 - Download [Debezium PostgreSQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-postgresql)
 
-## Step 2: Add **connector** "example JDBC" from [Confluent Hub](https://www.confluent.io/hub)
+# Sink Connectors
 
-```Dockerfile
-  FROM confluentinc/cp-kafka-connect
-  ENV MYSQL_DRIVER_VERSION 5.1.39
-  RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.5.0
-  RUN curl -k -SL "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-${MYSQL_DRIVER_VERSION}.tar.gz" \
-      | tar -xzf - -C /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib \
-      --strip-components=1 mysql-connector-java-5.1.39/mysql-connector-java-${MYSQL_DRIVER_VERSION}-bin.jar
-```
+## 1. BigQuery Sink Connector
+
+# Bonus
+
+# JMX metrics exporter
+
+- We add the [Prometheus JMX Exporter agent]() to our **Kafka Connect image**.
+  ```Dockerfile
+    # Dockerfile
+    # Install and configure JMX Exporter
+    COPY jmx_prometheus_javaagent-0.15.0.jar /opt/
+    COPY kafka-connect.yml /opt/
+  ```
+- Update `docker-compose.yml` with the following:
+  ```yml
+  # docker-compose.yml
+  # Export JMX metrics to :9876/metrics for Prometheus
+  KAFKA_JMX_PORT: "9875"
+  KAFKA_OPTS: "-javaagent:/opt/jmx_prometheus_javaagent-0.15.0.jar=9876:/opt/kafka-connect.yml"
+  ```
 
 # Resources and Further Reading
 
