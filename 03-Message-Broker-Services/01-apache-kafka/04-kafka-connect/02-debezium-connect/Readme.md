@@ -1,5 +1,6 @@
 # Debezium
-## 
+
+##
 
 ## Table Of Contents
 
@@ -115,6 +116,107 @@
   ```sh
     curl -X DELETE http://localhost:8083/connectors/postgresdb-connector-for-customers-v1
   ```
+
+# Examples - Debezium Source Connectors
+
+## 1. Debezium Source Connector For PostgreSQL
+
+## 2. Debezium Source Connector For MySQL
+
+- Step 1 (Setup MySQL Docker Container):
+  - Below our **docker-compose** file to deploy all the required services locally:
+    ```yml
+    version: "2"
+    services:
+      zookeeper:
+      kafka:
+      mysql:
+        image:
+        container_name: msql
+        ports:
+          - 3306:3306
+        environment:
+          - MYSQL_ROOT_PASSWORD=debezium
+          - MYSQL_USER=mysqluser
+          - MYSQL_PASSWORD=mysqlpw
+      debezium:
+    ```
+- Step 2 (Configure Debezium to start syncing MySQL to Kafka):
+  - Create a new file (“mysql-connector.json”) with these configurations:
+    ```json
+    {
+      "name": "mysql-connector",
+      "config": {
+        "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+        "tasks.max": "1",
+        "database.hostname": "mysql",
+        "database.port": "3306",
+        "database.user": "root",
+        "database.password": "debezium",
+        "database.server.id": "184054",
+        "topic.prefix": "debezium",
+        "database.include.list": "inventory",
+        "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
+        "schema.history.internal.kafka.topic": "schemahistory.inventory"
+      }
+    }
+    ```
+- Step 3 (Register MySQL Connector):
+  - To register the connector, run the following command :
+    ```sh
+        curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @mysql-connector.json
+    ```
+
+# 3. Debezium connector for MongoDB Atlas
+
+- **Debezium’s MongoDB connector** tracks a **MongoDB replica set** or a **MongoDB sharded cluster** for document changes in databases and collections, recording those changes as events in **Kafka topics**. The **connector** automatically handles the addition or removal of shards in a sharded cluster, changes in membership of each replica set, elections within each replica set, and awaiting the resolution of communications problems.
+
+- Step (Configure MongoDB Atlas Connector):
+
+  - Once the containers are running, you need to configure the **Debezium** MongoDB connector. You can do this by sending a `POST` request to the **Kafka Connect REST API**. Here is an example of the configuration:
+
+    ```json
+    {
+      "name": "participants-survey-mongodb-atlas-connector",
+      "config": {
+        "connector.class": "io.debezium.connector.mongodb.MongoDbConnector",
+        "tasks.max": "1",
+        "mongodb.connection.string": "<connection string>",
+        "mongodb.user": "<user>",
+        "mongodb.password": "<password>",
+        "mongodb.name": "<database>",
+        "collection.include.list": "survey-service.participants_surveys",
+        "heartbeat.interval.ms": "5000",
+        "publication.autocreate.mode": "filtered",
+        "topic.prefix": "survey-service",
+        "topic.creation.enable": "true",
+        "topic.creation.default.replication.factor": "1",
+        "topic.creation.default.partitions": "1",
+        "topic.creation.default.cleanup.policy": "delete",
+        "topic.creation.default.retention.ms": "604800000",
+        "database.history.kafka.topic": "schema-changes.mongo",
+        "database.history.kafka.bootstrap.servers": "kafka:29092",
+        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "value.converter.schemas.enable": false,
+        "snapshot.mode": "initial"
+      }
+    }
+    ```
+
+  - Replace `<DATABASE_NAME>`, `<USERNAME>`, and `<PASSWORD>` with your **MongoDB Atlas** details.
+
+- Step (Register MongoDB Atlas Connector):
+  - Use `curl` to send the configuration to the **Kafka Connect API**:
+  ```sh
+    curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @register-participants-survey-mongodb-atlas-connector.json
+  ```
+- Step (Remove the connectors by):
+  ```sh
+    curl -X DELETE http://localhost:8083/connectors/participants-survey-mongodb-atlas-connector
+  ```
+
+## 4. Debezium Source Connector For MongoDB
 
 # Resources and Further Reading
 
