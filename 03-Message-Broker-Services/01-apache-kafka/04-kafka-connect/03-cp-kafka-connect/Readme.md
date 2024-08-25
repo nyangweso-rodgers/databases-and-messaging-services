@@ -190,7 +190,7 @@
 
 - The **Avro converter** is a **plugin** that allows **Kafka Connect** to handle data in the **Avro format**. It's typically included in pre-built **Kafka Connect** images like `confluentinc/cp-kafka-connect`.
 - Remark:
-  - If you're using a pre-built image, you generally don't need to install the Avro plugin separately. The image should already contain the necessary components.
+  - If you're using a pre-built image, you generally don't need to install the **Avro plugin** separately. The image should already contain the necessary components.
 
 # Setup
 
@@ -267,61 +267,6 @@
   - The `CONNECT_PLUGIN_PATH` environment variable is set to `/usr/share/java,/usr/share/confluent-hub-components`, which are the paths where **Kafka Connect** looks for **plugins**.
 - Build a `Dockerfile`
 
-- Remarks:
-  1. [Kafka Connect Neo4j Connector](https://neo4j.com/docs/kafka/current/quickstart-connect/)
-
-## Step 3.2: Adding Connectors to a Container (Install using Docker at Runtime)
-
-- Typically, you will add **connector** instances once the worker process is running by manually submitting the configuration or via an external automation.
-- When a **Docker container** is run, it uses the `Cmd` or `EntryPoint` that was defined when the image was built. [Confluent’s Kafka Connect image](https://hub.docker.com/r/confluentinc/cp-kafka-connect-base) will—as you would expect—launch the **Kafka Connect** worker.
-  ```sh
-    docker inspect --format='{{.Config.Cmd}}' confluentinc/cp-kafka-connect-base:5.5.0
-  ```
-- We can override that at runtime to install the **plugins** first. In **Docker Compose** this looks like this:
-  ```yml
-  # docker-compose.yml
-  environment:
-    CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components/"
-  command:
-    - bash
-    - c
-    - |
-      # Install connector plugins
-      # This will by default install into /usr/share/confluent-hub-components/ so make
-      #  sure that this path is added to the plugin.path in the environment variables
-      confluent-hub install --no-prompt jcustenborder/kafka-connect-spooldir:2.0.43
-      # Launch the Kafka Connect worker
-      /etc/confluent/docker/run &
-      # Don't exit
-      sleep infinity
-  ```
-
-## Step 3.3: Manual Installation
-
-- Download the **JAR** file (usually from [Confluent Hub](https://www.confluent.io/hub/)) and place it in a folder on your **Kafka Connect** worker (directory specified by the CONNECT_PLUGIN_PATH environment variable). This method offers granular control but requires manual intervention on each node.
-- Key Components of the downloaded folder are:
-  1.  `lib/`: This directory holds the core JAR file containing the connector implementation. This is the essential part for your **Docker image**.
-  2.  `assets/`, `doc/`, `etc/`: These directories contain additional resources like configuration examples, documentation, and other supporting files. While not strictly required for the connector to function, they can be useful for reference and troubleshooting.
-- Step 2: Create a `cp-kafka-connect/` for the downloaded connectors. Here is how my directory looks like:
-  - cp-kafka-connect/
-    - Dockerfile
-    - plugins
-      - debezium-debezium-connector-postgres-2.5.4
-        - assets/
-        - doc/
-        - etc/
-        - lib/
-        - manifest.json
-- Step 3: create a `Dockerfile` and configure the files:
-  - **Example** (for debezium Postgres CDC Source Connector):
-    `Dockerfile
-  #FROM confluentinc/cp-kafka-connect-base:5.5.0
-  FROM confluentinc/cp-kafka-connect:7.7.0
-  ENV CONNECT_PLUGIN_PATH="/usr/share/java,/usr/share/confluent-hub-components"
-  RUN confluent-hub install --no-prompt jcustenborder/kafka-connect-spooldir:2.0.43
-`
-    ######################### ----------------------------------- #############################################
-
 ## Step 4: Get Available Connector Plugins
 
 ```sh
@@ -371,7 +316,6 @@
      - `org.apache.kafka.connect.mirror.MirrorCheckpointConnector` (version 1): Part of **MirrorMaker 2**, this **connector** helps manage the **offsets** in the target cluster, allowing **consumers** to pick up where they left off after a failover.
      - `org.apache.kafka.connect.mirror.MirrorHeartbeatConnector` (version 1): Also part of **MirrorMaker 2**, this **connector** is used for monitoring and ensuring the health and consistency of the data replication process.
      - `org.apache.kafka.connect.mirror.MirrorSourceConnector` (version 1): This **connector** is responsible for replicating data from one **Kafka cluster** to another (cross-cluster mirroring).
-  3. x
 
 ## Step 5: Popular Kafka command
 
@@ -392,44 +336,6 @@
       kafka-topics --bootstrap-server localhost:9092 --delete --topic  users.customers
    ```
 
-## Step 6: Connector Configuration
-
-- To set up a **connector**, you need to create a JSON configuration file that specifies details such as:
-  1. Connector class name
-  2. External system connection parameters
-  3. Topics to publish data to or consume data from
-  4. Number of tasks
-  5. Converters for serialization
-
-## Step 7: Register Connector
-
-- Example:
-  1. Register Postgres Source Connector by:
-     ```sh
-      curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @jdbc-json-connector-for-customers-postgresdb.json
-     ```
-  2. xx
-
-## Step 8: Test Your Connect Server
-
-- Test connector server by:
-
-  ```sh
-    curl --location --request GET 'http://localhost:8083/connectors'
-  ```
-
-- Example Output:
-  ```sh
-    ["postgresdb-connector-for-customers-v1"]
-  ```
-
-## Step : Delete Source Connector
-
-- Remove the **connectors** by:
-  ```sh
-    curl -X DELETE http://localhost:8083/connectors/postgresdb-connector-for-customers-v1
-  ```
-
 # Source Connectors
 
 - You can download connectors from [https://www.confluent.io/hub/](https://www.confluent.io/hub/)
@@ -438,7 +344,7 @@
 
 - The [Kafka Connect JDBC Source connector]() allows you to import data from any relational database with a **JDBC** driver into an **Apache Kafka topic**. This **connector** can support a wide variety of databases.
 
-- The **JDBC Source connector** includes the following features:
+- The **JDBC Source connector** includes the following **features**:
   1. **At least once delivery**: This **connector** guarantees that records are delivered to the **Kafka topic** at least once. If the **connector** restarts, there may be some duplicate records in the **Kafka topic**.
   2. **Supports one task**: The **JDBC Source connector** can read one or more tables from a single task. In query mode, the **connector** supports running only one task.
   3. Incremental query modes
@@ -536,7 +442,7 @@
             "query": "SELECT * FROM customers WHERE updated_at > ?"
           }
           ```
-  2. Single Message Transforms (SMTs)
+  2. **Single Message Transforms** (SMTs)
 - Once all the above is up and running we’re ready to create our new **JDBC Source connector** to produce database records onto **Kafka**.
 - **Remarks**:
   - **Limitations** Of **JDBC Connector**:
@@ -544,7 +450,7 @@
     2. The **connector** does not support the array data type.
     3. If the **connector** makes numerous parallel insert operations in a large source table, insert transactions can commit out of order; this is typical and means that a greater auto_increment ID (for example, 101) is committed earlier and a smaller ID (for example, 100) is committed later. The time difference may only be a few milliseconds, but the commits are out of order nevertheless.
 
-## 1.1. JDBC source connector with with Single Message Transformations -> Key:Long and Value:JSON
+## 1.1. JDBC Source Connector with with Single Message Transformations (SMTs) -> Key:Long and Value:JSON
 
 - Examles:
 
@@ -577,29 +483,24 @@
     }
     ```
 
-  - MySQL Connector:
+- **Step** (Register Connector)
 
-    ```json
-    {
-      "name": "mysql-source-connector",
+  - Register Postgres Source Connector by:
+    ```sh
+     curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @jdbc-json-connector-for-customers-postgresdb.json
+    ```
 
-      "config": {
-        "_comment": "The JDBC connector class. Don't change this if you want to use the JDBC Source.",
-        "connector.class": "MySqlSourceConnector",
+- **Step**: (**Test Your Connect Server**):
 
-        "connection.url": "jdbc:mysql://localhost:3306/mydatabase",
+  - Test connector server by:
+    ```sh
+      curl --location --request GET 'http://localhost:8083/connectors'
+    ```
 
-        "table.whitelist": "users",
-
-        "tasks.max": 2,
-
-        "topic.prefix": "mysql-topic-",
-
-        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
-
-        "value.converter": "org.apache.kafka.connect.json.JsonConverter"
-      }
-    }
+- **Step** (**Delete Source Connector**):
+  - Remove the **connectors** by:
+    ```sh
+      curl -X DELETE http://localhost:8083/connectors/postgresdb-connector-for-customers-v1
     ```
 
 ## 1.2. JDBC Source Connector with SpecificAvro -> Key:String(null) and Value:SpecificAvro
@@ -680,6 +581,217 @@
 
 ## 1. BigQuery Sink Connector
 
+- Now, we will **register** a **Kafka connector** to sink data based on the events streamed into the **Kafka topics**. We will achieve this by using a JSON configuration file named “bigquery-connector.json’”:
+  ```json
+  {
+    "name": "inventory-connector-bigquery",
+    "config": {
+      "connector.class": "com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
+      "tasks.max": "1",
+      "consumer.auto.offset.reset": "earliest",
+      "topics.regex": "debezium.inventory.*",
+      "sanitizeTopics": "true",
+      "autoCreateTables": "true",
+      "keyfile": "/bigquery-keyfile.json",
+      "schemaRetriever": "com.wepay.kafka.connect.bigquery.retrieve.IdentitySchemaRetriever",
+      "project": "my-gcp-project-id",
+      "defaultDataset": "kafka_dataset",
+      "allBQFieldsNullable": true,
+      "allowNewBigQueryFields": true,
+      //"transforms": "regexTopicRename,extractAfterData",
+      "transforms": "regexTopicRename,extractAfterData",
+      "transforms.regexTopicRename.type": "org.apache.kafka.connect.transforms.RegexRouter",
+      "transforms.regexTopicRename.regex": "debezium.inventory.(.*)",
+      "transforms.regexTopicRename.replacement": "$1",
+      "transforms.extractAfterData.type": "io.debezium.transforms.ExtractNewRecordState"
+    }
+  }
+  ```
+- The **BigQuery Sink connector** can be configured using a variety of configuration **properties**:
+
+  1. `name`: Globally-unique name to use for this connector.
+  2. `tasks.max`: Maximum number of tasks to use for this connector. The default is `1`. Each task replicates exclusive set of partitions assigned to it.
+  3. `topics.regex`: A Java regular expression of topics to replicate. For example: specify .`*` to replicate all available **topics** in the cluster. Applicable only when Use regular expressions is selected.
+  4. `keyfile`:
+     - A `JSON` key with **BigQuery** service account credentials.
+     - `keyfile` can be either a string representation of the Google credentials file or the path to the Google credentials file itself. The string representation of the Google credentials file is supported in BigQuery sink connector version 1.3 (and later).
+     - Type: string
+     - Default: null
+  5. `keySource`
+     - Determines whether the keyfile configuration is the path to the credentials JSON file or to the JSON itself. Available values are `FILE` and `JSON`. This property is available in BigQuery sink connector version 1.3 (and later).
+     - Type: string
+     - Default: FILE
+  6. `project`:
+     - The BigQuery project to which topic data will be written.
+     - Type: `string`
+  7. `defaultDataset`:
+     - The default Google BigQuery dataset to be used.
+     - Typs is `string`
+  8. `topics`:
+     - A list of **Kafka topics** to read from.
+  9. `sanitizeTopics`:
+     - Designates whether to automatically sanitize topic names before using them as table names. If not enabled, topic names are used as table names.
+     - Type: boolean
+     - Default: `false`
+  10. `includeKafkaData`:
+      - Whether to include an extra block containing the Kafka source topic, offset, and partition information in the resulting BigQuery rows.
+      - Type: boolean
+      - Default: false
+  11. `schemaRetriever`:
+      - A class that can be used for automatically creating tables and/or updating schemas. Note that in version 2.0.0, `SchemaRetriever` API changed to retrieve the schema from each SinkRecord, which will help support multiple schemas per topic. `SchemaRegistrySchemaRetriever` has been removed as it retrieves schema based on the topic.
+      - Type: class
+      - Default: `com.wepay.kafka.connect.bigquery.retrieve.IdentitySchemaRetriever`
+  12. `autoCreateTables`:
+      - Create **BigQuery** tables if they don’t already exist. This property should only be enabled for Schema Registry-based inputs: **Avro**, **Protobuf**, or **JSON Schema** (JSON_SR). Table creation is not supported for **JSON** input.
+      - Type: boolean
+      - Default: `false`
+  13. `topic2TableMap`:
+      - Map of **topics** to **tables** (optional). Format: comma-separated tuples, e.g. <topic-1>:<table-1>,<topic-2>:<table-2>,.. Note that **topic name** should not be modified using regex SMT while using this option. Also note that `SANITIZE_TOPICS_CONFIG` would be ignored if this config is set.
+      - Lastly, if the `topic2table` map doesn’t contain the topic for a record, a table with the same name as the topic name would be created.
+      - Type: `string`
+      - Default: “”
+  14. `allowNewBigQueryFields`: If `true`, new fields can be added to BigQuery tables during subsequent schema updates.
+  15. `allowBigQueryRequiredFieldRelaxation`: If `true`, fields in the BigQuery schema can be changed from `REQUIRED` to `NULLABLE`.
+  16. `upsertEnabled`:
+      - Enables upsert functionality on the connector
+      - Enable upsert functionality on the connector through the use of record keys, intermediate tables, and periodic merge flushes. Row-matching will be performed based on the contents of record keys. This feature won’t work with SMTs that change the name of the topic and doesn’t support JSON input.
+      - Type: boolean
+      - Default: `false`
+  17. `deleteEnabled`:
+      - Enable delete functionality on the connector through the use of record keys, intermediate tables, and periodic merge flushes. A delete will be performed when a record with a null value (that is–a tombstone record) is read. This feature will not work with **SMTs** that change the name of the topic and doesn’t support JSON input.
+      - Type: boolean
+      - Default: `false`
+  18. `kafkaKeyFieldName`:
+      - The name of the BigQuery table field for the Kafka key. Must be set when upsert or delete is enabled.
+      - The Kafka key field name. The default value is `null`, which means the **Kafka Key** field will not be included.
+      - Type: `string`
+      - Default: `null`
+  19. `kafkaDataFieldName`:
+      - The **Kafka data field name**. The default value is `null`, which means the **Kafka Data** field will not be included.
+      - Type: `string`
+      - Default: `null`
+  20. `timePartitioningType`:
+      - The time partitioning type to use when creating tables. Existing tables will not be altered to use this partitioning type.
+      - Type: string
+      - Default: DAY
+      - Valid Values: (case insensitive) [MONTH, YEAR, HOUR, DAY]
+  21. `bigQueryRetry`:
+      - The number of retry attempts made for each BigQuery request that fails with a backend or quota exceeded error.
+      - Type: `int`
+      - Default: 0
+      - Valid Values: [0,…]
+  22. `bigQueryRetryWait`:
+      - The minimum amount of time, in milliseconds, to wait between BigQuery backend or quota exceeded error retry attempts.
+      - Type: long
+      - Default: 1000
+      - Valid Values: [0,…]
+  23. `allowNewBigQueryFields`:
+      - If `true`, new fields can be added to BigQuery tables during subsequent schema updates.
+      - Type: boolean
+      - Default: `false`
+  24. `allowBigQueryRequiredFieldRelaxation`:
+      - If true, fields in BigQuery Schema can be changed from `REQUIRED` to `NULLABLE`. Note that `allowNewBigQueryFields` and `allowBigQueryRequiredFieldRelaxation` replaced the `autoUpdateSchemas` parameter of older versions of this connector.
+      - Type: boolean
+      - Default: `false`
+  25. `bigQueryMessageTimePartitioning`:
+      - Whether or not to use the message time when inserting records. Default uses the connector processing time.
+      - Type: `boolean`
+      - Default: false
+  26. `allowSchemaUnionization`:
+      - If `true`, the existing table schema (if one is present) will be unionized with new record schemas during schema updates. If false, the record of the last schema in a batch will be used for any necessary table creation and schema update attempts.
+      - Type: boolean
+      - Default: false
+  27. `bigQueryPartitionDecorator`:
+      - Whether or not to append partition decorator to BigQuery table name when inserting records.
+      - Default is `true`. Setting this to `true` appends partition decorator to table name (e.g. table$yyyyMMdd depending on the configuration set for `bigQueryPartitionDecorator`).
+      - Setting this to `false` bypasses the logic to append the partition decorator and uses raw table name for inserts.
+  28. `timestampPartitionFieldName`:
+      - The name of the field in the value that contains the timestamp to partition by in BigQuery and enable timestamp partitioning for each table. Leave this configuration blank, to enable ingestion time partitioning for each table.
+      - Type: `string`
+      - Default: null
+  29. `allBQFieldsNullable`:
+      - If `true`, no fields in any produced BigQuery schema are REQUIRED. All non-nullable `Avro` fields are translated as NULLABLE (or REPEATED, if arrays).
+      - Type: boolean
+      - Default: `false`
+  30. `intermediateTableSuffix`:
+      - A suffix that will be appended to the names of destination tables to create the names for the corresponding intermediate tables. Multiple intermediate tables may be created for a single destination table, but their names will always start with the name of the destination table, followed by this suffix, and possibly followed by an additional suffix.
+      - Type: `string`
+      - Default: “tmp”
+  31. `mergeIntervalMs`:
+      - How often (in milliseconds) to perform a merge flush, if upsert/delete is enabled. Can be set to -1 to disable periodic flushing.
+      - Type: `long`
+      - Default: 60_000L
+  32. `mergeRecordsThreshold`:
+      - How many records to write to an intermediate table before performing a merge flush, if upsert/delete is enabled. Can be set to `-1` to disable record count-based flushing.
+      - Type: long
+      - Default: -1
+  33. `clusteringPartitionFieldNames`:
+      - Comma-separated list of fields where data is clustered in BigQuery.
+      - Type: `list`
+      - Default: null
+  34. `avroDataCacheSize`
+      - The size of the cache to use when converting schemas from Avro to Kafka Connect.
+      - Type: int
+      - Default: 100
+      - Valid Values: [0,…]
+  35. `enableBatchLoad`:
+      - **Beta Feature** Use with caution. The sublist of topics to be batch loaded through GCS.
+      - Type: list
+      - Default: “”
+  36. `batchLoadIntervalSec`:
+      - The interval, in seconds, in which to attempt to run GCS to BigQuery load jobs. Only relevant if `enableBatchLoad` is configured.
+      - Type: `int`
+      - Default: 120
+  37. `convertDoubleSpecialValues`
+      - Designates whether +Infinity is converted to Double.MAX_VALUE and whether -Infinity and NaN are converted to Double.MIN_VALUE to ensure successfull delivery to BigQuery.
+      - Type: boolean
+      - Default: `false`
+  38. `errors.tolerance`: Error tolerance response during connector operation. Default value is `none` and signals that any error will result in an immediate connector task failure. Value of `all` changes the behavior to skip over problematic records.
+  39. `errors.deadletterqueue.topic.name`: The name of the **topic** to be used as the **dead letter queue** (DLQ) for messages that result in an error when processed by this **sink connector**, its transformations, or converters. The **topic name** is blank by default, which means that no messages are recorded in the DLQ.
+  40. `errors.deadletterqueue.topic .replication.factor`: Replication factor used to create the dead letter queue topic when it doesn’t already exist.
+  41. `errors.deadletterqueue.context .headers.enable`: When `true`, adds a header containing error context to the messages written to the dead letter queue. To avoid clashing with headers from the original record, all error context header keys, start with `__connect.errors`.
+  42. `value.converter`: The format of the value in the Redpanda topic. The default is `JSON`.
+  43. `autoCreateBucket`:
+      - Whether to automatically create the given bucket, if it does not exist.
+      - Type: boolean
+      - Default: `true`
+  44. `gcsBucketName`:
+      - The maximum size (or -1 for no maximum size) of the worker queue for **BigQuery** write requests before all topics are paused. This is a soft limit; the size of the queue can go over this before topics are paused. All topics resume once a flush is triggered or the size of the queue drops under half of the maximum size.
+      - Type: `long`
+      - Default: -1
+      - Valid Values: [-1,…]
+      - Importance: high
+  45. `threadPoolSize`:
+      - The size of the BigQuery write thread pool. This establishes the maximum number of concurrent writes to BigQuery.
+      - Type: `int`
+      - Default: 10
+      - Valid Values: [1,…]
+
+- Step: **register** the **Bigquery sink**:
+
+  ```sh
+    curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @bigquery-connector.json
+  ```
+
+- **Step 5**: Check Status Of The BigQuery Sink Connector
+  - Verify the status of the **connector** to ensure it is running without errors:
+    ```sh
+      curl -X GET http://localhost:8083/connectors/delegates-survey-bq-sink/status
+    ```
+- **Step 6**: Validate the connector configuration to see if there are any misconfigurations:
+
+  ```sh
+    curl -X PUT -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @delegates-survey-sink-connector.json
+  ```
+
+- **Step 7**: Delete BigQuery Sink Connector
+
+- Delete the existing **connector** by:
+  ```sh
+    #delete sink connector
+    curl -X DELETE http://localhost:8083/connectors/delegates-survey-sink-connector-v1
+  ```
+
 # Bonus
 
 # JMX metrics exporter
@@ -704,3 +816,6 @@
 1. [docs.confluent.io - Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html)
 2. [docs.confluent.ion - How to Use Kafka Connect - Get Started](https://docs.confluent.io/platform/current/connect/userguide.html)
 3. [redpanda - Understanding Apache Kafka](https://www.redpanda.com/guides/kafka-tutorial-what-is-kafka-connect)
+4. [runchydata.com/blog - postgresql-change-data-capture-with-debezium](https://www.crunchydata.com/blog/postgresql-change-data-capture-with-debezium)
+5. [www.iamninad.com - docker-compose-for-your-next-debezium-and-postgres-project](https://www.iamninad.com/posts/docker-compose-for-your-next-debezium-and-postgres-project/)
+6. [docs.confluent.io/kafka-connectors - bigquery/current/kafka_connect_bigquery_config](https://docs.confluent.io/kafka-connectors/bigquery/current/kafka_connect_bigquery_config.html)
