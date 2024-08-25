@@ -80,7 +80,7 @@
 - Remark:
   - **Converters** are decoupled from **connectors** themselves to allow for the reuse of **converters** between **connectors**. For example, using the same **Avro converter**, the **JDBC Source Connector** can write **Avro** data to **Kafka**, and the HDFS Sink Connector can read Avro data from Kafka
 
-### 4.1: Using String Converter
+### 4.1: Using String Converter (`StringConverter`)
 
 - Here’s an example of using the **String converter**. Since it’s just a **string**, there’s no **schema** to the data, and thus it’s not so useful to use for the **value**:
   ```json
@@ -159,7 +159,7 @@
     ```
   - As before, remember that the **converter** configuration option (here, `schemas.enable`) needs the prefix of `key.converter` or `value.converter` as appropriate.
 
-### 4.3: Using Avro Converter
+### 4.3: Using Avro Converter (`AvroConverter`)
 
 - Some **converters** have additional configuration. For **Avro**, you need to specify the **Schema Registry**.
 - When you specify converter-specific configurations, always use the `key.converter.` or `value.converter.` prefix. For example, to use **Avro** for the message payload, you’d specify the following:
@@ -291,39 +291,12 @@
 
 - [Confluent]() maintains its own image for **Kafka Connect**,[confluentinc/cp-kafka-connect](https://hub.docker.com/r/confluentinc/cp-kafka-connect), which provides a basic Connect worker to which you can add your desired **JAR files** for **sink** and **source connectors**, single message **transforms**, and **converters**.
 - **Note**:
+
   - Starting with Confluent Platform version 6.0 release, many **connectors** previously bundled with Confluent Platform are now available for download from [Confluent Hub](https://www.confluent.io/hub/?_ga=2.262009677.1350022208.1723832910-234518971.1709664712&_gl=1*11la3pl*_gcl_au*OTIxNjA2MDMuMTcxNzYxMTg4NA..*_ga*MjM0NTE4OTcxLjE3MDk2NjQ3MTI.*_ga_D2D3EGKSGD*MTcyNDE1OTU2My4xNDcuMS4xNzI0MTYwNTU1LjM1LjAuMA..). For more information, see the [6.0 Connector Release Notes](https://docs.confluent.io/platform/current/release-notes/index.html#connectors).
 
-## Step 1: Set up Postgres Database, Local Kafka Cluster,and Confluent Schema Registry
+- Configure **Kafka Connect**:
 
-## Step 2: Configure Kafka Connect
-
-- Setup Kafka Connect.
-- For example:
-
-  ```yml
-  # docker-compose.yml
-  version: "3"
-  services:
-    kafka:
-    # ... your kafka configuration
-
-    schema-registry:
-      # ... your schema-registry configuration
-
-    zookeeper:
-      # ... your zookeeper configuration
-  ```
-
-- Configuration includes:
-  1. `CONNECT_BOOTSTRAP_SERVERS`
-  2. `CONNECT_GROUP_ID`
-  3. `CONNECT_KEY_CONVERTER`
-  4. `CONNECT_VALUE_CONVERTER`
-  5. `CONNECT_CONFIG_STORAGE_TOPIC`
-  6. `CONNECT_OFFSET_STORAGE_TOPIC`
-  7. `CONNECT_STATUS_STORAGE_TOPIC`
-
-## Step 3: Adding Connectors to a Container
+# Adding Connectors to a Docker Container
 
 - You can use [Confluent Hub]() to add your desired **JARs**, either by installing them at runtime or by creating a new Docker image. Of course, there are pros and cons to either of these options, and you should choose based on your individual needs.
 
@@ -390,14 +363,6 @@
     }
   ]
   ```
-- Here, The response indicates that several **connector plugins** are available, each identified by its class, type, and version.
-  1. JdbcSinkConnector and JdbcSourceConnector:
-     - `io.confluent.connect.jdbc.JdbcSinkConnector` (version 10.7.6): A **sink connector** that allows data to be written from **Kafka topics** into a relational database using **JDBC**.
-     - `io.confluent.connect.jdbc.JdbcSourceConnector` (version 10.7.6): A **source connector** that allows data to be ingested from a relational database into **Kafka topics** using **JDBC**
-  2. MirrorMaker 2 Connectors:
-     - `org.apache.kafka.connect.mirror.MirrorCheckpointConnector` (version 1): Part of **MirrorMaker 2**, this **connector** helps manage the **offsets** in the target cluster, allowing **consumers** to pick up where they left off after a failover.
-     - `org.apache.kafka.connect.mirror.MirrorHeartbeatConnector` (version 1): Also part of **MirrorMaker 2**, this **connector** is used for monitoring and ensuring the health and consistency of the data replication process.
-     - `org.apache.kafka.connect.mirror.MirrorSourceConnector` (version 1): This **connector** is responsible for replicating data from one **Kafka cluster** to another (cross-cluster mirroring).
 
 ## Step 5: Popular Kafka command
 
@@ -524,17 +489,25 @@
             "query": "SELECT * FROM customers WHERE updated_at > ?"
           }
           ```
-  2. **Single Message Transforms** (SMTs)
 - Once all the above is up and running we’re ready to create our new **JDBC Source connector** to produce database records onto **Kafka**.
-- **Remarks**:
-  - **Limitations** Of **JDBC Connector**:
-    1. The geometry column type isn’t supported for the **JDBC Source connector**.
-    2. The **connector** does not support the array data type.
-    3. If the **connector** makes numerous parallel insert operations in a large source table, insert transactions can commit out of order; this is typical and means that a greater auto_increment ID (for example, 101) is committed earlier and a smaller ID (for example, 100) is committed later. The time difference may only be a few milliseconds, but the commits are out of order nevertheless.
+- **Limitations** Of **JDBC Connector**:
+  1. The geometry column type isn’t supported for the **JDBC Source connector**.
+  2. The **connector** does not support the array data type.
+  3. If the **connector** makes numerous parallel insert operations in a large source table, insert transactions can commit out of order; this is typical and means that a greater auto_increment ID (for example, 101) is committed earlier and a smaller ID (for example, 100) is committed later. The time difference may only be a few milliseconds, but the commits are out of order nevertheless.
 
-## 1.1. JDBC Source Connector with with Single Message Transformations (SMTs) -> Key:Long and Value:JSON
+## 1.1. JDBC Source Connector with with Single Message Transformations (SMTs) -> Key:`Long` and Value:`JSON`
 
-- Examles:
+- Here, The response indicates that several **connector plugins** are available, each identified by its class, type, and version.
+  1. `JdbcSinkConnector` and `JdbcSourceConnector`:
+     - `io.confluent.connect.jdbc.JdbcSinkConnector` (version 10.7.6): A **sink connector** that allows data to be written from **Kafka topics** into a relational database using **JDBC**.
+     - `io.confluent.connect.jdbc.JdbcSourceConnector` (version 10.7.6): A **source connector** that allows data to be ingested from a relational database into **Kafka topics** using **JDBC**
+  2. MirrorMaker 2 Connectors:
+     - `org.apache.kafka.connect.mirror.MirrorCheckpointConnector` (version 1): Part of **MirrorMaker 2**, this **connector** helps manage the **offsets** in the target cluster, allowing **consumers** to pick up where they left off after a failover.
+     - `org.apache.kafka.connect.mirror.MirrorHeartbeatConnector` (version 1): Also part of **MirrorMaker 2**, this **connector** is used for monitoring and ensuring the health and consistency of the data replication process.
+     - `org.apache.kafka.connect.mirror.MirrorSourceConnector` (version 1): This **connector** is responsible for replicating data from one **Kafka cluster** to another (cross-cluster mirroring).
+- **Step** ():
+
+- **Step** (Configure Connector):
 
   - For PostgreSQL:
 
@@ -569,7 +542,7 @@
 
   - Register Postgres Source Connector by:
     ```sh
-     curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @jdbc-json-connector-for-customers-postgresdb.json
+     curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @jdbc-avro-connector-for-customers-postgresdb.json
     ```
 
 - **Step**: (**Test Your Connect Server**):
@@ -582,10 +555,10 @@
 - **Step** (**Delete Source Connector**):
   - Remove the **connectors** by:
     ```sh
-      curl -X DELETE http://localhost:8083/connectors/postgresdb-connector-for-customers-v1
+      curl -X DELETE http://localhost:8083/connectors/jdbc-avro-connector-for-customers-postgresdb
     ```
 
-## 1.2. JDBC Source Connector with SpecificAvro -> Key:String(null) and Value:SpecificAvro
+## 1.2. JDBC Source Connector with SpecificAvro -> Key:String(null) and Value:`SpecificAvro`
 
 - To (de)serialize messages using **Avro** by default, we add the following environment variables.
   ```yml
@@ -663,32 +636,91 @@
 
 ## 1. BigQuery Sink Connector
 
-- Now, we will **register** a **Kafka connector** to sink data based on the events streamed into the **Kafka topics**. We will achieve this by using a JSON configuration file named “bigquery-connector.json’”:
-  ```json
-  {
-    "name": "inventory-connector-bigquery",
-    "config": {
-      "connector.class": "com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
-      "tasks.max": "1",
-      "consumer.auto.offset.reset": "earliest",
-      "topics.regex": "debezium.inventory.*",
-      "sanitizeTopics": "true",
-      "autoCreateTables": "true",
-      "keyfile": "/bigquery-keyfile.json",
-      "schemaRetriever": "com.wepay.kafka.connect.bigquery.retrieve.IdentitySchemaRetriever",
-      "project": "my-gcp-project-id",
-      "defaultDataset": "kafka_dataset",
-      "allBQFieldsNullable": true,
-      "allowNewBigQueryFields": true,
-      //"transforms": "regexTopicRename,extractAfterData",
-      "transforms": "regexTopicRename,extractAfterData",
-      "transforms.regexTopicRename.type": "org.apache.kafka.connect.transforms.RegexRouter",
-      "transforms.regexTopicRename.regex": "debezium.inventory.(.*)",
-      "transforms.regexTopicRename.replacement": "$1",
-      "transforms.extractAfterData.type": "io.debezium.transforms.ExtractNewRecordState"
+- **BigQuery Sink connector** has the following **limitations**:
+
+  1. The connector doesn’t support schemas with recursion.
+  2. The connector doesn’t support schemas having float fields with `NaN` or `+Infinity` values.
+  3. When the connector is configured with `upsertEnabled` or `deleteEnabled`, it does not support **Single Message Transformations** (SMTs) that modify the topic name. Additionally, the following transformations are not allowed:
+     1. `io.debezium.transforms.ByLogicalTableRouter`
+     2. `io.debezium.transforms.outbox.EventRouter`
+     3. `org.apache.kafka.connect.transforms.RegexRouter`
+     4. `org.apache.kafka.connect.transforms.TimestampRouter`
+     5. `io.confluent.connect.transforms.MessageTimestampRouter`
+     6. `io.confluent.connect.transforms.ExtractTopic$Key`
+     7. `io.confluent.connect.transforms.ExtractTopic$Value`
+
+- **Note**:
+
+  - When the connector is not configured with `upsertEnabled` or `deleteEnabled`, these **SMTs** can be used without any issue.
+
+- **Remark**:
+
+  - Streaming into BigQuery is not available with the Google Cloud free tier. If you try to use streaming without enabling billing, you receive the following error: `BigQuery: Streaming insert is not allowed in the free tier.`. For more details, see [Streaming data into BigQuery](https://cloud.google.com/bigquery/docs/streaming-data-into-bigquery)
+
+- **Step 1** (Configure BigQuery)
+  - The following prerequisites are required before setting up the BigQuery connector.
+    1. An active Google Cloud account with authorization to create resources.
+    2. A BigQuery project. You can create the project using the [Google Cloud Console](https://console.cloud.google.com/welcome?project=general-364419)
+    3. A [BigQuery dataset](https://cloud.google.com/bigquery/docs/datasets) in the project
+    4. A service account that can access the BigQuery project containing the dataset. You can create this service account in the [Google Cloud Console](https://console.cloud.google.com/welcome?project=general-364419)
+    5. The service account must have access to the BigQuery project containing the dataset. You create and download a key when creating a service account. You must download the key as a JSON file as shown in the following example:
+  - Folow the following steps to retrieve the keyfile:
+    1. In the [Google Cloud console](), go to the [Service accounts page](https://console.cloud.google.com/projectselector2/iam-admin/serviceaccounts?walkthrough_id=iam--create-service-account-keys&start_index=1&_ga=2.20857274.380216664.1724589020-457635835.1696958253&supportedpurview=project#step_index=1)
+    2. Select a project
+    3. Click the email address of the service account that you want to create a key for.
+    4. Click the **Keys** tab.
+    5. Click the **Add key** drop-down menu, then select **Create new key**.
+    6. Select **JSON** as the **Key type** and click **Create**.
+    7. Clicking **Create** downloads a service account key file. After you download the key file, you cannot download it again.
+    8. The downloaded key has the following format, where `PRIVATE_KEY` is the private portion of the public/private key pair:
+       ```json
+       {
+         "type": "service_account",
+         "project_id": "PROJECT_ID",
+         "private_key_id": "KEY_ID",
+         "private_key": "-----BEGIN PRIVATE KEY-----\nPRIVATE_KEY\n-----END PRIVATE KEY-----\n",
+         "client_email": "SERVICE_ACCOUNT_EMAIL",
+         "client_id": "CLIENT_ID",
+         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+         "token_uri": "https://accounts.google.com/o/oauth2/token",
+         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/SERVICE_ACCOUNT_EMAIL"
+       }
+       ```
+- **Step 2**: (**Install the BigQuery connector**)
+  - Verify the **BigQuery Sink Connector plugin** has been installed correctly and recognized by the plugin loader:
+    ```sh
+      curl -sS localhost:8083/connector-plugins | jq .[].class | grep BigQuerySinkConnector
+    ```
+- **Step 3**: (**Start the BigQuery Sink connector**)
+
+  - Create the file register-kcbd-connect-bigquery.json to store the connector configuration.
+    ```json
+    {
+      "name": "inventory-connector-bigquery",
+      "config": {
+        "connector.class": "com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
+        "tasks.max": "1",
+        "consumer.auto.offset.reset": "earliest",
+        "topics.regex": "debezium.inventory.*",
+        "sanitizeTopics": "true",
+        "autoCreateTables": "true",
+        "keyfile": "/bigquery-keyfile.json",
+        "schemaRetriever": "com.wepay.kafka.connect.bigquery.retrieve.IdentitySchemaRetriever",
+        "project": "my-gcp-project-id",
+        "defaultDataset": "kafka_dataset",
+        "allBQFieldsNullable": true,
+        "allowNewBigQueryFields": true,
+        //"transforms": "regexTopicRename,extractAfterData",
+        "transforms": "regexTopicRename,extractAfterData",
+        "transforms.regexTopicRename.type": "org.apache.kafka.connect.transforms.RegexRouter",
+        "transforms.regexTopicRename.regex": "debezium.inventory.(.*)",
+        "transforms.regexTopicRename.replacement": "$1",
+        "transforms.extractAfterData.type": "io.debezium.transforms.ExtractNewRecordState"
+      }
     }
-  }
-  ```
+    ```
+
 - The **BigQuery Sink connector** can be configured using a variety of configuration **properties**:
 
   1. `name`: Globally-unique name to use for this connector.
@@ -852,18 +884,21 @@
 - Step: **register** the **Bigquery sink**:
 
   ```sh
-    curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @bigquery-connector.json
+    curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @bigquery-avro-connector-for-customers.json
   ```
 
-- **Step 5**: Check Status Of The BigQuery Sink Connector
+- **Step 5**: Check Status Of The **BigQuery Sink Connector**
   - Verify the status of the **connector** to ensure it is running without errors:
     ```sh
-      curl -X GET http://localhost:8083/connectors/delegates-survey-bq-sink/status
+      curl -X GET http://localhost:8083/connectors/bigquery-avro-connector-for-customers/status
     ```
 - **Step 6**: Validate the connector configuration to see if there are any misconfigurations:
 
   ```sh
-    curl -X PUT -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @delegates-survey-sink-connector.json
+    curl -X PUT -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @bigquery-avro-connector-for-customers.json
+  ```
+  ```sh
+    curl -X POST -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @bigquery-connector.json
   ```
 
 - **Step 7**: Delete BigQuery Sink Connector
@@ -871,7 +906,7 @@
 - Delete the existing **connector** by:
   ```sh
     #delete sink connector
-    curl -X DELETE http://localhost:8083/connectors/delegates-survey-sink-connector-v1
+    curl -X DELETE http://localhost:8083/connectors/bigquery-sink-connector-for-customers
   ```
 
 # Bonus
@@ -898,6 +933,6 @@
 1. [docs.confluent.io - Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html)
 2. [docs.confluent.ion - How to Use Kafka Connect - Get Started](https://docs.confluent.io/platform/current/connect/userguide.html)
 3. [redpanda - Understanding Apache Kafka](https://www.redpanda.com/guides/kafka-tutorial-what-is-kafka-connect)
-4. [runchydata.com/blog - postgresql-change-data-capture-with-debezium](https://www.crunchydata.com/blog/postgresql-change-data-capture-with-debezium)
-5. [www.iamninad.com - docker-compose-for-your-next-debezium-and-postgres-project](https://www.iamninad.com/posts/docker-compose-for-your-next-debezium-and-postgres-project/)
-6. [docs.confluent.io/kafka-connectors - bigquery/current/kafka_connect_bigquery_config](https://docs.confluent.io/kafka-connectors/bigquery/current/kafka_connect_bigquery_config.html)
+4. [www.iamninad.com - docker-compose-for-your-next-debezium-and-postgres-project](https://www.iamninad.com/posts/docker-compose-for-your-next-debezium-and-postgres-project/)
+5. [docs.confluent.io/kafka-connectors - bigquery/current/kafka_connect_bigquery_config](https://docs.confluent.io/kafka-connectors/bigquery/current/kafka_connect_bigquery_config.html)
+6. [cloud.google.com/iam/docs/keys-create-delete#console](https://cloud.google.com/iam/docs/keys-create-delete#console)

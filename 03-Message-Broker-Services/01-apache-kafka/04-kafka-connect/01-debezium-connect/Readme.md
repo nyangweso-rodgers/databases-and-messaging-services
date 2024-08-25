@@ -416,4 +416,5 @@
 
 # Resources and Further Reading
 
-1. [https://github.com/data-burst/debezium_avro_integration](https://github.com/data-burst/debezium_avro_integration)
+1. [runchydata.com/blog - postgresql-change-data-capture-with-debezium](https://www.crunchydata.com/blog/postgresql-change-data-capture-with-debezium)
+2. [https://github.com/data-burst/debezium_avro_integration](https://github.com/data-burst/debezium_avro_integration)
