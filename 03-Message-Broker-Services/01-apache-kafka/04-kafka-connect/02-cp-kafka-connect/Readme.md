@@ -300,98 +300,92 @@
 
 - You can use [Confluent Hub]() to add your desired **JARs**, either by installing them at runtime or by creating a new Docker image. Of course, there are pros and cons to either of these options, and you should choose based on your individual needs.
 
-## Step 3.1: Create a Docker Image Containing Confluent Hub Connectors
+## Create a Docker Image Containing Confluent Hub Connectors
 
 - Add connectors from [Confluent Hub](https://www.confluent.io/hub/?_ga=2.263155916.1350022208.1723832910-234518971.1709664712&_gl=1*1ttjnnz*_gcl_au*OTIxNjA2MDMuMTcxNzYxMTg4NA..*_ga*MjM0NTE4OTcxLjE3MDk2NjQ3MTI.*_ga_D2D3EGKSGD*MTcyNDE1OTU2My4xNDcuMS4xNzI0MTYyNjA2LjEuMC4w)
 
-- Write a `Dockerfile` -
+- Write a `Dockerfile` with the connectors as follows:
 
-  - Example 1():
-    ```Dockerfile
-      FROM confluentinc/cp-server-connect-base:7.7.0
-      RUN   confluent-hub install --no-prompt hpgrahsl/kafka-connect-mongodb:1.1.0 && confluent-hub install --no-prompt microsoft/kafka-connect-iothub:0.6 && confluent-hub install --no-prompt wepay/kafka-connect-bigquery:1.1.0
-    ```
-  - Example 2 ():
-    ```Dockerfile
-      FROM confluentinc/cp-kafka-connect:7.1.0-1-ubi8
-      ENV CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
-      RUN confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:2.0.2
-    ```
+  ```Dockerfile
+    FROM confluentinc/cp-server-connect-base:7.7.0
+    # FROM confluentinc/cp-kafka-connect:7.1.0-1-ubi8
 
-- Remarks:
+    ENV CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+
+    RUN confluent-hub install --no-prompt hpgrahsl/kafka-connect-mongodb:1.1.0
+    RUN confluent-hub install --no-prompt microsoft/kafka-connect-iothub:0.6
+    RUN confluent-hub install --no-prompt wepay/kafka-connect-bigquery:1.1.0
+    RUN confluent-hub install --no-prompt neo4j/kafka-connect-neo4j:2.0.2
+  ```
+
+- **Remarks**:
   - The `CONNECT_PLUGIN_PATH` environment variable is set to `/usr/share/java,/usr/share/confluent-hub-components`, which are the paths where **Kafka Connect** looks for **plugins**.
 - Build a `Dockerfile`
 
-## Step 4: Get Available Connector Plugins
+- **Step**: (**Get Available Connector Plugins**)
 
-```sh
-  curl localhost:8083/connector-plugins | json_pp
-```
+  - Get available connectro plugins by:
+    ```sh
+      curl localhost:8083/connector-plugins | json_pp
+    ```
+  - If you need to check the list of available **plugins** you should hit `localhost:8083/connector-plugins`
 
-- If you need to check the list of available **plugins** you should hit `localhost:8083/connector-plugins`
-  ```sh
-      curl localhost:8083/connector-plugins
-  ```
-- The `curl` command you ran is querying the **Kafka Connect** REST API to list the available **connector plugins** on your **Kafka Connect** instance.
-- Sample Output:
-  ```json
-  [
-    {
-      "class": "io.confluent.connect.jdbc.JdbcSinkConnector",
-      "type": "sink",
-      "version": "10.7.6"
-    },
-    {
-      "class": "io.confluent.connect.jdbc.JdbcSourceConnector",
-      "type": "source",
-      "version": "10.7.6"
-    },
-    {
-      "class": "org.apache.kafka.connect.mirror.MirrorCheckpointConnector",
-      "type": "source",
-      "version": "1"
-    },
-    {
-      "class": "org.apache.kafka.connect.mirror.MirrorHeartbeatConnector",
-      "type": "source",
-      "version": "1"
-    },
-    {
-      "class": "org.apache.kafka.connect.mirror.MirrorSourceConnector",
-      "type": "source",
-      "version": "1"
-    }
-  ]
-  ```
+    ```sh
+        curl localhost:8083/connector-plugins
+    ```
 
-## Step 5: Popular Kafka command
+  - The `curl` command you ran is querying the **Kafka Connect** REST API to list the available **connector plugins** on your **Kafka Connect** instance.
+  - Sample Output:
+    ```json
+    [
+      {
+        "class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+        "type": "sink",
+        "version": "10.7.6"
+      },
+      {
+        "class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+        "type": "source",
+        "version": "10.7.6"
+      },
+      {
+        "class": "org.apache.kafka.connect.mirror.MirrorCheckpointConnector",
+        "type": "source",
+        "version": "1"
+      },
+      {
+        "class": "org.apache.kafka.connect.mirror.MirrorHeartbeatConnector",
+        "type": "source",
+        "version": "1"
+      },
+      {
+        "class": "org.apache.kafka.connect.mirror.MirrorSourceConnector",
+        "type": "source",
+        "version": "1"
+      }
+    ]
+    ```
 
-1. List Kafka Topics:
-   ```sh
-      kafka-topics --bootstrap-server localhost:9092 --list
-   ```
-2. Create Kafka Topic
-
-   - To create a **topic** in Kafka, you can use the `kafka-topics` command with the `--create` option.
-   - Create a new **kafka topic**, `test-kafka-topic` with `docker exec` command
-     ```sh
-       kafka-topics --create --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic users.customers
-     ```
-
-3. Delete Kafka Topic by:
-   ```sh
-      kafka-topics --bootstrap-server localhost:9092 --delete --topic  users.customers
-   ```
-
-# Source Connectors
+# Configure Source Connectors
 
 - You can download connectors from [https://www.confluent.io/hub/](https://www.confluent.io/hub/)
 
-# 1. [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc)
+# 1. Configure [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc)
 
 - The [Kafka Connect JDBC Source connector]() allows you to import data from any relational database with a **JDBC** driver into an **Apache Kafka topic**. This **connector** can support a wide variety of databases.
+- We add both the [Avro Converter](https://www.confluent.io/hub/confluentinc/kafka-connect-avro-converter) and [JDBC Source/Sink](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) plugins to our **Docker image**.
+- `Dockerfile` for **Kafka Connect** with **plugins**:
+
+  ```Dockerfile
+    FROM confluentinc/cp-kafka-connect-base:6.2.1
+
+    # Install Avro & JDBC plugins
+    RUN confluent-hub install --no-prompt confluentinc/kafka-connect-avro-converter:5.5.4
+    RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.1.1
+  ```
 
 - The **JDBC Source connector** includes the following **features**:
+
   1. **At least once delivery**: This **connector** guarantees that records are delivered to the **Kafka topic** at least once. If the **connector** restarts, there may be some duplicate records in the **Kafka topic**.
   2. **Supports one task**: The **JDBC Source connector** can read one or more tables from a single task. In query mode, the **connector** supports running only one task.
   3. Incremental query modes
@@ -421,16 +415,6 @@
        }
        ```
   5. Mapping column types
-- We add both the [Avro Converter](https://www.confluent.io/hub/confluentinc/kafka-connect-avro-converter) and [JDBC Source/Sink](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) plugins to our **Docker image**.
-- `Dockerfile` for **Kafka Connect** with **plugins**:
-
-  ```Dockerfile
-    FROM confluentinc/cp-kafka-connect-base:6.2.1
-
-    # Install Avro & JDBC plugins
-    RUN confluent-hub install --no-prompt confluentinc/kafka-connect-avro-converter:5.5.4
-    RUN confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.1.1
-  ```
 
 - Properties of **JDBC Source Connector**:
   1. `"mode":` - The **Kafka JDBC Source Connector** supports several **modes** that determine how data is captured from a **relational database** and streamed to **Kafka topics**. Each **mode** serves a different purpose, depending on the nature of your data and the requirements of your streaming application.
@@ -498,6 +482,7 @@
 ## 1.1. JDBC Source Connector with with Single Message Transformations (SMTs) -> Key:`Long` and Value:`JSON`
 
 - Here, The response indicates that several **connector plugins** are available, each identified by its class, type, and version.
+
   1. `JdbcSinkConnector` and `JdbcSourceConnector`:
      - `io.confluent.connect.jdbc.JdbcSinkConnector` (version 10.7.6): A **sink connector** that allows data to be written from **Kafka topics** into a relational database using **JDBC**.
      - `io.confluent.connect.jdbc.JdbcSourceConnector` (version 10.7.6): A **source connector** that allows data to be ingested from a relational database into **Kafka topics** using **JDBC**
@@ -505,9 +490,8 @@
      - `org.apache.kafka.connect.mirror.MirrorCheckpointConnector` (version 1): Part of **MirrorMaker 2**, this **connector** helps manage the **offsets** in the target cluster, allowing **consumers** to pick up where they left off after a failover.
      - `org.apache.kafka.connect.mirror.MirrorHeartbeatConnector` (version 1): Also part of **MirrorMaker 2**, this **connector** is used for monitoring and ensuring the health and consistency of the data replication process.
      - `org.apache.kafka.connect.mirror.MirrorSourceConnector` (version 1): This **connector** is responsible for replicating data from one **Kafka cluster** to another (cross-cluster mirroring).
-- **Step** ():
 
-- **Step** (Configure Connector):
+- **Step** (**Configure jdbc Source Connector**):
 
   - For PostgreSQL:
 
@@ -538,7 +522,7 @@
     }
     ```
 
-- **Step** (Register Connector)
+- **Step** (**Register jdbc Source Connector**)
 
   - Register Postgres Source Connector by:
     ```sh
@@ -626,15 +610,13 @@
     }
     ```
 
-  - MongoDB
-
-# 2. [Debezium PostgreSQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-postgresql)
+# 2. Configure [Debezium PostgreSQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-postgresql)
 
 - Download [Debezium PostgreSQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-postgresql)
 
-# Sink Connectors
+# How to Configure Sink Connectors
 
-## 1. BigQuery Sink Connector
+## 1. Configure BigQuery Sink Connector
 
 - **BigQuery Sink connector** has the following **limitations**:
 
@@ -897,6 +879,7 @@
   ```sh
     curl -X PUT -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @bigquery-avro-connector-for-customers.json
   ```
+
   ```sh
     curl -X POST -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @bigquery-connector.json
   ```
