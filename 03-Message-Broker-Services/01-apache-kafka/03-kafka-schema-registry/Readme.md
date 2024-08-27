@@ -39,32 +39,6 @@
 - The job of this **serializer** is to convert the Java object to a **protobuf** binary format before the producer writes the message to Kafka.
 - The additional job of the **serialiser** is to check whether the **protobuf schema** exists in the **Schema Registry**. If not, it will write the **schema** to **Schema Registry** and it will write the schema id to the message (at the beginning of the message). Then, when the **Kafka** record reaches the consumer, the consumer will use KafkaProtobufDeserializer to fetch the schema from the Schema Registry based on the schema id from the message. Once the schema is fetched, the KafkaProtobufDeserializer will use it to deserialize the message. This way the consumer doesn’t need to know the schema in advance to be able to consume messages from Kafka.
 
-# `curl` Commands For Schema Registry
-
-## 1. Verify Registered schema types.
-
-- verify which schema types are currently registered with Schema Registry by:
-  ```sh
-    curl http://localhost:8081/schemas/types
-  ```
-- The response will be one or more of the following. If additional schema format plugins are installed, these will also be available.
-  ```sh
-    # output
-    ["JSON","PROTOBUF","AVRO"]
-  ```
-
-## 2. Fetch a schema by globally unique ID
-
-```sh
-    curl -X GET http://localhost:8081/schemas/ids/10
-```
-
-- Example output:
-  ```sh
-    {"schema":"\"string\""}
-  ```
-
 # Resources and Further Reading
 
 1. [docs.confluent.io - schema-registry](https://docs.confluent.io/platform/current/schema-registry/index.html)
-2.

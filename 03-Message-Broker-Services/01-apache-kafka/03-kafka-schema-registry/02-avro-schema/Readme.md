@@ -35,6 +35,22 @@
       "value.converter.schema.registry.url":"http://localhost:8081"
   ```
 
+## How to Handle Avro with Kafka in Python
+
+1. Install Required Packages:
+   - You should install `confluent-kafka` for Kafka client functionality.
+   - You should also install `fastavro` or `avro-python3` for **Avro** serialization/deserialization.
+     ```sh
+      pip install confluent-kafka fastavro
+     ```
+   - Or:
+     ```sh
+       pip install confluent-kafka avro-python3
+     ```
+2. Using `confluent-kafka` with **Avro**:
+   - The `confluent-kafka` package provides **Kafka producer** and **consumer** functionality.
+   - For **Avro** schema management, you typically use `fastavro` or `avro-python3` in conjunction with `confluent-kafka`.
+
 # Setup
 
 ## 1. Define Avro Schema
@@ -73,7 +89,19 @@
 - **Remarks**:
   - In **Avro schema** definitions, the **namespace** attribute is used to organize and uniquely identify the **schemas** within a larger system. It is similar to the concept of **namespaces** in programming languages like Java or C#. The **namespace** helps to avoid naming conflicts by providing a context for the schema name.
 
-## Step 2.1: Register Schema Using Schema Registry REST API
+## Step 2.1. Verify Registered Schema Types.
+
+- verify which **schema types** are currently registered with **Schema Registry** by:
+  ```sh
+    curl http://localhost:8081/schemas/types
+  ```
+- The response will be one or more of the following. If additional schema format plugins are installed, these will also be available.
+  ```sh
+    # output
+    ["JSON","PROTOBUF","AVRO"]
+  ```
+
+## Step 2.2: Register Schema Using Schema Registry REST API
 
 - You can use `curl` to register the schema. Assuming your Schema Registry is running locally on port `8081`, you can execute the following command:
   ```sh
@@ -81,7 +109,7 @@
   ```
 - This command sends the schema to the Schema Registry and registers it under the **subject** `users.customers-value`.
 
-## Step 2.2: Register Schema Using Python Script
+## Step 2.3: Register Schema Using Python Script
 
 - Create a python script to register the schema by:
 
@@ -115,7 +143,15 @@
     curl -X GET http://localhost:8081/subjects/users.customers-value/versions
   ```
 
-## Step 4: Delete Schema
+## 4. Fetch a chema by globally Unique ID
+
+- You can fetch a schema by global unique id by:
+
+  ```sh
+      curl -X GET http://localhost:8081/schemas/ids/10
+  ```
+
+## Step 5: Delete Schema
 
 - Use a `DELETE` request to remove the old schema version.
 - Here’s an example using `curl`:
