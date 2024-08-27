@@ -524,7 +524,7 @@
 
 - **Step** (**Register jdbc Source Connector**)
 
-  - Register Postgres Source Connector by:
+  - **Register** Postgres **Source Connector** by:
     ```sh
      curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @jdbc-avro-connector-for-customers-postgresdb.json
     ```
@@ -758,7 +758,7 @@
       - Type: boolean
       - Default: `false`
   18. `kafkaKeyFieldName`:
-      - The name of the BigQuery table field for the Kafka key. Must be set when upsert or delete is enabled.
+      - The name of the BigQuery table field for the Kafka key. Must be set when **upsert** or **delete** is enabled.
       - The Kafka key field name. The default value is `null`, which means the **Kafka Key** field will not be included.
       - Type: `string`
       - Default: `null`
@@ -863,33 +863,32 @@
       - Default: 10
       - Valid Values: [1,…]
 
-- Step: **register** the **Bigquery sink**:
+- **Step**: **Register** the **Bigquery sink**:
 
   ```sh
-    curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @bigquery-avro-connector-for-customers.json
+    curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @bigquery-avro-sink-connector-for-customers.json
   ```
 
-- **Step 5**: Check Status Of The **BigQuery Sink Connector**
+- **Step**: Check **Status** Of The **BigQuery Sink Connector**
   - Verify the status of the **connector** to ensure it is running without errors:
     ```sh
       curl -X GET http://localhost:8083/connectors/bigquery-avro-connector-for-customers/status
     ```
-- **Step 6**: Validate the connector configuration to see if there are any misconfigurations:
+- **Step**: Validate the connector configuration to see if there are any misconfigurations:
 
   ```sh
-    curl -X PUT -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @bigquery-avro-connector-for-customers.json
+    curl -X PUT -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @bigquery-avro-sink-connector-for-customers.json
   ```
 
   ```sh
     curl -X POST -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @bigquery-connector.json
   ```
 
-- **Step 7**: Delete BigQuery Sink Connector
+- **Step 7**: **Delete BigQuery Sink Connector**
 
 - Delete the existing **connector** by:
   ```sh
-    #delete sink connector
-    curl -X DELETE http://localhost:8083/connectors/bigquery-sink-connector-for-customers
+    curl -X DELETE http://localhost:8083/connectors/bigquery-avro-connector-for-customers
   ```
 
 # Bonus
