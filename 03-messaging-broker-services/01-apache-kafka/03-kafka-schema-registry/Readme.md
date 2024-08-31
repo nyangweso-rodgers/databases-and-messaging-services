@@ -126,11 +126,11 @@
 
   1. For **Avro**, register the schema using:
      ```sh
-      curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{"schema": "{\"type\":\"record\",\"name\":\"Customers\",\"namespace\":\"my.examples\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"first_name\",\"type\":\"string\"}, {\"name\":\"last_name\",\"type\":\"string\"}, {\"name\":\"status\",\"type\":{\"type\":\"enum\",\"name\":\"StatusEnum\",\"symbols\":[\"TRUE\",\"FALSE\"]}}, {\"name\":\"created_by\",\"type\":\"string\"}, {\"name\":\"updated_by\",\"type\":\"string\"},{\"name\":\"created_at\",\"type\":\"long\"}, {\"name\":\"updated_at\",\"type\":\"long\"}]}"}' http://localhost:8081/subjects/users-customers-v1-value/versions
+      curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{"schema": "{\"type\":\"record\",\"name\":\"Customers\",\"namespace\":\"my.examples\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"first_name\",\"type\":\"string\"}, {\"name\":\"last_name\",\"type\":\"string\"}, {\"name\":\"status\",\"type\":{\"type\":\"enum\",\"name\":\"StatusEnum\",\"symbols\":[\"TRUE\",\"FALSE\"]}}, {\"name\":\"created_by\",\"type\":\"string\"}, {\"name\":\"updated_by\",\"type\":\"string\"},{\"name\":\"created_at\",\"type\":\"long\"}, {\"name\":\"updated_at\",\"type\":\"long\"}]}"}' http://localhost:8081/subjects/users.customers.v1-value/versions
      ```
   2. For **Protobuf** register schema by:
      ```sh
-      curl -X POST -H "Content-Type: application/vnd.schemaregistry+protobuf" --data '{"schema": "syntax = \"proto3\"; package my.examples; import \"google/protobuf/timestamp.proto\"; message Customers { string id = 1; string first_name = 2; string last_name = 3; bool status = 4; string created_by = 5; string updated_by = 6; google.protobuf.Timestamp created_at = 7; google.protobuf.Timestamp updated_at = 8; }"}' http://localhost:8081/subjects/users-customers-v1-value/versions
+      curl -X POST -H "Content-Type: application/vnd.schemaregistry+protobuf" --data '{"schema": "syntax = \"proto3\"; package my.examples; import \"google/protobuf/timestamp.proto\"; message Customers { string id = 1; string first_name = 2; string last_name = 3; bool status = 4; string created_by = 5; string updated_by = 6; google.protobuf.Timestamp created_at = 7; google.protobuf.Timestamp updated_at = 8; }"}' http://localhost:8081/subjects/users.customers.v1-value/versions
      ```
   3. For JSON Schema
 
