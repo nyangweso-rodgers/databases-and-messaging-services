@@ -130,8 +130,12 @@
      ```
   2. For **Protobuf** register schema by:
      ```sh
-      curl -X POST -H "Content-Type: application/vnd.schemaregistry+protobuf" --data '{"schema": "syntax = \"proto3\"; package my.examples; import \"google/protobuf/timestamp.proto\"; message Customers { string id = 1; string first_name = 2; string last_name = 3; bool status = 4; string created_by = 5; string updated_by = 6; google.protobuf.Timestamp created_at = 7; google.protobuf.Timestamp updated_at = 8; }"}' http://localhost:8081/subjects/users.customers.v1-value/versions
+      curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+protobuf" --data '{"schema": "syntax = \"proto3\"; package my.examples; import \"google/protobuf/timestamp.proto\"; message Customers { string id = 1; string first_name = 2; string last_name = 3; bool status = 4; string created_by = 5; string updated_by = 6; google.protobuf.Timestamp created_at = 7; google.protobuf.Timestamp updated_at = 8; }"}' http://localhost:8081/subjects/users.customers.v1-value-protobuf/versions
      ```
+     - Test with a minimal 
+       ```sh
+        curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+protobuf" --data '{"schema": "syntax = \"proto3\"; message Simple { string name = 1; }"}' http://localhost:8081/subjects/simple-schema-value-protobuf/versions
+       ``` 
   3. For JSON Schema
 
 - Example output:
