@@ -53,21 +53,6 @@
 
 # Protobuf schema compatibility rules
 
-# Commands
-
-## 1. Examine Subjects Used In Schema
-
-- Use the REST endpoints to examine the **schemas** that were registered. First, you can see which **subjects** were used by using the following command.
-
-  ```sh
-    curl http://localhost:8081/subjects
-  ```
-
-- Test Output:
-  ```sh
-  ["users.customers-value"]
-  ```
-
 # Protobuf using Kafka REST interface
 
 # Register Protobuf Schema Using Python Script

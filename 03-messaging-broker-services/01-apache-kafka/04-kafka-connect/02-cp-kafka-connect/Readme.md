@@ -322,12 +322,12 @@
   - The `CONNECT_PLUGIN_PATH` environment variable is set to `/usr/share/java,/usr/share/confluent-hub-components`, which are the paths where **Kafka Connect** looks for **plugins**.
 - Build a `Dockerfile`
 
-- **Step**: (**Get Available Connector Plugins**)
+- **Step**: (**Get Available Connector Plugins**): Get available connectro plugins by:
 
-  - Get available connectro plugins by:
-    ```sh
-      curl localhost:8083/connector-plugins | json_pp
-    ```
+  ```sh
+    curl localhost:8083/connector-plugins | json_pp
+  ```
+
   - If you need to check the list of available **plugins** you should hit `localhost:8083/connector-plugins`
 
     ```sh

@@ -14,39 +14,35 @@
 - A **schema registry** is a centralized repository for storing and managing data schemas. It runs as a standalone server process on an external machine.
 - The primary purpose of a **schema registry** is to maintain a database of **schemas**, ensuring consistency and compatibility of data formats across different systems and services within an organization.
 
-# When to use Kafka schema registry
+# How Kafka Schema Registry works?
 
-1. The schema is likely to change in the future
-2. When schema is expected to change in the future
-3. The data can be serialized with the formats supported by Kafka schema registry
-
-# How Kafka schema registry works
-
-- A **Kafka schema registry** resides in a **Kafka cluster**. It can be plugged into the Kafka configuration. The configuration stores the schema and distributes it to the producer and consumer for serialization and deserialization. Hosting schemas like this allows schema evolution, making message transfer robust.
+- A **Kafka schema registry** resides in a **Kafka cluster**. It can be plugged into the **Kafka** configuration. The configuration stores the schema and distributes it to the **producer** and **consumer** for **serialization** and **deserialization**. Hosting schemas like this allows **schema evolution**, making message transfer robust.
 - Without **schemas**, there would be no easy way to establish a contract ensuring messages sent by the **producer** match the format expected by the **consumer**.
 
 # Serialization & Deserialization
 
 - _Serialization_ & **_Deserialization_** involves converting data into a byte format for transfer over the network or saving to disk (**serialization**) and converting it back into a usable format (**deserialization**).
-
-# Choosing a serialization format for Kafka schema registry
-
-- The **Kafka schema registry** supports three serialization formats:
+- The **Kafka schema registry** supports three **serialization** formats:
   1. Avro (recommended for most use cases)
   2. JSON
   3. Google Protobuf
 
-# Compatibility
+# Schema Compatibility
 
-- The Schema Registry server can enforce certain compatibility rules when new schemas are registered in a subject. These are the compatibility types:
-  1. **BACKWARD**:
-     - This is the default.
-     - **consumers** using the new schema can read data written by **producers** using the latest registered schema
-  2. **FORWARD**
-     - **consumers** using the latest registered schema can read data written by **producers** using the new schema
-  3. FULL
-  4. **NONE**
-     - schema compatibility checks are disabled
+- You can configure different types of **schema compatibility**, which are applied to a **subject** when a new schema is registered. The Schema Registry supports the following compatibility types:
+  1. `BACKWARD` (default) - **Consumers** using the new schema (for example, version 10) can read data from **producers** using the previous schema (for example, version 9).
+  2. `BACKWARD_TRANSITIVE` - **Consumers** using the new schema (for example, version 10) can read data from **producers** using all previous schemas (for example, versions 1-9).
+  3. `FORWARD` - **Consumers** using the previous schema (for example, version 9) can read data from **producers** using the new schema (for example, version 10).
+  4. `FORWARD_TRANSITIVE` - **Consumers** using any previous schema (for example, versions 1-9) can read data from producers using the new schema (for example, version 10).
+  5. `FULL` - A new schema and the previous schema (for example, versions 10 and 9) are both backward and forward compatible with each other.
+  6. `FULL_TRANSITIVE` - Each schema is both backward and forward compatible with all registered schemas.
+  7. `NONE` - No schema compatibility checks are done.
+- Compatibility uses and constraints:
+  1. A **consumer** that wants to read a topic from the beginning (for example, an AI learning process) benefits from backward compatibility. It can process the whole topic using the latest schema. This allows producers to remove fields and add attributes.
+  2. A real-time consumer that doesn’t care about historical events but wants to keep up with the latest data (for example, a typical streaming application) benefits from forward compatibility. Even if producers change the schema, the consumer can carry on.
+  3. Full compatibility can process historical data and future data. This is the safest option, but it limits the changes that can be done. This only allows for the addition and removal of optional fields.
+- Remark:
+  - To set the compatibility type for a subject, make a PUT request to `/config/<subject-name>` with the specific compatibility type:
 
 # Content Types
 
@@ -85,22 +81,24 @@
 - Use Case:
   - This is used when the **key** of your Kafka message has a specific structure or schema that needs to be enforced (e.g., a composite key made up of multiple fields). It's less common than value subjects but crucial in scenarios where the key carries meaningful structured data.
 
-# Common Schema Registry API Usage (Schema Registry `curl` Commands)
+# Use Schema Registry API with `curl` Commands
 
 - Use `curl` Commands to interact with the Schema Registry [Schema Registry API](https://docs.confluent.io/platform/current/schema-registry/develop/api.html#schemaregistry-api)
 
 ## Command 1: List schema types currently registered in Schema Registry
 
-```sh
-  curl -X GET http://localhost:8081/schemas/types
-```
+- verify which **schema types** are currently registered with **Schema Registry** by:
+
+  ```sh
+    curl -X GET http://localhost:8081/schemas/types
+  ```
 
 - Example Result:
   ```sh
     ["JSON", "PROTOBUF", "AVRO"]
   ```
 
-## Command 2: Register a New Version of a Schema under key and value subjects
+## Command 2: Register a New Version of a Schema under key or value subjects
 
 - Examples:
   1. Register a new version of a **schema** under the **subject** “**Kafka-key**”
@@ -130,13 +128,9 @@
      ```
   2. For **Protobuf** register schema by:
      ```sh
-      curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+protobuf" --data '{"schema": "syntax = \"proto3\"; package my.examples; import \"google/protobuf/timestamp.proto\"; message Customers { string id = 1; string first_name = 2; string last_name = 3; bool status = 4; string created_by = 5; string updated_by = 6; google.protobuf.Timestamp created_at = 7; google.protobuf.Timestamp updated_at = 8; }"}' http://localhost:8081/subjects/users.customers.v1-value-protobuf/versions
+      curl -X POST -H "Content-Type: application/json" http://localhost:8081/subjects/users.customers.v1-value-protobuf/versions -d '{"schemaType": "PROTOBUF","schema": "syntax = \"proto3\"; message Customers { string id = 1; string first_name = 2; string last_name = 3; bool status = 4; string created_by = 5; string updated_by = 6; google.protobuf.Timestamp created_at = 7; google.protobuf.Timestamp updated_at = 8; }"}'
      ```
-     - Test with a minimal 
-       ```sh
-        curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+protobuf" --data '{"schema": "syntax = \"proto3\"; message Simple { string name = 1; }"}' http://localhost:8081/subjects/simple-schema-value-protobuf/versions
-       ``` 
-  3. For JSON Schema
+  3. For **JSON Schema**
 
 - Example output:
   ```sh
@@ -145,7 +139,7 @@
 
 ## Command 4: List all schema versions registered under the key or value subject
 
-- List all schema version registered under the "`users-customers-v1-value`" value by:
+- List all schema version registered under the **subject** "`users-customers-v1-value`" **value** by:
 
   ```sh
       curl -X GET http://localhost:8081/subjects/users-customers-v1-value/versions
@@ -235,40 +229,354 @@
 - Remark:
   - If the schema type is **JSON Schema** or **Protobuf**, the response will also include the schema type. If the schema type is **Avro**, which is the default, the schema type is not included in the response, per the above example.
 
-## 9. Delete Version 1 of the schema registered under subject “Kafka-value”
+## Step 5: Delete Schema
 
-```sh
-  curl -X DELETE http://localhost:8081/subjects/Kafka-value/versions/1
-```
-
-- Example result:
+- Use a `DELETE` request to remove the old schema version.
+- Example:
   ```sh
-    1
+    curl -X DELETE http://localhost:8081/subjects/users.customers.v1-value
+  ```
+- Remark:
+  - After deleting a schema, you confirm that the schema has been deleted by listing the **subjects**:
+  ```sh
+    curl http://localhost:8081/subjects
+  ```
+  - Delete Version 1 of Schema Registered under subject `users.customers.v2-value`
+    ```sh
+      curl -X DELETE http://localhost:8081/subjects/users.customers.v2-value/versions/1
+    ```
+  - Delete the most recently registered schema under subject `users.customers.v2-value`
+    ```sh
+      curl -X DELETE http://localhost:8081/subjects/users.customers.v2-value/versions/latest
+    ```
+  - Delete all schema versions registered under the subject `users.customers.v2-value`
+    ```sh
+      curl -X DELETE http://localhost:8081/subjects/users.customers.v2-value
+    ```
+
+# Use Schema Registry API with Python
+
+## Command 1: Query supported schema formats
+
+- verify which **schema types** are currently registered with **Schema Registry** by:
+
+  ```py
+    import requests
+    import json
+
+    def pretty(text):
+      print(json.dumps(text, indent=2))
+
+    base_uri = "http://localhost:8081"
+
+    res = requests.get(f'{base_uri}/schemas/types').json()
+    pretty(res)
   ```
 
-## 10. Delete the most recently registered schema under subject “Kafka-value”
-
-```sh
-  curl -X DELETE http://localhost:8081/subjects/Kafka-value/versions/latest
-```
-
-- Example result:
+- Example output:
   ```sh
-    2
+    [
+    "JSON",
+    "PROTOBUF",
+    "AVRO"
+  ]
   ```
 
-## Delete all schema versions registered under the subject “Kafka-value”
+## Command 2: Register a schema
 
-```sh
-  curl -X DELETE http://localhost:8081/subjects/Kafka-value
+- A **schema** is registered in the registry with a **subject**, which is a name that is associated with the **schema** as it evolves. **Subjects** are typically in the form `<topic-name>-key` or `<topic-name>-value`.
+- To register the `users.customers` schema, make a `POST` request to the `/subjects/users.customers-value/versions` endpoint with the Content-Type `application/vnd.schemaregistry.v1+json`:
+
+  ```py
+    import requests
+    import json
+
+    def pretty(text):
+      print(json.dumps(text, indent=2))
+
+    base_uri = "http://localhost:8081"
+
+    customers_schema = {
+      "type": "record",
+      "name": "customers",
+      "fields": [
+        {"name": "id", "type": "string"},
+        {"name": "first_name", "type": "string"},
+        {"name": "last_name", "type": "string"}
+        ]
+      }
+
+    res = requests.post(
+        url=f'{base_uri}/subjects/users.customers.v2-value/versions',
+        data=json.dumps({
+          'schema': json.dumps(customers_schema)
+        }),
+        headers={'Content-Type': 'application/vnd.schemaregistry.v1+json'}).json()
+    pretty(res)
+  ```
+
+- Example output:
+  ```sh
+    {"id": 8}
+  ```
+
+## Command 3: Retrieve a schema
+
+- To retrieve a registered schema from the registry, make a `GET` request to the `/schemas/ids/<id>` endpoint:
+
+  ```py
+    import requests
+    import json
+
+    def pretty(text):
+      print(json.dumps(text, indent=2))
+
+    base_uri = "http://localhost:8081"
+
+    res = requests.get(f'{base_uri}/schemas/ids/8').json()
+    pretty(res)
+  ```
+
+- Example output:
+  ```sh
+    {
+      "schema": "{\"type\":\"record\",\"name\":\"customers\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"first_name\",\"type\":\"string\"},{\"name\":\"last_name\",\"type\":\"string\"}]}"
+    }
+  ```
+
+## Command 4: List registry subjects
+
+```py
+  import requests
+  import json
+
+  def pretty(text):
+    print(json.dumps(text, indent=2))
+
+  base_uri = "http://localhost:8081"
+
+  res = requests.get(f'{base_uri}/subjects').json()
+  pretty(res)
 ```
 
-- Example result:
+- Example output:
   ```sh
+    [
+    "users.customers-value",
+    "users.customers.v1-value",
+    "users.customers.v1-value-protobuf"
+  ]
+  ```
+
+## Command 5: Retrieve schema versions of a subject
+
+- To query the schema versions of a **subject**, make a `GET` request to the `/subjects/<subject-name>/versions` endpoint.
+- For example, to get the schema versions of the `users.customers.v2-value` subject:
+
+  ```py
+    import requests
+    import json
+
+    def pretty(text):
+      print(json.dumps(text, indent=2))
+
+    base_uri = "http://localhost:8081"
+
+    res = requests.get(f'{base_uri}/subjects/users.customers.v2-value/versions').json()
+    pretty(res)
+  ```
+
+- Example output:
+  ```sh
+    [
     1
+  ]
+  ```
+
+## Command 6: Retrieve a schema of a subject
+
+- To retrieve a schema associated with a subject, make a `GET` request to the `/subjects/<subject-name>/versions/<version-id>` endpoint:
+
+  ```py
+    import requests
+    import json
+
+    def pretty(text):
+      print(json.dumps(text, indent=2))
+
+    base_uri = "http://localhost:8081"
+
+    res = requests.get(f'{base_uri}/subjects/users.customers.v1-value/versions/1').json()
+    pretty(res)
+  ```
+
+- Example output:
+  ```sh
+    {
+    "subject": "users.customers.v1-value",
+    "version": 1,
+    "id": 6,
+    "schema": "{\"type\":\"record\",\"name\":\"Customers\",\"namespace\":\"my.examples\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"first_name\",\"type\":\"string\"},{\"name\":\"last_name\",\"type\":\"string\"},{\"name\":\"status\",\"type\":{\"type\":\"enum\",\"name\":\"StatusEnum\",\"symbols\":[\"TRUE\",\"FALSE\"]}},{\"name\":\"created_by\",\"type\":\"string\"},{\"name\":\"updated_by\",\"type\":\"string\"},{\"name\":\"created_at\",\"type\":\"long\"},{\"name\":\"updated_at\",\"type\":\"long\"}]}"
+  }
+  ```
+- To get the **latest version**, use latest as the version ID:
+
+  ```py
+    import requests
+    import json
+
+    def pretty(text):
+      print(json.dumps(text, indent=2))
+
+    base_uri = "http://localhost:8081"
+
+    res = requests.get(f'{base_uri}/subjects/users.customers.v1-value/versions/latest').json()
+    pretty(res)
+  ```
+
+- Example output:
+  ```sh
+    {
+    "subject": "users.customers.v1-value",
+    "version": 1,
+    "id": 6,
+    "schema": "{\"type\":\"record\",\"name\":\"Customers\",\"namespace\":\"my.examples\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"first_name\",\"type\":\"string\"},{\"name\":\"last_name\",\"type\":\"string\"},{\"name\":\"status\",\"type\":{\"type\":\"enum\",\"name\":\"StatusEnum\",\"symbols\":[\"TRUE\",\"FALSE\"]}},{\"name\":\"created_by\",\"type\":\"string\"},{\"name\":\"updated_by\",\"type\":\"string\"},{\"name\":\"created_at\",\"type\":\"long\"},{\"name\":\"updated_at\",\"type\":\"long\"}]}"
+  }
+  ```
+- To get only the **schema**, append `/schema` to the endpoint path:
+
+  ```py
+    import requests
+    import json
+
+    def pretty(text):
+      print(json.dumps(text, indent=2))
+
+    base_uri = "http://localhost:8081"
+
+    res = requests.get(f'{base_uri}/subjects/users.customers.v1-value/versions/latest').json()
+    pretty(res)
+  ```
+
+- Example output:
+  ```sh
+    {
+      "type": "record",
+      "name": "Customers",
+      "namespace": "my.examples",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "first_name",
+          "type": "string"
+        },
+        {
+          "name": "last_name",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": {
+            "type": "enum",
+            "name": "StatusEnum",
+            "symbols": [
+              "TRUE",
+              "FALSE"
+            ]
+          }
+        },
+        {
+          "name": "created_by",
+          "type": "string"
+        },
+        {
+          "name": "updated_by",
+          "type": "string"
+        },
+        {
+          "name": "created_at",
+          "type": "long"
+        },
+        {
+          "name": "updated_at",
+          "type": "long"
+        }
+      ]
+    }
+  ```
+
+## Command 7: Delete a schema
+
+- The [Schema Registry API]() provides DELETE endpoints for deleting a single schema or all schemas of a subject:
+  1. `/subjects/<subject>/versions/<version>`
+  2. `/subjects/<subject>`
+- Schemas cannot be deleted if any other schemas reference it.
+- A schema can be **soft deleted** (impermanently) or **hard deleted** (permanently), based on the boolean query parameter `permanent`. A soft deleted schema can be retrieved and re-registered. A hard deleted schema cannot be recovered.
+- To **soft delete** a schema, make a `DELETE` request with the subject and version ID (where `permanent=false` is the default parameter value):
+
+  ```py
+    import requests
+    import json
+
+    def pretty(text):
+        print(json.dumps(text, indent=2))
+
+    base_uri = "http://localhost:8081"
+
+    res = requests.delete(f'{base_uri}/subjects/users.customers.v2-value/versions/2').json()
+    pretty(res)
+  ```
+
+  - Example output
+    ```sh
+      2
+    ```
+  - Doing a soft delete for an already deleted schema returns an error:
+
+- Remark:
+
+  - To list **subjects** of soft-deleted schemas, make a `GET` request with the deleted parameter set to `true`, `/subjects?deleted=true`:
+
+    ```py
+      import requests
+      import json
+
+      def pretty(text):
+          print(json.dumps(text, indent=2))
+
+      base_uri = "http://localhost:8081"
+
+      payload = { 'deleted' : 'true' }
+      res = requests.get(f'{base_uri}/subjects', params=payload).json()
+      pretty(res)
+    ```
+
+    - Example output:
+      - This returns all subjects, including deleted ones:
+
+- To **hard delete** a schema, make two `DELETE` requests with the second request setting the permanent parameter to `true` (`/subjects/<subject>/versions/<version>?permanent=true`):
+
+  ```py
+    import requests
+    import json
+
+    def pretty(text):
+        print(json.dumps(text, indent=2))
+
+    base_uri = "http://localhost:8081"
+
+    res = requests.delete(f'{base_uri}/subjects/users.customers.v2-value/versions/2').json()
+    pretty(res)
+    payload = { 'permanent' : 'true' }
+    res = requests.delete(f'{base_uri}/subjects/users.customers.v2-value/versions/2', params=payload).json()
+    pretty(res)
   ```
 
 # Resources and Further Reading
 
 1. [docs.confluent.io - schema-registry](https://docs.confluent.io/platform/current/schema-registry/index.html)
 2. [Schema Registry API Usage Examples for Confluent Platform](https://docs.confluent.io/platform/current/schema-registry/develop/using.html)
+3. [redpanda.com - Use the Schema Registry API](https://docs.redpanda.com/current/manage/schema-reg/schema-reg-api/#tabs-1-curl)
