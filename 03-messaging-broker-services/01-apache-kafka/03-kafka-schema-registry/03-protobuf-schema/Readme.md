@@ -51,7 +51,18 @@
 - The job of this **serializer** is to convert the Java object to a **protobuf** binary format before the producer writes the message to Kafka.
 - The additional job of the **serialiser** is to check whether the **protobuf schema** exists in the **Schema Registry**. If not, it will write the **schema** to **Schema Registry** and it will write the schema id to the message (at the beginning of the message). Then, when the **Kafka** record reaches the consumer, the consumer will use KafkaProtobufDeserializer to fetch the schema from the Schema Registry based on the schema id from the message. Once the schema is fetched, the KafkaProtobufDeserializer will use it to deserialize the message. This way the consumer doesn’t need to know the schema in advance to be able to consume messages from Kafka.
 
-# Protobuf schema compatibility rules
+# Protobuf Schema
+
+- Example configuration using `ProtobufConverter` for the value converter and using `StringConverter` for the key:
+
+  ```json
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+
+    "value.converter": "io.confluent.connect.protobuf.ProtobufConverter",
+    "value.converter.schema.registry.url": "http://localhost:8081"
+  ```
+
+# Protobuf Schema Compatibility Rules
 
 # Protobuf using Kafka REST interface
 

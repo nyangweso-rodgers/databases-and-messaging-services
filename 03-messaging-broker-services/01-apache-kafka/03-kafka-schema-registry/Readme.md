@@ -150,7 +150,7 @@
       [1]
     ```
 
-- Check whether a schema has been registered under subject "`Kafka-key`" by:
+- Check whether a **schema** has been registered under subject "`Kafka-key`" by:
 
   ```sh
       curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{"schema": "{\"type\": \"string\"}"}' http://localhost:8081/subjects/Kafka-key
@@ -174,7 +174,7 @@
 - Remark:
   - You do not need to use the `AvroConverter` for topic replication or schema management, even if the topic is **Avro** format. The `ByteArrayConverter` retains the “magic byte”, which is the schema ID. When a replicator is created, messages are replicated with the schema ID. You do not need to create a schema subject. A best practice is to avoid the use of **Avro** due to the overhead, as there is no real value to it in this context.
 
-## Command 5: List all subjects
+## Command 5: List All Subjects
 
 - The following API call lists all schema subjects.
   ```sh
@@ -182,10 +182,10 @@
   ```
 - Example Result:
   ```sh
-    ["Kafka-value","Kafka-key"]
+    ["users.customers-value","users.customers.v1-value","users.customers.v1-value-protobuf"]
   ```
-- Remark:
-  - You can use the `deleted` flag at the end of the request to list all **subjects**, including **subjects** that have been soft-deleted (`?deleted=true`).
+- **Remark**:
+  - You can use the `deleted` flag at the end of the request to list all **subjects**, including **subjects** that have been **soft-deleted** (`?deleted=true`).
     ```sh
       curl -X GET http://localhost:8081/subjects?deleted=true
     ```
@@ -236,7 +236,7 @@
   ```sh
     curl -X DELETE http://localhost:8081/subjects/users.customers.v1-value
   ```
-- Remark:
+- **Remark**:
   - After deleting a schema, you confirm that the schema has been deleted by listing the **subjects**:
   ```sh
     curl http://localhost:8081/subjects
@@ -344,7 +344,7 @@
     }
   ```
 
-## Command 4: List registry subjects
+## Command 4: List Registry Subjects
 
 ```py
   import requests
@@ -393,7 +393,7 @@
   ]
   ```
 
-## Command 6: Retrieve a schema of a subject
+## Command 6: Retrieve a Schema of a Subject
 
 - To retrieve a schema associated with a subject, make a `GET` request to the `/subjects/<subject-name>/versions/<version-id>` endpoint:
 
@@ -508,7 +508,7 @@
     }
   ```
 
-## Command 7: Delete a schema
+## Command 7: Delete a Schema
 
 - The [Schema Registry API]() provides DELETE endpoints for deleting a single schema or all schemas of a subject:
   1. `/subjects/<subject>/versions/<version>`
@@ -538,7 +538,7 @@
 
 - Remark:
 
-  - To list **subjects** of soft-deleted schemas, make a `GET` request with the deleted parameter set to `true`, `/subjects?deleted=true`:
+  - To list **subjects** of **soft-deleted schemas**, make a `GET` request with the deleted parameter set to `true`, `/subjects?deleted=true`:
 
     ```py
       import requests

@@ -29,14 +29,7 @@
     value.converter.schema.registry.url=http://localhost:8081
   ```
 
-# Protobuf Schema
 
-- Example configuration using `ProtobufConverter` for the value converter and using `StringConverter` for the key:
-  ```json
-    key.converter=org.apache.kafka.connect.storage.StringConverter
-    value.converter=io.confluent.connect.protobuf.ProtobufConverter
-    value.converter.schema.registry.url=http://localhost:8081
-  ```
 
 # Resources And Further Reading
 
