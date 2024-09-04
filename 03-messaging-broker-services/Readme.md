@@ -1,5 +1,34 @@
 # Message Broker Services
 
+## Table Of Contents
+
+# Messaging Queues In Action
+
+- Imagine an online store where every time a customer places an order, you need to:
+  1. Process the payment.
+  2. Update inventory.
+  3. Send a confirmation email.
+- Doing all of this immediately, especially during peak traffic times, could slow down the customer’s experience.
+- In this case, we have a large number of application events, and we can’t handle all of them at once.
+
+# Basic Architecture of a Message Queue
+
+- A **message queue** is a durable component stored in memory that supports **asynchronous communication**. It serves as a buffer and **distributes asynchronous requests**.
+- The basic architecture of a _message queue_ is simple. Input services, called **producers** or **publishers**, create and publish messages to a **message queue**. Other services, called **consumers** or **subscribers**, connect to the queue and perform actions defined by the messages.
+- In a real-world scenario, there can be many apps writing to the queue and many servers reading from the queue.
+
+# Benefits of using Message Queues
+
+1. The main advantage is that we **decouple** these events, and this message queue will allow us to process these events **asynchronously**. We can queue them until we can process them. With the **message queue**, the **producer** can post a message to the **queue** when the consumer is unavailable to process it. Also, the **consumer** can read messages from the **queue** even when the **producer** is unavailable.
+2. Another great benefit is that they are **durable**. If the queue crashes, that data will not be lost as it’s not stored in **RAM** but in **Disk**. If a worker crashes while processing a message, no problem! The message is still in the queue and will be picked up by another worker.
+3. Message queues also provide **scalability**. If you receive a flood of orders, the queue will just get longer. You can add more workers to handle the extra load without affecting the website.
+
+# Different Queue Types
+
+- Most common message queues are:
+  1. **FIFO** (First-In-First-Out): Just like a regular line, messages are processed in the order they arrive. This is important for things like payment processing.
+  2. **Priority Queues**: Some messages might be more important than others. You can prioritize these so they get processed sooner.
+
 # Introduction to Event Driven Architecture
 
 - In an Event Driven Architecture, systems reacts based on the event instead of the regular making request and waiting for a response sequence. This allows systems to communicate with one another asynchronously and reliably. Even when the system is down it’s still able to process the request when it comes back online.
@@ -22,6 +51,13 @@
 # Overview Of Broker Service
 
 - **Broker Service**: When using **asynchronous communication** for **Microservices**, it is common to use a **message broker**. A **broker** ensures communication between different **microservices** is reliable and stable, that the **messages** are managed and monitored within the system and that messages don’t get lost. There are a few message brokers you can choose from, varying in scale and data capabilities. e.g.,
-  - RabbitMQ
-  - Kafka
-  - Redis
+  1. RabbitMQ
+  2. Kafka
+  3. Redis
+  4. Amazon SQS (Simple Queue Service): A fully managed cloud-based queue service offered by AWS. It’s scalable and reliable, with features like delay queues and dead-letter queues.
+
+
+# Resources and Further Reading
+
+1. [Medium - Message Queues in System Design](https://levelup.gitconnected.com/message-queues-in-system-design-0440a1221023)
+2. [Medium - How Did LinkedIn Handle 7 Trillion Messages Daily With Apache Kafka?](https://blog.det.life/how-did-linkedin-handle-7-trillion-messages-daily-with-apache-kafka-07a167f1a949)
