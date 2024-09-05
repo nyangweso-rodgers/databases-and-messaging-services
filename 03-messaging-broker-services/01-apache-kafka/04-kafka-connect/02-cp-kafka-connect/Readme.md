@@ -246,9 +246,6 @@
 
 - **Dead Letter Queues** (DLQs) are only applicable for **sink connectors**.
 - An invalid record may occur for a number of reasons. One example is when a record arrives at a **sink connector** serialized in **JSON** format, but the **sink connector** configuration is expecting **Avro** format. When an invalid record can’t be processed by the **sink connector**, the error is handled based on the connector `errors.tolerance` configuration property.
-
-### Create a Dead Letter Queue topic
-
 - To create a **DLQ**, add the following configuration properties to your **sink connector** configuration:
   ```json
     errors.tolerance = all
@@ -526,9 +523,14 @@
 
   - **Register** Postgres **Source Connector** by:
     ```sh
-     curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @jdbc-avro-connector-for-customers-postgresdb.json
+     curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @jdbc-protobuf-connector-for-customers-postgresdb.json
     ```
 
+- Step : Check the Connector Status
+  - Use the following command to check the status of your Kafka Connect connector
+    ```sh
+      curl -X GET http://localhost:8083/connectors/jdbc-protobuf-connector-for-customers-postgresdb/status
+    ```
 - **Step**: (**Test Your Connect Server**):
 
   - Test connector server by:
@@ -539,7 +541,7 @@
 - **Step** (**Delete Source Connector**):
   - Remove the **connectors** by:
     ```sh
-      curl -X DELETE http://localhost:8083/connectors/jdbc-avro-connector-for-customers-postgresdb
+      curl -X DELETE http://localhost:8083/connectors/jdbc-protobuf-connector-for-customers-postgresdb
     ```
 
 ## 1.2. JDBC Source Connector with SpecificAvro -> Key:String(null) and Value:`SpecificAvro`

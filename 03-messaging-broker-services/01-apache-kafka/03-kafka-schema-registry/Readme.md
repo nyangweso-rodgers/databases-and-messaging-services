@@ -118,7 +118,7 @@
         ["id": 1]
        ```
 
-## Command 3: Register a schema for a new Kafka Topic
+## Command 3: Register a Schema for a new Kafka Topic
 
 - Suppose we have a `users-customers-v1` topic already registered, we can use the [Schema Registry API]() to add a schema for the topic by:
 
@@ -128,7 +128,7 @@
      ```
   2. For **Protobuf** register schema by:
      ```sh
-      curl -X POST -H "Content-Type: application/json" http://localhost:8081/subjects/users.customers.v1-value-protobuf/versions -d '{"schemaType": "PROTOBUF","schema": "syntax = \"proto3\"; message Customers { string id = 1; string first_name = 2; string last_name = 3; bool status = 4; string created_by = 5; string updated_by = 6; google.protobuf.Timestamp created_at = 7; google.protobuf.Timestamp updated_at = 8; }"}'
+      curl -X POST -H "Content-Type: application/json" http://localhost:8081/subjects/users.customers.protobuf.v1-value/versions -d '{"schemaType": "PROTOBUF","schema": "syntax = \"proto3\"; message Customers { string id = 1; string first_name = 2; string last_name = 3; bool status = 4; string created_by = 5; string updated_by = 6; google.protobuf.Timestamp created_at = 7; google.protobuf.Timestamp updated_at = 8; }"}'
      ```
   3. For **JSON Schema**
 
@@ -137,7 +137,7 @@
     {"id":1}
   ```
 
-## Command 4: List all schema versions registered under the key or value subject
+## Command 4: List all schema versions Registered under the key or value subject
 
 - List all schema version registered under the **subject** "`users-customers-v1-value`" **value** by:
 

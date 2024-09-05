@@ -123,6 +123,31 @@
     print(new_person)
   ```
 
+# Steps
+
+## Step : Create the Protobuf Schema
+
+## Step : Create the Topic
+
+- Use the `kafka-topics` command to create the topic, specifying the desired number of partitions and replication factor
+  ```sh
+    kafka-topics --create --bootstrap-server kafka:29092 --partitions 1 --replication-factor 1 --topic users.customers.protobuf.v1
+  ```
+
+## Step : Register the Schema with Confluent Schema Registry
+
+- For **Protobuf** register schema by:
+  ```sh
+   curl -X POST -H "Content-Type: application/json" http://localhost:8081/subjects/users.customers.protobuf.v1-value/versions -d '{"schemaType": "PROTOBUF","schema": "syntax = \"proto3\"; message Customers { string id = 1; string first_name = 2; string last_name = 3; bool status = 4; string created_by = 5; string updated_by = 6; google.protobuf.Timestamp created_at = 7; google.protobuf.Timestamp updated_at = 8; }"}'
+  ```
+- Verify Schema Registry Setup:
+  - Ensure that the schema is correctly registered with this command
+    ```sh
+      curl -X GET http://localhost:8081/subjects/users.customers.protobuf.v1-value/versions
+    ```
+
+## Step : Produce Messages to the Topic
+
 # Resources and Further Reading
 
 1. [Protobuf Documentation](https://protobuf.dev/overview/#scalar)
