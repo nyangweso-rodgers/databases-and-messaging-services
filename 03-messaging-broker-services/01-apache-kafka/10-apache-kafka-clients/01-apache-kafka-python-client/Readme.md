@@ -4,7 +4,7 @@
 
 # Apache Kafka Python Client
 
-- The Python client provides a high-level **producer**, **consumer**, and **AdminClient** that are compatible with **Kafka brokers** (version 0.8 or later), Confluent Cloud, and Confluent Platform.
+- The **Python client** provides a high-level **producer**, **consumer**, and **AdminClient** that are compatible with **Kafka brokers** (version 0.8 or later), Confluent Cloud, and Confluent Platform.
 
 # Python Client Installation
 
@@ -17,7 +17,7 @@
 
 - Complete simple Kafka cluster administrative tasks using the Python `AdminClient` class
 
-## Use AdminClient to Create a Topic and Alter its Configuration
+## 1. Use AdminClient to Create a Topic and Alter its Configuration
 
 - A **topic** is an **immutable**, append-only log of events. Usually, a topic is comprised of the same kind of events.
 - use the `AdminClient` class to create a new Kafka topic and alter one of its configuration properties.
@@ -51,7 +51,7 @@
                 print("Failed to create topic {}: {}".format(topic, e))
   ```
 
-## Use AdminClient to Describe the New Kafka Topic
+## 2. Use AdminClient to Describe the New Kafka Topic
 
 - Create a function that uses a `ConfigResource` instance and the `describe_configs()` function:
   ```py
@@ -77,6 +77,10 @@
   ```
 
 # Kafka Producer
+
+## Producing and consuming JSON
+
+## Producing and consuming Protobuf
 
 ## Step : Initialization
 
@@ -167,8 +171,6 @@
   ```sh
     pip install kafka-python
   ```
-
-
 
 # Setting Up a Kafka Producer in Python
 

@@ -123,6 +123,49 @@
     print(new_person)
   ```
 
+# Protobuf Schema Backward Compatibility
+
+- All the versions of your schema need to be backwards-compatible. i.e., you must be able to correctly apply the previous version of the schema to the current data.
+- Example:
+  - These schema versions of the schemas are backward compatible: The `v2` schema includes all the fields from the `v1`, and adds a new optional field after. **Consumers** using the new schema can read data written by **producers** using the latest registered schema:
+  - `v1`
+    ```json
+    {
+      "type": "object",
+      "title": "Reservation",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "persons": {
+          "type": "integer"
+        }
+      },
+      "required": ["name", "table"],
+      "additionalProperties": false
+    }
+    ```
+  - `v2`
+    ```json
+    {
+      "type": "object",
+      "title": "Reservation",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "persons": {
+          "type": "integer"
+        },
+        "comment": {
+          "type": "string"
+        }
+      },
+      "required": ["name", "table"],
+      "additionalProperties": false
+    }
+    ```
+
 # Steps
 
 ## Step : Create the Protobuf Schema
@@ -145,6 +188,21 @@
     ```sh
       curl -X GET http://localhost:8081/subjects/users.customers.protobuf.v1-value/versions
     ```
+- Remarks:
+  - To view the `users.customers.protobuf.v1-value` schema, run the following command:
+    ```sh
+      curl http://localhost:8081/subjects/users.customers.protobuf.v1-value/versions/1
+    ```
+    - Sample Output:
+      ```json
+      {
+        "subject": "users.customers.protobuf.v1-value",
+        "version": 1,
+        "id": 8,
+        "schemaType": "PROTOBUF",
+        "schema": "syntax = \"proto3\";\n\nmessage Customers {\n  string id = 1;\n  string first_name = 2;\n  string last_name = 3;\n  bool status = 4;\n  string created_by = 5;\n  string updated_by = 6;\n  google.protobuf.Timestamp created_at = 7;\n  google.protobuf.Timestamp updated_at = 8;\n}\n"
+      }
+      ```
 
 ## Step : Produce Messages to the Topic
 
