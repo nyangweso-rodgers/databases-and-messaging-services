@@ -367,7 +367,7 @@
 
 - You can download connectors from [https://www.confluent.io/hub/](https://www.confluent.io/hub/)
 
-# 1. Configure [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc)
+# 1. [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc)
 
 - The [Kafka Connect JDBC Source connector]() allows you to import data from any relational database with a **JDBC** driver into an **Apache Kafka topic**. This **connector** can support a wide variety of databases.
 - We add both the [Avro Converter](https://www.confluent.io/hub/confluentinc/kafka-connect-avro-converter) and [JDBC Source/Sink](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) plugins to our **Docker image**.
@@ -519,30 +519,57 @@
     }
     ```
 
-- **Step** (**Register jdbc Source Connector**)
+## Command : Register Source Connector
 
-  - **Register** Postgres **Source Connector** by:
-    ```sh
-     curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @jdbc-protobuf-connector-for-customers-postgresdb.json
-    ```
+- Register jdbc Postgres Source Connector by:
 
-- Step : Check the Connector Status
-  - Use the following command to check the status of your Kafka Connect connector
-    ```sh
-      curl -X GET http://localhost:8083/connectors/jdbc-protobuf-connector-for-customers-postgresdb/status
-    ```
-- **Step**: (**Test Your Connect Server**):
+  ```sh
+   curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @jdbc-avro-connector-for-customers-postgresdb.json
+  ```
 
-  - Test connector server by:
-    ```sh
-      curl --location --request GET 'http://localhost:8083/connectors'
-    ```
+- Example Output:
 
-- **Step** (**Delete Source Connector**):
-  - Remove the **connectors** by:
-    ```sh
-      curl -X DELETE http://localhost:8083/connectors/jdbc-protobuf-connector-for-customers-postgresdb
-    ```
+## Command : Check the Connector Status
+
+- Use the following command to check the status of your Kafka Connect connector
+  ```sh
+    curl -X GET http://localhost:8083/connectors/jdbc-avro-connector-for-customers-postgresdb/status
+  ```
+- Example Output:
+
+## Command : Get a List of all Connectors
+
+- To get a list of connectors for your Apache Kafka® cluster:
+
+  ```sh
+    curl --location --request GET 'http://localhost:8083/connectors'
+  ```
+
+- Example Output:
+
+## Command : Get Detailed Information on a Connector
+
+- Example Output:
+
+## Command : Pause a Connector
+
+- Example Output:
+
+## Command : Resume a Connector
+
+- Example Output:
+
+## Command : Update a Connector
+
+- Example Output:
+
+## Command : Delete a Connector
+
+- Remove the **connectors** by:
+  ```sh
+    curl -X DELETE http://localhost:8083/connectors/jdbc-avro-connector-for-customers-postgresdb
+  ```
+- Example Output:
 
 ## 1.2. JDBC Source Connector with SpecificAvro -> Key:String(null) and Value:`SpecificAvro`
 
