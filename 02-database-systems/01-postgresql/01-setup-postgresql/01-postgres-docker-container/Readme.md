@@ -75,8 +75,42 @@
   ```sh
       docker-compose up -d
   ```
+- Remarks:
+  - Confirm that PostgreSQL is up and running inside Docker.
+    ```sh
+      docker ps
+    ```
 
-## Step 3: Configure PgAdmin Connection
+## Step 3: Connecting to a Postgres Docker Container
+
+- To connect to a **PostgreSQL** instance running within a **Docker container**, you can use the `docker exec` command combined with the `psql` command:
+  ```bash
+    docker exec -it <container> psql -U <username>
+  ```
+- **Example 1**:
+  - Access the PostgreSQL Container
+    ```sh
+      docker exec -it postgres psql -U admin
+    ```
+- **Example 2**:
+  - Acccess specific database in PostgreSQL Container
+  ```sh
+    docker exec -it postgres psql -U admin -d test_db
+  ```
+- **Remark**:
+  1. We Can **Create** a Database by:
+     ```sh
+      CREATE DATABASE surveys;
+     ```
+
+## Step 4: Check PostgreSQL Health Status
+
+- Check PostgreSQL health status by:
+  ```sh
+    docker inspect --format='{{json .State.Health}}' postgres
+  ```
+
+# How to Configure PgAdmin Connection
 
 - Configure the **PgAdmin** connection by specifying the following parameters:
   - **Host name/address**: `postgres` (the name of your service in Docker Compose)
@@ -86,17 +120,6 @@
 - Note:
   - **Network Connection Between Containers**: Since `pgadmin` and `postgres` are running as services within the same Docker Compose file, they are by default on the same network.
   - **Correct Credentials and Host**: When setting up your `PgAdmin` connection, make sure to use the correct credentials from your `.env` file and specify the `host` as `postgres` (the service name in the Docker Compose file). This should match what you have set up in your environment variables.
-
-## Step : Connecting to a Postgres Docker Container
-
-- To connect to a **PostgreSQL** instance running within a **Docker container**, you can use the `docker exec` command combined with the `psql` command:
-  ```bash
-    docker exec -it <container> psql -U <username>
-  ```
-- Example:
-  ```sh
-    docker exec -it postgres psql -U admin -d test_db
-  ```
 
 ## Step : Creating a Postgres user
 
