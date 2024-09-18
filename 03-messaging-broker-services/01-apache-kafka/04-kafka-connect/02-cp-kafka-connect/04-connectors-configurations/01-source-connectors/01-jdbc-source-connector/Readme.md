@@ -123,7 +123,7 @@
 - Register jdbc Postgres Source Connector by:
 
   ```sh
-   curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @02-jdbc-avro-connector-for-customers-postgresdb.json
+   curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @04-jdbc-protobuf-connector-for-participants-surveys-postgresdb.json
   ```
 
 - Example Output:
