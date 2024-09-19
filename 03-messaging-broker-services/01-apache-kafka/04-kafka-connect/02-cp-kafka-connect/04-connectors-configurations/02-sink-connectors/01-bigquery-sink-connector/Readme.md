@@ -96,20 +96,82 @@
 ## Step 4 : Register BigQuery Sink Connector
 
 ```sh
-    curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @bigquery-avro-sink-connector-for-customers.json
+    curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @01-bq-sink-connector-for-participants-survey-with-avro.json
 ```
+
+- Examle Output:
+  ```json
+  {
+    "name": "bq-sink-connector-for-participants-survey-with-avro",
+    "config": {
+      "connector.class": "com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
+      "tasks.max": "1",
+      "topics": "surveys.protobuf.v1.participants_survey",
+      "project": "general-364419",
+      "defaultDataset": "surveys",
+      "keyfile": "/etc/plugins/bigquery-keyfile.json",
+      "autoCreateTables": "true",
+      "autoUpdateSchemas": "true",
+      "tableWriteWait": "1000",
+      "bufferSize": "1000",
+      "flush.size": "10000",
+      "retry": "3",
+      "retryWait": "10000",
+      "consumer.auto.offset.reset": "earliest",
+      "topicsToTables": "surveys.protobuf.v1.participants_survey=participants_survey",
+      "sanitizeTopics": "true",
+      "maxWriteSize": "10000",
+      "allBQFieldsNullable": "true",
+      "allowNewBigQueryFields": "true",
+      "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+      "value.converter": "io.confluent.connect.avro.AvroConverter",
+      "value.converter.schema.registry.url": "http://schema-registry:8081",
+      "value.converter.schemas.enable": "true",
+      "errors.tolerance": "all",
+      "errors.log.enabled": "true",
+      "errors.log.include.messages": "true",
+      "name": "bq-sink-connector-for-participants-survey-with-avro"
+    },
+    "tasks": [],
+    "type": "sink"
+  }
+  ```
+
+## Command : Get a List of all Connectors
+
+- To get a list of connectors for your Apache Kafka® cluster:
+
+  ```sh
+    curl --location --request GET 'http://localhost:8083/connectors'
+  ```
+
+- Example Output:
+  ```sh
+    ["jdbc-protobuf-connector-for-customers-postgresdb","jdbc-avro-connector-for-customers-postgresdb","jdbc-protobuf-connector-for-participants-surveys-postgresdb"]
+  ```
 
 ## Step 5: Check Status of BigQuery Sink Connector
 
 - Verify the status of the **connector** to ensure it is running without errors:
   ```sh
-    curl -X GET http://localhost:8083/connectors/bigquery-avro-connector-for-customers/status
+    curl -X GET http://localhost:8083/connectors/bq-sink-connector-for-participants-survey-with-avro/status
+  ```
+- Examle Output:
+  ```json
+  {
+    "name": "bq-sink-connector-for-participants-survey-with-avro",
+    "connector": { "state": "RUNNING", "worker_id": "cp-kafka-connect:8083" },
+    "tasks": [
+      { "id": 0, "state": "RUNNING", "worker_id": "cp-kafka-connect:8083" }
+    ],
+    "type": "sink"
+  }
   ```
 
 ## Step 6: Validate the connector configuration to see if there are any misconfigurations
 
 ```sh
-    curl -X PUT -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @bigquery-avro-sink-connector-for-customers.json
+    curl -X PUT -H "Content-Type: application/json" http://localhost:8083/connector-plugins/com.wepay.kafka.connect.bigquery.BigQuerySinkConnector/config/validate -d @01-bq-sink-connector-for-participants-survey-with-avro.json
 ```
 
 ## Step 7: Delete BigQuery Sink Connector

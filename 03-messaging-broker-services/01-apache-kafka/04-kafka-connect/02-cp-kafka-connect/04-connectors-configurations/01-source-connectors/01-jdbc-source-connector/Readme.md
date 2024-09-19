@@ -123,7 +123,7 @@
 - Register jdbc Postgres Source Connector by:
 
   ```sh
-   curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @04-jdbc-protobuf-connector-for-participants-surveys-postgresdb.json
+   curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @01-jdbc-postgresdb-source-connector-for-participants-surveys-with-protobuf.json
   ```
 
 - Example Output:
@@ -137,6 +137,9 @@
   ```
 
 - Example Output:
+  ```sh
+    ["jdbc-protobuf-connector-for-customers-postgresdb","jdbc-avro-connector-for-customers-postgresdb","jdbc-protobuf-connector-for-participants-surveys-postgresdb"]
+  ```
 
 ## Command : Check the Connector Status
 
@@ -166,7 +169,7 @@
 
 - Remove the **connectors** by:
   ```sh
-    curl -X DELETE http://localhost:8083/connectors/jdbc-avro-connector-for-customers-postgresdb
+    curl -X DELETE http://localhost:8083/connectors/jdbc-protobuf-connector-for-participants-surveys-postgresdb
   ```
 - Example Output:
 
