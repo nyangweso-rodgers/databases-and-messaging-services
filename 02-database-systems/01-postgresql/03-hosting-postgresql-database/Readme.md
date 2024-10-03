@@ -9,6 +9,10 @@
 
 # Supabase
 
-- With Supabase, you can fire up docker container and self-host
+- With Supabase, you can fire up docker container and self-host.
+- Supabase offe 3 main products:
+  1.  Database
+  2.  Storage
+  3.  Authentication
 
 # Resources and Further Reading
