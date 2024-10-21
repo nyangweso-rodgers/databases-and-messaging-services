@@ -85,7 +85,27 @@
       SELECT * FROM source_data
     ```
 
-- Creating a 
+- Creating a
+
+# How to Execute Dataform Transformations
+
+## 1. Manual Execution
+
+- Within your Dataform repository, you can effortlessly execute Dataform by selecting **tags**, **actions**, **dependencies**.
+- This approach is ideal for development and testing environments. It can also be used for projects that does not require frequent execution on specific dates. However, for more complex use cases, manual execution has significant limitations.
+
+# CI/CD and Scheduling for Dataform Pipelines
+
+## 1. Scheduling
+
+### 1.1: Cloud Scheduler as a Dataform Scheduler
+
+- Dataform can be scheduled using DAG/task in Cloud Composer
+
+## 2. Workflow Configurations
+
+- Workflow configurations offer a straightforward approach to executing Dataform transformations at **predetermined intervals**. Within the GCP Dataform service, you can establish one or more workflow configurations. Simply select the transformations you want to run (using tags, actions, etc.) and specify a **scheduled time**. GCP will handle the rest, automating the execution process.
+- More complex scenarios can already be envisaged with this solution. For instance, triggering major transformations of our project every hour and executing data quality tests only once a day to limit costs.
 
 # Resources and Further Reading
 
