@@ -137,12 +137,11 @@
 
 # Resources
 
-1.
-2.
-3. [confluent.io - Kafka Listeners – Explained](https://www.confluent.io/blog/kafka-listeners-explained/)
-4. [confluent.io - Introducing the Kafka Consumer: Getting Started with the New Apache Kafka 0.9 Consumer Client](https://www.confluent.io/blog/tutorial-getting-started-with-the-new-apache-kafka-0-9-consumer-client/)
-5. [Schema Registry Documentation](https://docs.confluent.io/platform/current/schema-registry/index.html)
-6. [developer.confluent.io - Managing Schemas](https://developer.confluent.io/courses/schema-registry/manage-schemas/#:~:text=When%20you%20register%20a%20schema,or%20topic%2Dname%2Dvalue.)
-7. [Protocol Buffers Documentation](https://protobuf.dev/overview/#scalar)
-8. [Apache avro](https://avro.apache.org/)
-9. [confluentinc/cp-schema-registry Docker Image](https://hub.docker.com/r/confluentinc/cp-schema-registry)
+
+1. [confluent.io - Kafka Listeners – Explained](https://www.confluent.io/blog/kafka-listeners-explained/)
+2. [confluent.io - Introducing the Kafka Consumer: Getting Started with the New Apache Kafka 0.9 Consumer Client](https://www.confluent.io/blog/tutorial-getting-started-with-the-new-apache-kafka-0-9-consumer-client/)
+3. [Schema Registry Documentation](https://docs.confluent.io/platform/current/schema-registry/index.html)
+4. [developer.confluent.io - Managing Schemas](https://developer.confluent.io/courses/schema-registry/manage-schemas/#:~:text=When%20you%20register%20a%20schema,or%20topic%2Dname%2Dvalue.)
+5. [Protocol Buffers Documentation](https://protobuf.dev/overview/#scalar)
+6. [Apache avro](https://avro.apache.org/)
+7. [confluentinc/cp-schema-registry Docker Image](https://hub.docker.com/r/confluentinc/cp-schema-registry)
