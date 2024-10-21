@@ -25,51 +25,42 @@
 4. **Database Replication**:
    - Database Commit log is piped to a Kafka topic.
 
-# Kafka Architecture
+# Kafka Concepts (Architecture)
 
-## 1. Kafka Cluster
-
-- **Kafka Cluster** is a collection of **Kafka brokers**.
-
-## 2. Kafka Broker
-
-- **Kafka Brokers** store data that is sent from the **producer** and keep data in both **cache** and **disk**. The default data retention on **disk** is **7 days** but we can configure for more or less.
-
-# Kafka Concepts
-
-## Kafka Concept 2: Producers
+## 1. Producers
 
 - **Producers** are **applications** that publish data to **Kafka topics**. They write messages to specific **topics**, and these messages are then stored in the **Kafka brokers**
 
-## Kafka Concept 3: Consumers
+## 2. Consumers
 
 - **Consumers** are **applications** that read data from **Kafka topics**. They **subscribe** to one or more **topics** and receive messages from the **partitions** of those **topics**.
+- The following are associated with Consumers:
+  1. **Consumer Group**
+     - **Consumers** can be organized into **consumer groups**, where each group consists of one or more **consumers** who work together to consume messages from one or more topics. Each message in a **partition** is delivered to only one **consumer** within a group, allowing parallel processing of data.
+     - Example:
+       - Let’s consider an example where we have a **Kafka topic** named `orders` with three partitions. We create a **consumer group** named `orderProcessors` with two **consumer** instances (`consumer-1` and `consumer-2`). **Kafka** automatically assigns partitions to these consumers as follows:
+         - `consumer-1` -> partitions 0, 2
+         - `consumer-2` -> partition 1
+       - Now, each **consumer** instance within the `orderProcessors` group processes messages from its assigned partitions concurrently, allowing efficient and parallel message processing.
+  2. `GroupId`:
+     - The `GroupId` identifies a **consumer group**, which is a logical collection of **consumer** instances that work together to consume messages from one or more topics.
+     - **Consumers** within the same `GroupId` coordinate to process messages from assigned partitions, ensuring parallelism and fault tolerance.
+  3. `ConsumerId`:
+     - The `ConsumerId` uniquely identifies an individual **consumer** instance within a **consumer group**
+     - Each **consumer** instance in a group has a distinct `ConsumerId`, which helps Kafka track its progress and state in consuming messages.
+  4. `ClientId`:
+     - The `ClientId` is an identifier assigned to a **Kafka client application** (**producer** or **consumer**).
+     - Multiple **consumer** instances or **producers** can share the same `ClientId` if they belong to the same application
 
-### Kafka Concept 3.1: Consumer Groups
+## 3. Kafka Broker
 
-- **Consumers** can be organized into **consumer groups**, where each group consists of one or more **consumers** who work together to consume messages from one or more topics. Each message in a **partition** is delivered to only one **consumer** within a group, allowing parallel processing of data.
-- Example:
-  - Let’s consider an example where we have a **Kafka topic** named `orders` with three partitions. We create a **consumer group** named `orderProcessors` with two **consumer** instances (`consumer-1` and `consumer-2`). **Kafka** automatically assigns partitions to these consumers as follows:
-    - `consumer-1` -> partitions 0, 2
-    - `consumer-2` -> partition 1
-  - Now, each **consumer** instance within the `orderProcessors` group processes messages from its assigned partitions concurrently, allowing efficient and parallel message processing.
+- **Kafka Brokers** store data that is sent from the **producer** and keep data in both **cache** and **disk**. The default data retention on **disk** is **7 days** but we can configure for more or less.
 
-### Kafka Concept 3.2: `GroupId`
+## 4. Kafka Cluster
 
-- The `GroupId` identifies a **consumer group**, which is a logical collection of **consumer** instances that work together to consume messages from one or more topics.
-- **Consumers** within the same `GroupId` coordinate to process messages from assigned partitions, ensuring parallelism and fault tolerance.
+- **Kafka Cluster** is a collection of **Kafka brokers**.
 
-### Kafka Concept 3.3: `ConsumerId`
-
-- The `ConsumerId` uniquely identifies an individual **consumer** instance within a **consumer group**.
-- Each **consumer** instance in a group has a distinct `ConsumerId`, which helps Kafka track its progress and state in consuming messages.
-
-### Kafka Concept 3.4: `ClientId`
-
-- The `ClientId` is an identifier assigned to a **Kafka client application** (**producer** or **consumer**).
-  - Multiple **consumer** instances or **producers** can share the same `ClientId` if they belong to the same application
-
-## Kafka Concept 4: Topics
+## 5. Topics
 
 - **Kafka** categorizes data into **topics**. A **topic** is a category or feed name to which records are published.
 - **Producers** publish messages to a specific **topic**. The messages can be in any format, with `JSON` and `Avro` being popular options. **Consumers** subscribe to a **topic** to consume the records published by producers.
@@ -81,19 +72,32 @@
   - **Topics** are durable, holding onto messages for a specific period (by default 7 days) by saving them to physical storage on disk.
   - You can configure topics so that messages expire after a certain amount of time, or when a certain amount of storage is exceeded. You can even store messages indefinitely as long as you can pay for the storage costs.
 
-## Kafka Concept 5: Partitions
+## 6. Partitions
 
 - In order to help **Kafka** to scale, **topics** can be divided into **partitions**. This breaks up the event log into multiple logs, each of which lives on a separate node in the **Kafka cluster**. This means that the work of writing and storing messages can be spread across multiple machines.
 - When you create a **topic**, you specify the amount of **partitions** it has. The **partitions** are themselves numbered, starting at `0`. When a new event is written to a **topic**, it's appended to one of the topic's **partitions**.
 - **Messages** that have the same `key` will always be sent to the same **partition**, and in the same order. The `key` is run through a hashing function which turns it into an integer. This output is then used to select a **partition**.
 - **Messages** within each **partition** are guaranteed to be ordered. For example, all messages with the same `customer_id` as their `key` will be sent to the same partition in the order in which **Kafka** received them.
 
-## Kafka Concept 6: Offsets
+## 7. Offsets
 
 - Each **message** in a **partition** gets an `id` that is an incrementing integer, called an **offset**.
 - **Offsets** start at `0` and are incremented every time **Kafka** writes a message to a **partition**. This means that each message in a given **partition** has a unique **offset**.
 - **Offsets** are not reused, even when older messages get deleted. They continue to increment, giving each new message in the **partition** a unique id.
 - When data is read from a **partition**, it is read in order from the lowest existing **offset** upwards.
+
+# Kafka Messaging Strategies And How To Choose The Right One
+
+- What should be the next step after publishing an event? It turns out there are 3 options we could choose from:
+  1. Fire and Forget
+  2. Synchronous Send
+  3. Asynchronous Send
+
+## 1. Fire and Forget
+
+- In this strategy, we send a message to the Kafka broker and forget about it. We simply don’t care what happens to it.
+- Since Kafka is highly available, it will likely arrive on the other side successfully. In case of a minor issue, the Producer will retry sending the message automatically.
+- **Fire and forget** means that messages can and will get lost. Also, the application won’t get any information or exceptions about these lost messages.
 
 # Resources and Further Reading
 
