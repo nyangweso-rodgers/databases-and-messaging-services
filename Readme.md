@@ -174,16 +174,22 @@
 
 ## 7. Sharding
 
+- **Sharding** is a strategy to horizontally scale the database.
 - Database **sharding** is a technique that partitions a single large database into smaller, more manageable units called **shards**.
-- In a sharded database architecture, data is distributed across multiple shards based on a specific sharding key. The choice of the sharding key determines how the data is allocated to different shards.
+- In a sharded database architecture, data is distributed across multiple **shards** based on a specific sharding key. The choice of the sharding key determines how the data is allocated to different shards.
+
 - Common **sharding strategies** include:
+
   1. **Range-based Sharding**: Data is partitioned based on a range of values of the sharding key.
   2. **Hash-based Sharding**: A hash function is applied to the sharding key to determine the target shard.
   3. **Directory-based Sharding**: A separate lookup table is maintained to map the sharding key to the corresponding shard.
+
 - The **benefits** of **Sharding** are as follows:
+
   1. Sharding allows for horizontal scaling of the database.
   2. Queries and write operations are processed in parallel.
   3. Reduced hardware costs when compared to vertical scaling.
+
 - However, there are also trade-offs:
   1. Sharding introduces additional complexity.
   2. Rebalancing data across shards can be a complex and time-consuming process.
@@ -193,3 +199,4 @@
 
 1. [MongoDB Basics - What are ACID Properties in Database Management Systems?](https://www.mongodb.com/basics/acid-transactions)
 2. [newsletter.systemdesigncodex.com - 7-techniques-for-database-performance?ref=dailydev](https://newsletter.systemdesigncodex.com/p/7-techniques-for-database-performance?ref=dailydev)
+3. [database sharding](https://newsletter.systemdesigncodex.com/p/database-sharding?ref=dailydev)
