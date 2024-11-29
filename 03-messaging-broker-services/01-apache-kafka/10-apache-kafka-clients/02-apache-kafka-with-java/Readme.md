@@ -10,6 +10,36 @@
 4. Use `KafkaTemplate` to send messages to a topic
 5. Use `@KafkaListener` to listen to messages sent to the topic in real-time
 
+# Java APIs Overview
+
+## Step 1. Adding Kafka Dependency:
+
+### 1.1 Maven Dependency
+
+- If you’re using **Maven**, you can add the following dependency to your `pom.xml` file:
+  ```xml
+    <dependencies>
+      <dependency>
+          <groupId>org.apache.kafka</groupId>
+          <artifactId>kafka-clients</artifactId>
+          <version>3.0.0</version> <!-- Make sure to use the latest stable version -->
+      </dependency>
+  </dependencies>
+  ```
+
+### 1.2 Gradle Dependency
+
+- If you’re using **Gradle**, you can add the following dependency to your `build.gradle` file:
+  ```gradle
+    dependencies {
+      implementation 'org.apache.kafka:kafka-clients:3.0.0' // Make sure to use the latest stable version
+  }
+  ```
+
+## Step 2. KafkaProducer API
+
+## Step 3. KafkaConsumer API
+
 ## Step: Docker Compose File Kafka Broker
 
 ```yml
@@ -21,7 +51,7 @@ services:
 
 ## Step : Kafka Configuration
 
-### Step .1: Minal Configuration
+### Step .1: Minual Configuration
 
 - The **Kafka** configuration is controlled by the configuration properties with the prefix `spring.kafka.*`. For example, add the following property so Spring boot auto-configuration will create a KafkaTemplate and other necessary beans.
   ```yml
