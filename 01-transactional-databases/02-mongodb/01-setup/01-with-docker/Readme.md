@@ -13,194 +13,198 @@
 - **Remark**:
   - Using the [kubernetes operator](https://www.mongodb.com/docs/kubernetes-operator/master/) with the enterprise image is highly recommended for a production environment to be fully supported.
 
-# Running MongoDB with Docker Compose (Without Auth)
+# Running MongoDB with Docker Compose
+
+## Step 1. Create `docker-compose.yml` File with MongoDB Configurations
 
 - In a `docker-compose.yaml` file, describe all of your containers that are part of the application.
-- **Step 1**: Setup `docker-compose.yaml` File
 
-  - Create a `docker-compose.yml` file with the following service:
-    ```yml
-    #docker-compose.yml for mongodb
-    version: "2"
-    services:
-      mongo:
-        image: mongo:latest
-        container_name: mongo
-        ports:
-          - "27017:27017"
-        volumes:
-          - mongo-volume:/data/db
-    volumes:
-      mongo_data:
-    ```
-  - Where:
-    - `MONGO_INITDB_DATABASE`: used to specify the name of the initial database to be created when the **MongoDB container** starts up for the first time. If you don't specify it, MongoDB will default to creating a database named `test`. If you're not planning to create a specific initial database or if you're only working with the default `test` database, you can omit this line from the `docker-compose.yml` file.
-    - The `27017:27017` in this command maps the container port to the host port. This allows you to connect to **MongoDB** with a `localhost:27017` connection string.
+  ```yml
+  #docker-compose.yml for mongodb
+  version: "2"
+  services:
+    mongo:
+      image: mongo:latest
+      container_name: mongo
+      ports:
+        - "27017:27017"
+      volumes:
+        - mongo-volume:/data/db
+  volumes:
+    mongo_data:
+  ```
 
-- **Step 2**: start the **MongoDB** services defined in the compose file by executing the given command:
+- Where:
+  - `MONGO_INITDB_DATABASE`: used to specify the name of the initial database to be created when the **MongoDB container** starts up for the first time. If you don't specify it, MongoDB will default to creating a database named `test`. If you're not planning to create a specific initial database or if you're only working with the default `test` database, you can omit this line from the `docker-compose.yml` file.
+  - The `27017:27017` in this command maps the container port to the host port. This allows you to connect to **MongoDB** with a `localhost:27017` connection string.
+
+## Step 2. Start MongoDB Docker Container
+
+- start the **MongoDB** services defined in the compose file by executing the given command:
 
   ```sh
     docker-compose up --build -d
   ```
 
-  - You can view the running mongodb container by `docker ps` command.
+- You can view the running mongodb container by `docker ps` command.
 
-- **Step 4**: **Validate MongoDB Deployment**
+## Step 3. Validate MongoDB Deployment
 
-  - To confirm **MongoDB** instance is running, run the Hello command:
+- To confirm **MongoDB** instance is running, run the Hello command:
+  ```sh
+    #mongosh
+    db.runCommand({hello: 1})
+  ```
+- The result of this command returns a document describing your `mongod` deployment:
+
+  ```sh
+    {
+      isWritablePrimary: true,
+      topologyVersion: {
+        processId: ObjectId('66573f5ac9f4dcfbff93864d'),
+        counter: Long('0')
+      },
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 100000,
+      localTime: ISODate('2024-05-29T14:58:41.485Z'),
+      logicalSessionTimeoutMinutes: 30,
+      connectionId: 21,
+      minWireVersion: 0,
+      maxWireVersion: 21,
+      readOnly: false,
+      ok: 1
+    }
+  ```
+
+- This basically means that, any one with access to the system, can do anything possible to **MongoDB** databases since there is no restriction implemented.
+- If you check from **MongoDB** shell prompt, no user is created by default;
+
+  ```bash
+    #mongosh
+    show users #output: []
+    #or
+    db.getUsers(); #output: { users: [], ok: 1 }
+  ```
+
+## Step 4. Create MongoDB Administrative, `admin` User
+
+- To create an `admin` user, switch to default `admin` **MongoDB** database.
+- Listing available databases first;
+  ```bash
+    #mongosh
+    show dbs
+  ```
+- Sample output:
+
+  ```sh
+    test> show dbs
+    admin   40.00 KiB
+    config  12.00 KiB
+    local   40.00 KiB
+  ```
+
+- Next, run the command below from the shell prompt to switch to **MongoDB** default `admin` database;
+
+  ```sh
+    #mongosh
+    use admin
+  ```
+
+- Once you have switched to `admin` database, create **MongoDB** `admin` user by:
+
+  ```bash
+    #mongosh
+    use admin
+    db.createUser({user: 'admin', pwd: 'mypassword', roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]})
+  ```
+
+  - Sample Output:
     ```sh
-      #mongosh
-      db.runCommand({hello: 1})
+      { ok: 1 }
     ```
-  - The result of this command returns a document describing your `mongod` deployment:
 
-    ```sh
+- The command above simply create an admin user with the following roles;
+  - **roles**: This field specifies the roles assigned to the user. Roles define the user’s permissions and privileges within the MongoDB database.
+    - `{ role: “userAdminAnyDatabase”, db: “admin” }`: Grants the user administrative privileges (userAdminAnyDatabase) on the admin database. This role allows the user to create and manage users on any database.
+    - `“readWriteAnyDatabase”`: Grants the user read and write access (readWriteAnyDatabase) to any database. This role allows the user to read and write data to any database in the MongoDB instance.
+- List users again to confirm;
+
+  ```bash
+    #mongosh
+    show users
+  ```
+
+  - Sample Output:
+    ```bash
+      [
       {
-        isWritablePrimary: true,
-        topologyVersion: {
-          processId: ObjectId('66573f5ac9f4dcfbff93864d'),
-          counter: Long('0')
-        },
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 100000,
-        localTime: ISODate('2024-05-29T14:58:41.485Z'),
-        logicalSessionTimeoutMinutes: 30,
-        connectionId: 21,
-        minWireVersion: 0,
-        maxWireVersion: 21,
-        readOnly: false,
-        ok: 1
+        _id: 'admin.admin',
+        userId: UUID('b97b2883-16c9-4f73-98fa-2fc6e9f63a35'),
+        user: 'admin',
+        db: 'admin',
+        roles: [
+          { role: 'userAdminAnyDatabase', db: 'admin' },
+          { role: 'readWriteAnyDatabase', db: 'admin' }
+        ],
+        mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ]
       }
+    ]
     ```
 
-  - This basically means that, any one with access to the system, can do anything possible to **MongoDB** databases since there is no restriction implemented.
-  - If you check from **MongoDB** shell prompt, no user is created by default;
-    ```bash
-      #mongosh
-      show users #output: []
-      #or
-      db.getUsers(); #output: { users: [], ok: 1 }
-    ```
+## Step 5. Create other Users
 
-- **Step 5**: Create MongoDB Administrative, `admin` User
+- For a database name, `test_db`, we can create a seperate user with a read and write access to the database as follows:
 
-  - To create an `admin` user, switch to default `admin` **MongoDB** database.
-  - Listing available databases first;
-    ```bash
-      #mongosh
-      show dbs
-    ```
-  - Sample output:
+  ```sh
+    #mongosh
+    use test_db
+    db.createUser({user: 'test_user', pwd: 'test_pwd', roles: [{role: "readWrite", db: "test_db"}]})
+  ```
 
-    ```sh
-      test> show dbs
-      admin   40.00 KiB
-      config  12.00 KiB
-      local   40.00 KiB
-    ```
+## Step 6. Connect to MongoDB with Auth
 
-  - Next, run the command below from the shell prompt to switch to **MongoDB** default `admin` database;
+- Connect to `admin` database with `auth`:
 
-    ```sh
-      #mongosh
-      use admin
-    ```
+  ```bash
+    docker exec -it mongodb-community-server mongosh -u admin <pwd> --authenticationDatabase admin
+  ```
 
-  - Once you have switched to `admin` database, create **MongoDB** `admin` user by:
+- Connect to `test_db` database with `auth`:
 
-    ```bash
-      #mongosh
-      use admin
-      db.createUser({user: 'admin', pwd: 'mypassword', roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]})
-    ```
+  ```bash
+    docker exec -it mongodb-community-server mongosh -u test_db <pwd> --authenticationDatabase test_db
+  ```
 
-    - Sample Output:
-      ```sh
-        { ok: 1 }
-      ```
+## Step 7. Update `MONGO_URI`
 
-  - The command above simply create an admin user with the following roles;
-    - **roles**: This field specifies the roles assigned to the user. Roles define the user’s permissions and privileges within the MongoDB database.
-      - `{ role: “userAdminAnyDatabase”, db: “admin” }`: Grants the user administrative privileges (userAdminAnyDatabase) on the admin database. This role allows the user to create and manage users on any database.
-      - `“readWriteAnyDatabase”`: Grants the user read and write access (readWriteAnyDatabase) to any database. This role allows the user to read and write data to any database in the MongoDB instance.
-  - List users again to confirm;
-    ```bash
-      #mongosh
-      show users
-    ```
-    - Sample Output:
-      ```bash
-        [
-        {
-          _id: 'admin.admin',
-          userId: UUID('b97b2883-16c9-4f73-98fa-2fc6e9f63a35'),
-          user: 'admin',
-          db: 'admin',
-          roles: [
-            { role: 'userAdminAnyDatabase', db: 'admin' },
-            { role: 'readWriteAnyDatabase', db: 'admin' }
-          ],
-          mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ]
-        }
-      ]
-      ```
-
-- **Step 6**: **Create other Users**
-
-  - For a database name, `test_db`, we can create a seperate user with a read and write access to the database as follows:
-    ```sh
-      #mongosh
-      use test_db
-      db.createUser({user: 'test_user', pwd: 'test_pwd', roles: [{role: "readWrite", db: "test_db"}]})
-    ```
-
-- **Step 7**: **Connect to MongoDB with Auth**
-
-  - Connect to `admin` database with `auth`:
-
-    ```bash
-      docker exec -it mongodb-community-server mongosh -u admin <pwd> --authenticationDatabase admin
-    ```
-
-  - Connect to `test_db` database with `auth`:
-    ```bash
-      docker exec -it mongodb-community-server mongosh -u test_db <pwd> --authenticationDatabase test_db
-    ```
-
-- Step 8: Update the `MONGO_URI` to Use the New Credentials
+- Update the `MONGO_URI` to Use the New Credentials
 
   ```yml
   environment:
     - MONGO_URI=mongodb://<user>:<userpasswd>@mongodb:27017/<db_name>
   ```
 
-- **Step 8**: Connecting to MongoDB Uisng `.env` File
+## Step 8. Connecting to MongoDB Uisng `.env` File
 
-  - Create a `.env` File with:
-    ```.env
-      MONGO_INITDB_ROOT_USERNAME=admin
-      MONGO_INITDB_ROOT_PASSWORD=<pwd>
-      MONGODB_DATABASE=test_db
-      MONGODB_USER=test_user
-      MONGODB_PASSWORD=test_pwd
-      MONGODB_HOST_NAME=localhost
-      MONGODB_PORT=27017
-    ```
+- Create a `.env` File with:
+  ```.env
+    MONGO_INITDB_ROOT_USERNAME=admin
+    MONGO_INITDB_ROOT_PASSWORD=<pwd>
+    MONGODB_DATABASE=test_db
+    MONGODB_USER=test_user
+    MONGODB_PASSWORD=test_pwd
+    MONGODB_HOST_NAME=localhost
+    MONGODB_PORT=27017
+  ```
 
 # Access MongoDB
 
-## 1. Access MongoDB Using MongoDB Compass
+## 1. Connect to the MongoDB Docker Container with `mongosh`
 
-- Using this method, you will be able to connect to your **MongoDB** instance on `mongodb://localhost:27017`. You can try it with [Compass](https://www.mongodb.com/products/tools/compass), MongoDB’s GUI to visualize and analyze your data.
-- If your application is running inside a container itself, you can run **MongoDB** as part of the same Docker network as your application using `--network`. With this method, you will connect to **MongoDB** on `mongodb://mongodb:27017` from the other containerized applications in the network.
-- To initialize your **MongoDB** with a root user, you can use the environment variables `MONGO_INITDB_ROOT_USERNAME` and `MONGO_INITDB_ROOT_PASSWORD`. These environment variables will create a user with root permissions with the specified user name and password.
+- **Remark**:
 
-- **Remarks**:
-  - If you already installed "MongoDB", and if you accidentally exit from the MongoDB server, then "restart your system".
-  - On **Windows**: press `Windows + R`, then type `services.msc` and click "ok", it opens "services" window, and then search for "MongoDB Server" in the list. After you find "MongoDB Server", right-click and choose "start" from the pop-up menu.
-
-## 2. Connect to the MongoDB Docker Container with `mongosh`
+  - For this Make sure you have installed **mongoDB server** as **mongoDB compass** does not includes **mongoDB server** which is actual database server. Download it from here and if its already installed make sure its up and running : https://www.mongodb.com/try/download/community
 
 - By default, self hosted **MongoDB** doesn’t enforce user **authentication** by default. For example, when you connect to **MongoDB** from the command line using the **mongosh** or command mongosh `mongodb://127.0.0.1:27017`, you will connect with no prompt for authentication.
 - Open the Bash shell inside the running **MongoDB docker container** through the following command:
@@ -226,6 +230,16 @@
 
     For mongosh info see: https://docs.mongodb.com/mongodb-shell/
   ```
+
+## 2. Access MongoDB Using MongoDB Compass
+
+- Using this method, you will be able to connect to your **MongoDB** instance on `mongodb://localhost:27017`. You can try it with [Compass](https://www.mongodb.com/products/tools/compass), MongoDB’s GUI to visualize and analyze your data.
+- If your application is running inside a container itself, you can run **MongoDB** as part of the same Docker network as your application using `--network`. With this method, you will connect to **MongoDB** on `mongodb://mongodb:27017` from the other containerized applications in the network.
+- To initialize your **MongoDB** with a root user, you can use the environment variables `MONGO_INITDB_ROOT_USERNAME` and `MONGO_INITDB_ROOT_PASSWORD`. These environment variables will create a user with root permissions with the specified user name and password.
+
+- **Remarks**:
+  - If you already installed "MongoDB", and if you accidentally exit from the MongoDB server, then "restart your system".
+  - On **Windows**: press `Windows + R`, then type `services.msc` and click "ok", it opens "services" window, and then search for "MongoDB Server" in the list. After you find "MongoDB Server", right-click and choose "start" from the pop-up menu.
 
 ## Mongosh Shell Commands
 
