@@ -28,6 +28,9 @@
       container_name: mongo
       ports:
         - "27017:27017"
+      environment:
+        - MONGO_INITDB_ROOT_USERNAME=user
+        - MONGO_INITDB_ROOT_PASSWORD=pass
       volumes:
         - mongo-volume:/data/db
   volumes:
@@ -35,6 +38,7 @@
   ```
 
 - Where:
+  - To initialize **MongoDB** with a root user, you can use the environment variables `MONGO_INITDB_ROOT_USERNAME` and `MONGO_INITDB_ROOT_PASSWORD`. These environment variables will create a user with root permissions with the specified user name and password.
   - `MONGO_INITDB_DATABASE`: used to specify the name of the initial database to be created when the **MongoDB container** starts up for the first time. If you don't specify it, MongoDB will default to creating a database named `test`. If you're not planning to create a specific initial database or if you're only working with the default `test` database, you can omit this line from the `docker-compose.yml` file.
   - The `27017:27017` in this command maps the container port to the host port. This allows you to connect to **MongoDB** with a `localhost:27017` connection string.
 
@@ -236,6 +240,11 @@
 - Using this method, you will be able to connect to your **MongoDB** instance on `mongodb://localhost:27017`. You can try it with [Compass](https://www.mongodb.com/products/tools/compass), MongoDB’s GUI to visualize and analyze your data.
 - If your application is running inside a container itself, you can run **MongoDB** as part of the same Docker network as your application using `--network`. With this method, you will connect to **MongoDB** on `mongodb://mongodb:27017` from the other containerized applications in the network.
 - To initialize your **MongoDB** with a root user, you can use the environment variables `MONGO_INITDB_ROOT_USERNAME` and `MONGO_INITDB_ROOT_PASSWORD`. These environment variables will create a user with root permissions with the specified user name and password.
+- MongoDB Connection String:
+
+  ```sh
+    mongodb://<username>:<password>@<ip address>:27017/<database-name>?authSource=admin
+  ```
 
 - **Remarks**:
   - If you already installed "MongoDB", and if you accidentally exit from the MongoDB server, then "restart your system".
@@ -243,14 +252,30 @@
 
 ## Mongosh Shell Commands
 
-1. Switch Databases
+1. Authenticate After Connecting to `mongosh`
+   - If you already started mongosh without authentication, you can manually authenticate by:
+   - First: Switch to `admin` Database:
+     ```sh
+      use admin
+     ```
+   - Secondly, Authenticate using the `db.auth` method:
+     ```sh
+      db.auth("admin", "secret")
+     ```
+   - After successful authentication, you can now switch to other databases or execute commands:
+     ```sh
+      show dbs
+      use users
+      show collections
+     ```
+2. Switch Databases
 
    - Switch to `admin` database
      ```sh
       use admin
      ```
 
-2. Display Current Databases
+3. Display Current Databases
 
    - To display the database you are using, type `db`
      ```sh
@@ -258,13 +283,13 @@
      ```
    - The operation should return `test`, which is the default database.
 
-3. Create a Database User
+4. Create a Database User
 
    ```sh
      db.createUser({user: "mongo", pwd: "mongo", roles: ["root"]})
    ```
 
-4. Show Databases
+5. Show Databases
 
    - Show databases by:
 
@@ -281,28 +306,60 @@
      local   40.00 KiB
    ```
 
-5. Show Database collections
+6. Show Database collections
 
    - List **collections** of a **database**
      ```sh
       show collections
      ```
 
-6. Create a New Non-Existent Database
+7. Display **Documents** in a **Collection**:
+   - To display all documents in a specific **collection**, use the `find()` method:
+   - First, If you’re not already in the desired database (e.g., `users`), switch to it
+     ```sh
+      use users
+     ```
+   - Secondly, To ensure the collection exists, list the collections:
+     ```sh
+      show collections
+     ```
+   - Query Documents by:
+     ```sh
+      db.users.find()
+     ```
+   - Format the Output: By default, `find()` will show all fields of each document in an unformatted way. Use `.pretty()` to make it more readable:
+     ```sh
+      db.users.find().pretty()
+     ```
+   - Filter Results (Optional): You can use a query to filter results. For example, if you want to find documents where name is `Rodgers`:
+     ```sh
+      db.users.find({name: "Rodgers"}).pretty()
+     ```
+   - Limit the Number of Results (Optional): To limit the number of documents displayed:
+     ```sh
+      db.users.find().limit(5).pretty()
+     ```
+   - Count Documents (Optional): To count the number of documents in the collection:
+     ```sh
+      db.users.countDocuments()
+     ```
+8. Create a New Non-Existent Database
 
    ```sh
     use test_db;
    ```
 
-7. Create a Collection
-   - In the `mongosh` shell, create a collection by:
-   ```sh
-     db.test_collection.insertOne({'some key': 'some value'});
-     {
-       acknowledged: true,
-       insertedId: ObjectId("65eef82cb0faece445b9bb74")
-     }
-   ```
+9. Create a Collection
+
+- In the `mongosh` shell, create a collection by:
+
+```sh
+  db.test_collection.insertOne({'some key': 'some value'});
+  {
+    acknowledged: true,
+    insertedId: ObjectId("65eef82cb0faece445b9bb74")
+  }
+```
 
 ## 2. Access MongoDB Server Using Shell
 
