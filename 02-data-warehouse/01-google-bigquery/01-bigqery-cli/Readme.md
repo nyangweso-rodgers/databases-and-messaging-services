@@ -35,6 +35,36 @@
     bq mk --table kafka_dataset.table_name --schema='fields=name:STRING,age:INTEGER'
   ```
 
+# Working with Scheduled Queries using command Line
 
+## List BigQuery Scheduled Queries
 
+- Syntax: Use the following command can be used to list scheduled queries
+
+  ```sh
+    bq ls --transfer_config --transfer_location=LOCATION --filter='dataSourceIds:scheduled_query'
+  ```
+
+  - Replace LOCATION with the region you want to inspect, for example "us".
+
+- **Example**:
+  - Lists Scheduled Queries from `europe-west4`
+    ```sh
+      bq ls --transfer_config --transfer_location=europe-west4 --filter='dataSourceIds:scheduled_query'
+    ```
+```sh
+  bq show --format=json --transfer_config <transfer_config_name>
+```
+```sh
+  bq show --format=json --transfer_config stock_replenishment
+```
+```sh
+  bq ls \
+--transfer_config \
+--transfer_location=europe-west4 \
+--project_id=kyosk-prod \
+--max_results=10 \
+--filter=dataSourceIds:stock_replenishment
+```
+```sh```
 # Resources and Further Reading
