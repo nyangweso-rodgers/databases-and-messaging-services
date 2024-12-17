@@ -5,7 +5,7 @@ from google.cloud import bigquery_datatransfer
 client = bigquery_datatransfer.DataTransferServiceClient()
 
 # Replace with your project ID and location
-project_id = "kyosk-prod"
+project_id = "<project-id>"
 location = "europe-west4" # replace location
 
 # Parent resource

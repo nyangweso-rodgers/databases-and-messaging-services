@@ -6,9 +6,9 @@ import json
 client = bigquery_datatransfer.DataTransferServiceClient()
 
 # Replace with your project ID, location, and config ID
-project_id = "kyosk-prod"
+project_id = "<project-id>"
 location = "europe-west4"
-config_id = "6717e095-0000-2fac-8097-582429a6eca8"
+config_id = "<config-id>"
 
 # Properly format the config_name
 config_name = f"projects/{project_id}/locations/{location}/transferConfigs/{config_id}"

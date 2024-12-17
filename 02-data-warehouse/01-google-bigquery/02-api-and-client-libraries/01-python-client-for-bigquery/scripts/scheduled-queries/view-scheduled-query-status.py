@@ -2,7 +2,7 @@ from google.cloud import bigquery_datatransfer
 
 transfer_client = bigquery_datatransfer.DataTransferServiceClient()
 
-project_id = "kyosk-prod"
+project_id = "<project-id>"
 location = "europe-west4"  # Replace with your location
 parent = f"projects/{project_id}/locations/{location}"
 
