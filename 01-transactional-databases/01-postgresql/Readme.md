@@ -22,3 +22,5 @@
      - \*pgcrypto: This extension provides cryptographic functions, allowing you to perform encryption operations directly in the database. It's useful for applications that need to store sensitive data securely.
      - **full_text_search**: While PostgreSQL has built-in text search capabilities, this extension enhances them further, providing more advanced search features like stemming and ranking.
 5. It's Free and Well-Supported
+
+# Resources and Further Reading
