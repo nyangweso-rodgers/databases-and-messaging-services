@@ -1,5 +1,7 @@
 # PostgreSQL
 
+## Table Of Contents
+
 # Introduction to PostgreSQL
 
 - **PostgreSQL** is an free open-source database system that supports both relational (SQL) and non-relational (JSON) queries.
@@ -8,6 +10,19 @@
 
 - It began in 1986 as a research project at the University of California, Berkeley. The project aimed to create a database system that could handle complex data and relationships more effectively than existing systems.
 - In 1995, the project added support for SQL, a standard language for working with databases, and was renamed PostgreSQL.
+
+# How PostgreSQL Stores Data
+
+- Postgres stores all its data in a directory sensibly called `/var/lib/postgresql/data`
+- Example:
+  - Let's spin up an empty Postgres installation with Docker and mount the data directory in a local folder so that we can see what’s going on in there
+    ```sh
+      docker run --rm -v ./pg-data:/var/lib/postgresql/data -e POSTGRES_PASSWORD=password postgres:16
+    ```
+  - Files created include:
+    - When you start up a fresh Postgres server, **Postgres** will automatically create 3 databases for you. i.e.,:
+      1. `postgres` – when you connect to a server, you need the name of a database to connect to, but you don’t always know what the name is. This is also true of database management tools. While it’s not strictly necessary, you can almost always rely on the postgres database existing – once you’ve connected to this empty, default database, you can list all the other databases on the server, create new databases, and so on.
+      2. `template0`, `template1` – as the name suggests, these databases are templates used to create future databases.
 
 # Why PostgreSQL for Web Development?
 
@@ -24,3 +39,5 @@
 5. It's Free and Well-Supported
 
 # Resources and Further Reading
+
+1. [daily.dev - How Postgres stores data on disk – this one's a page turner](https://drew.silcock.dev/blog/how-postgres-stores-data-on-disk/?ref=dailydev)
