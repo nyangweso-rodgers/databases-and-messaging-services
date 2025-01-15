@@ -27,6 +27,9 @@
 - Launch **pgAdmin** from your computer and click the "Add New Server" option.
 - Fill in the required information on the "Connection" tab at the top of the server screen.
 - Click "Save."
+- Where:
+  - `PGADMIN_DEFAULT_EMAIL` is used to create a new user account on **pgAdmin**.
+  - `PGADMIN_DEFAULT_PASSWORD` is used as a password for the user account identified by `PGADMIN_DEFAULT_EMAIL`.
 
 ## 3. Using 3rd-Party Clients (e.g., DBeaver)
 

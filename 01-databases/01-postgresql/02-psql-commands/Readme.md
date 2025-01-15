@@ -1,23 +1,10 @@
-# `psql` Commands
+# psql Commands
 
 ## Table Of Contents
 
-# `psql` Commands
-
 - To execute an SQL query, simply type it at the prompt followed by a semicolon (`;`), and hit enter
 
-# Connecting to a Postgres Docker Container
-
-- To connect to a **PostgreSQL** instance running within a **Docker container**, you can use the `docker exec` command combined with the `psql` command:
-  ```bash
-    docker exec -it <container> psql -U <username>
-  ```
-- Example:
-  ```sh
-    docker exec -it postgres psql -U admin -d test_db
-  ```
-
-## Command : Check Version
+## Command 1. Check Version
 
 - Check the version with this SQL statement:
 
@@ -26,7 +13,7 @@
     SELECT version();
   ```
 
-## Command : Check the current database
+## Command 2. Check the current database
 
 - To see which database you are currently connected to, use the following command:
 
@@ -39,7 +26,7 @@
     You are connected to database "test_db" as user "admin" on host "postgres" (address "172.22.0.2") at port "5432".
   ```
 
-## Command : Connect to a specific database
+## Command 3. Connect to a specific database
 
 - Use the `\c` command followed by the database name you want to connect to. For example, if you want to connect to `test_db`, you would run:
   ```sh
@@ -47,7 +34,7 @@
     postgres=# \c test_db
   ```
 
-## Command : Display Database Table
+## Command 4. Display Database Table
 
 - Display table:
 
@@ -56,28 +43,28 @@
     select * from sale_order;
   ```
 
-## Command : List Tables in a Database
+## Command 5. List Tables in a Database
 
 - To list all tables in the current database, use the `\dt` command:
   ```sh
     mydb=> \dt
   ```
 
-## Command : Database Table Information
+## Command 6. Database Table Information
 
 - To get information about a specific table, use the `\d` command followed by the table name:
   ```sh
     mydb=> \d mytable
   ```
 
-## Command : Switch To Another Database Table
+## Command 7. Switch To Another Database Table
 
 - To switch to another database, use the `\c` command followed by the database name:
   ```sh
     mydb=> \c anotherdb
   ```
 
-## Command : Create Database Table
+## Command 8. Create Database Table
 
 - Create `sale_order` table:
   ```sh
@@ -85,7 +72,7 @@
     create table sale_order (id varchar(255), item varchar(255), quantity int);
   ```
 
-## Command : Insert Table Row/Data
+## Command 9. Insert Table Row/Data
 
 - insert data into the `sale_order` table
   ```sh
@@ -93,7 +80,7 @@
     insert into sale_order table values ('SO-TEST-123', 'test item 1', 1);
   ```
 
-## Command : Insert Multiple Table Rows
+## Command 10. Insert Multiple Table Rows
 
 - Insert multiple rows:
   ```sh
@@ -101,9 +88,11 @@
     insert into sale_order (id, item, quantity) values ('SO-TEST-2', 'test item 2', 2), ('SO-TEST-3', 'test item 3', 3), ('SO-TEST-4', 'test item 4', 4);
   ```
 
-## Command : Exit `psql`
+## Command 1.. Exit `psql`
 
 - To quit `psql`, type `\q` and hit enter:
   ```sh
     mydb=> \q
   ```
+
+# Resources and Further Reading
