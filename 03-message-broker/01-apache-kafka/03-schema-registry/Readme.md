@@ -2,30 +2,37 @@
 
 ## Table Of Contents
 
-# Why do we need schemas
+# About Schemas
 
-- **Schemas** represents a contract between the participants in communication, just like an API represents a contract between a service and its consumers.
-- **Schemas** describe the structure of the data by:
-  - specifying which fields are in the message
-  - specifying the data type for each field and whether the field is mandatory or not
+- Why do we need **schemas**?
+
+  1. **Schemas** represents a contract between the participants in communication, just like an API represents a contract between a service and its consumers.
+  2. **Schemas** describe the structure of the data by:
+     - specifying which fields are in the message
+     - specifying the data type for each field and whether the field is mandatory or not
+
+- About **Kafka Schema Management**:
+  - Applications that leverage **Kafka** fall into two categories: they are either **producers** or **consumers** (or both in some cases).
+  - **Producers** generate messages or events which are then published to **Kafka**. These take the form of `key-value` records which the **producers** serialize into byte arrays and send to **Kafka brokers**. The **brokers** store these serialized records into designated **topics**.
+  - **Consumers** subscribe to one or more **topics**, request the stored events, and process them. **Consumers** must be able to deserialize the bytes, returning them to their original record format.
+  - This creates an implicit contract between the two applications. There is an assumption from the **producer** that the **consumer** will understand the format of the message. Meanwhile, the **consumer** also assumes that the **producer** will continue to send the **messages** in the same format.
+  - A **schema** is a set of rules that establishes the format of the messages being sent. It outlines the structure of the message, the names of any fields, what data types they contain, and any other important details. This **schema** is a contract between the two applications. Both the **producer** and **consumer** are expected to support the **schema**.
 
 # What is a Schema Registry?
 
-- A **schema registry** is a centralized repository for storing and managing data schemas. It runs as a standalone server process on an external machine.
-- The primary purpose of a **schema registry** is to maintain a database of **schemas**, ensuring consistency and compatibility of data formats across different systems and services within an organization.
+- The **schema registry** is a service that records the various **schemas** and their different versions as they evolve. **Producer** and **consumer** clients retrieve **schemas** from the **schema registry** via `HTTPS`, store them locally in cache, and use them to **serialize** and **deserialize** messages sent to and received from **Kafka**. This **schema** retrieval occurs only once for a given **schema** and from that point on the cached copy is relied upon.
 
-# How Kafka Schema Registry works?
+- How **Kafka Schema Registry** works?
 
-- A **Kafka schema registry** resides in a **Kafka cluster**. It can be plugged into the **Kafka** configuration. The configuration stores the schema and distributes it to the **producer** and **consumer** for **serialization** and **deserialization**. Hosting schemas like this allows **schema evolution**, making message transfer robust.
-- Without **schemas**, there would be no easy way to establish a contract ensuring messages sent by the **producer** match the format expected by the **consumer**.
+  - A **Kafka schema registry** resides in a **Kafka cluster**. It can be plugged into the **Kafka** configuration. The configuration stores the schema and distributes it to the **producer** and **consumer** for **serialization** and **deserialization**. Hosting schemas like this allows **schema evolution**, making message transfer robust.
+  - Without **schemas**, there would be no easy way to establish a contract ensuring messages sent by the **producer** match the format expected by the **consumer**.
 
-# Serialization & Deserialization
-
-- _Serialization_ & **_Deserialization_** involves converting data into a byte format for transfer over the network or saving to disk (**serialization**) and converting it back into a usable format (**deserialization**).
-- The **Kafka schema registry** supports three **serialization** formats:
-  1. Avro (recommended for most use cases)
-  2. JSON
-  3. Google Protobuf
+- **Serialization** & **Deserialization**:
+  - **Serialization** & **Deserialization** involves converting data into a byte format for transfer over the network or saving to disk (**serialization**) and converting it back into a usable format (**deserialization**).
+  - The **Kafka schema registry** supports three **serialization** formats:
+    1. Avro (recommended for most use cases)
+    2. JSON
+    3. Google Protobuf
 
 # Schema Compatibility
 
@@ -258,3 +265,10 @@
 
 1. [docs.confluent.io - schema-registry](https://docs.confluent.io/platform/current/schema-registry/index.html)
 2. [Schema Registry API Usage Examples for Confluent Platform](https://docs.confluent.io/platform/current/schema-registry/develop/using.html)
+3. [confluent.io - Kafka Listeners – Explained](https://www.confluent.io/blog/kafka-listeners-explained/)
+4. [confluent.io - Introducing the Kafka Consumer: Getting Started with the New Apache Kafka 0.9 Consumer Client](https://www.confluent.io/blog/tutorial-getting-started-with-the-new-apache-kafka-0-9-consumer-client/)
+5. [Schema Registry Documentation](https://docs.confluent.io/platform/current/schema-registry/index.html)
+6. [developer.confluent.io - Managing Schemas](https://developer.confluent.io/courses/schema-registry/manage-schemas/#:~:text=When%20you%20register%20a%20schema,or%20topic%2Dname%2Dvalue.)
+7. [Protocol Buffers Documentation](https://protobuf.dev/overview/#scalar)
+8. [Apache avro](https://avro.apache.org/)
+9. [confluentinc/cp-schema-registry Docker Image](https://hub.docker.com/r/confluentinc/cp-schema-registry)

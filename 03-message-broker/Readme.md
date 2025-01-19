@@ -12,23 +12,21 @@
 - The basic architecture of a **message queue** is simple. Input services, called **producers** or **publishers**, create and publish messages to a **message queue**. Other services, called **consumers** or **subscribers**, connect to the queue and perform actions defined by the messages.
 - In a real-world scenario, there can be many apps writing to the queue and many servers reading from the queue.
 
-## Features of Message Queues
+- **Features of Message Queues**:
 
-1. **Asynchronous Communication**: **Producers** and **consumers** interact with the queue at their own pace without waiting for each other.
-2. **Decoupling**: **Producers** and **consumers** are decoupled, making the system more modular and easier to manage and scale.
-3. **Load Balancing**: Messages can be distributed across multiple consumers, balancing the workload.
-4. **Scalability**: Easily handles varying loads by scaling consumers up or down based on the volume of messages.
-5. **Reliability**: Ensures that messages are not lost even if the system crashes, through persistent storage.
+  1. **Asynchronous Communication**: **Producers** and **consumers** interact with the queue at their own pace without waiting for each other.
+  2. **Decoupling**: **Producers** and **consumers** are decoupled, making the system more modular and easier to manage and scale.
+  3. **Load Balancing**: Messages can be distributed across multiple consumers, balancing the workload.
+  4. **Scalability**: Easily handles varying loads by scaling consumers up or down based on the volume of messages.
+  5. **Reliability**: Ensures that messages are not lost even if the system crashes, through persistent storage.
 
-## Benefits of using Message Queues
+- **Benefits of using Message Queues**:
 
-1. The main advantage is that we **decouple** these events, and this message queue will allow us to process these events **asynchronously**. We can queue them until we can process them. With the **message queue**, the **producer** can post a message to the **queue** when the consumer is unavailable to process it. Also, the **consumer** can read messages from the **queue** even when the **producer** is unavailable.
-2. Another great benefit is that they are **durable**. If the queue crashes, that data will not be lost as it’s not stored in **RAM** but in **Disk**. If a worker crashes while processing a message, no problem! The message is still in the queue and will be picked up by another worker.
-3. Message queues also provide **scalability**. If you receive a flood of orders, the queue will just get longer. You can add more workers to handle the extra load without affecting the website.
+  1. The main advantage is that we **decouple** these events, and this message queue will allow us to process these events **asynchronously**. We can queue them until we can process them. With the **message queue**, the **producer** can post a message to the **queue** when the consumer is unavailable to process it. Also, the **consumer** can read messages from the **queue** even when the **producer** is unavailable.
+  2. Another great benefit is that they are **durable**. If the queue crashes, that data will not be lost as it’s not stored in **RAM** but in **Disk**. If a worker crashes while processing a message, no problem! The message is still in the queue and will be picked up by another worker.
+  3. Message queues also provide **scalability**. If you receive a flood of orders, the queue will just get longer. You can add more workers to handle the extra load without affecting the website.
 
-## Different Queue Types
-
-- Most common message queues are:
+- **Queue Types**: Most common message queues are:
   1. **FIFO** (First-In-First-Out): Just like a regular line, messages are processed in the order they arrive. This is important for things like payment processing.
   2. **Priority Queues**: Some messages might be more important than others. You can prioritize these so they get processed sooner.
 

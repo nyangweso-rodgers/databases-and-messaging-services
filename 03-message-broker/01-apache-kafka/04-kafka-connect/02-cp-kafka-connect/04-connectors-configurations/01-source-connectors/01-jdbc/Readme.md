@@ -56,7 +56,9 @@
 
 - The **Kafka JDBC Source Connector** supports several **modes** that determine how data is captured from a **relational database** and streamed to **Kafka topics**. Each **mode** serves a different purpose, depending on the nature of your data and the requirements of your streaming application.
 - Following Modes are suported:
+
   1. `bulk` (**Bulk Mode**): In **bulk mode**, the **connector** loads the entire content of the specified tables at each poll interval.Use cases include:
+
      - Suitable for use cases where the entire table data needs to be replicated periodically.
      - Ideal when data is relatively small or when the table is static (rarely changes).
      - Not efficient for large, frequently changing tables because it reloads all the data every time.
@@ -66,6 +68,13 @@
          "mode": "bulk"
        }
        ```
+     - Common Use Cases for `bulk` Mode:
+       1. **Initial Data Load**: When you want to bootstrap your Kafka topics with the entire dataset from a database table.
+       2. **Periodic Batch Processing**: If your use case requires periodic full synchronization of data (e.g., every night or every few hours), bulk mode can fetch the full dataset to ensure the topic is fully up-to-date.
+       3. **Stateless Data Pipelines**: When your pipeline doesn't require tracking changes over time, and you only care about the full dataset being replicated periodically.
+       4. **Data Archiving**: If you want to archive or snapshot your entire database table to a Kafka topic for downstream processing, bulk mode is suitable.
+       5. **Testing and Debugging**: Useful for testing Kafka Connect configurations by quickly populating topics with large amounts of data.
+
   2. `incrementing` (**Incrementing Mode**): The **connector** identifies new records based on an **incrementing column**, typically a **primary key** or auto-incrementing ID. It tracks the maximum value of this column seen so far and only fetches rows with a greater value. Use cases include:
      - Suitable when records are only inserted, and the ID column is guaranteed to increment monotonically.
      - Commonly used for tables with an auto-incremented primary key.
@@ -77,7 +86,7 @@
          "incrementing.column.name": "id"
        }
        ```
-  3. `timestamp` (**Timestamp Mode**): The **connector** tracks changes by monitoring a timestamp column. It queries only rows where the timestamp is greater than the last recorded timestamp. Use Cases include:
+  3. `timestamp` (**Timestamp Mode**): The **connector** tracks changes by monitoring a `timestamp` column. It queries only rows where the timestamp is greater than the last recorded timestamp. Use Cases include:
      - Ideal for tables where records can be updated, and the timestamp column captures the last modified time.
      - Suitable when records are inserted and updated, but no deletions occur.
      - Requires a reliable timestamp column that is updated with every change.
