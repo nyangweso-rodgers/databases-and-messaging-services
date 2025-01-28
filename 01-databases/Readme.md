@@ -10,10 +10,35 @@
 
 # Database Concepts
 
-## 1. Columnar Database
+## 1. Columnar vs. Row-Oriented Database
 
-- The majority of popular solutions — MySQL, Postgres, SQLite — are all row-based. In each of these, data / objects are stored as rows, like a phone book.
-- A **columnar database** is a database management system (DBMS) which stores data in **columns** rather than **rows**. The purpose of this storage method is to efficiently write and read data to and from hard disk storage, which leads to improved query performance and speed.
+- **Row-Oriented Databases**
+
+  - **Row-oriented databases** store data one row at a time, making them ideal for **transactional workloads** (**online transaction processing** - **OLTP**). Each row represents a complete record, which means retrieving an entire entity—like a customer order or a financial transaction—is quick and efficient.
+  - **Features**:
+
+    1. **Data Sotorage**: Data is stored in rows, where each row represents a complete record, and each column stores a specific attribute of that record.
+
+    2. **Query Performance**: Can be slower for read-heavy workloads as the entire row might need to be scanned for access. However, it's faster for write-heavy workloads as updates are limited to a single row.
+
+    3. **Compression**: The presence of multiple data types in a row makes compression less efficient compared to **columnar databases**
+
+    4. **Flexibility**: Flexible for schema changes.
+
+  - **Examples**: The majority of popular solutions — MySQL, Postgres, SQLite — are all row-based. In each of these, data / objects are stored as rows, like a phone book.
+
+- **Columnar Database**:
+
+  - **Columnar databases** store data by **field**, grouping values from the same column together. This format excels in **analytical workloads** (online** analytical processing** - **OLAP**) because queries that involve aggregations or filtering across large datasets can scan only the necessary columns, avoiding unnecessary I/O.
+  - **Features**:
+
+    1. **Data Sotorage**: Data is stored by columns, with all the values of a particulr column grouped across different rows.
+
+    2. **Query Performance**: Performs well for read-heavy workloads but slower for write-heavy workloads.
+
+    3. **Compression**: Support efficient compression techniques like run-length encoding for repetitive values, reducing storage requirements.
+
+    4. **Flexibility**: Less flexible for schema changes.
 
 ## 2. Database Locks
 
