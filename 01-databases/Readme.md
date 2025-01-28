@@ -75,12 +75,27 @@
 - **Indexing** is a technique used in database management systems to improve the speed and efficiency of data retrieval operations. An **index** is a **data structure** that provides a quick way to look up rows in a table based on the values in one or more columns. **Database indexes** allow you to find specific data without searching through the entire database.
 - Technically, an **index** is a **data structure** (usually a **B-tree** or a **hash table**) that stores the values of one or more columns in a way that allows for quick **searches**, **sorting**, and **filtering**. The **index** provides pointers to the actual rows in the database table where the data resides.
 
+- **How Do Indexes Work?**
+
+  - When you create an **index** on a column (or set of columns), the database creates a separate structure that contains two things:
+    1. The values from the indexed column(s)
+    2. Pointers to the corresponding rows in the table
+  - This structure is sorted, which allows for fast searching, usually through an algorithm like **Binary Search**.
+  - **Example**:
+    - Let's use our **Books** table as an example. Say we frequently search for books by their publication **year**. Without an index, if we wanted to find all books published in 1997, the database would need to check the `PublicationYear` of every single book in the **Books** table. With millions of books, this could take a long time.
+
 - **Types of Indexes**:
 
-  1. **Primary Index**
+  1. **Primary Index** (**Unique Indexes**)
 
      - Automatically created when a **primary key** is defined. It uniquely identifies each row in the table.
      - For example, To define a **primary index** in a **Spring Boot application**, you need to annotate the **primary key** field in your entity class with the `@Id` annotation. This indicates that the field is the **primary key**, and most relational databases will automatically create an index on this column to optimize searches based on the primary key.
+     - **Example**:
+       - The primary key of a table automatically has a unique index.
+       ```sql
+         CREATE UNIQUE INDEX idx_unique_isbn ON Books (ISBN);
+       ```
+       - This prevents any two books from having the same ISBN, which makes sense as ISBN is supposed to be unique for each book.
 
   2. **Secondary Index**:
 
@@ -102,11 +117,45 @@
          }
        ```
 
-  3. **Clustered Index**
+  3. **Single-Column Indexes**:
 
-     - Sorts and stores the data rows of the table based on the index key. A table can have only one **clustered index** because the data rows can be sorted in only one order.
+     - These are created on just one column.
+     - Example: An index on `PublicationYear` is a single-column index.
+
+       ```sql
+        CREATE INDEX idx_publication_year ON Books (PublicationYear);
+       ```
+
+     - This is useful when you frequently search or sort by this one column.
+
+  4. **Multi-Column Indexes**:
+
+     - These are created on two or more columns. They're useful for queries that frequently filter or sort by multiple columns.
+     - Example:
+       ```sql
+        CREATE INDEX idx_author_year ON Books (AuthorID, PublicationYear);
+       ```
+     - This index would be useful for queries like:
+       ```sql
+        SELECT * FROM Books WHERE AuthorID = 1 AND PublicationYear > 2000;
+       ```
+
+  5. **Partial Indexes**:
+
+     - These **index** only a subset of a table's data. They're useful when you frequently query for a specific subset of your data.
+     - Example:
+
+       ```sql
+        CREATE INDEX idx_recent_books ON Books (PublicationYear) WHERE PublicationYear > 2000;
+       ```
+
+     - This index only includes books published after 2000. It's useful if you often query for recent books but rarely for older ones.
+
+  6. **Clustered Index**
+
+     - Sorts and stores the data rows of the table based on the **index key**. A table can have only one **clustered index** because the data rows can be sorted in only one order.
      - In many databases, the **primary key** is clustered by default, so if you want to cluster on a different column, you would need to use a specific SQL statement during database setup or use a custom annotation if your database supports it.
-     - Custom SQL to Create a Clustered Index (For a clustered index on a non-primary key column, you’d usually execute a SQL script. Here’s how you might do it for a MySQL database)
+     - Custom SQL to Create a **Clustered Index** (For a **clustered index** on a non-primary key column, you’d usually execute a SQL script. Here’s how you might do it for a **MySQL** database)
        ```sql
          CREATE TABLE users (
             id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -118,7 +167,7 @@
        ```
      - You can run this SQL script during your application startup using a `schema.sql` file in your `resources` directory, or manually in your database.
 
-  4. **Non-clustered Index**
+  7. **Non-clustered Index**
      - Contains a sorted list of values along with pointers to the data rows where the values are found. A table can have multiple **non-clustered indexes**.
      - Example: Create a Non-Clustered Index on the `name` column in a `User` entity.
        - `@Table(indexes = @Index(...))` annotation creates a **non-clustered index** on the `name` column, which will improve the performance of queries that filter or sort by the `name` field.
@@ -139,6 +188,7 @@
          ```
 
 - **How Indexing Improves Query Performance**:
+
   - **Faster data retrieval**: Indexex significantly speeds up data retrieval operations by reducing the amount of data the DBMS needs to scan.
   - **Efficient sorting and filtering**: indexes helps in quickly sorting and filtering data based on the index columns, which is especially useful for `ORDER BY`, `GROUP BY`, and `WHERE` clauses.
   - **Improved query performance**: properly indexed columns results in faster query execution times, leading to a more responsive application.
@@ -146,6 +196,77 @@
   - **Better resource utilization**: By reducing the time taken to execute queries, indexes lead to a better utilization of server resources (CPU, memory) allowing the system to handle more queries and users simultaneously.
   - **Support for constraints**: Indexes are used to enforce unique constraints (like primary keys) in databases ensuring data integrity.
   - **Optimized data access patterns**: indexes enable the database to optimize complex queries, especially in large datasets, by efficiently managing data access patterns.
+
+- **Creating an Index In PostgreSQL**
+
+  - You create an index in SQL using the `CREATE INDEX` statement.
+  - **Syntax**:
+    ```sql
+      CREATE INDEX index_name ON table_name (column1, column2, ...);
+    ```
+  - **Example 1**: Single Column Index on Year
+    ```sql
+      CREATE INDEX idx_customers_country on customers (country_code)
+    ```
+  - **Example 2**: Multi-column index
+    ```sql
+      CREATE INDEX idx_customers_country on customers (country_code, year)
+    ```
+
+- **The Cost of Indexes**: While **indexes** can dramatically speed up data retrieval, they come with some costs:
+
+  1. **Storage**: Each index requires additional storage space. It's essentially creating a copy of the indexed data plus the row pointers. For large tables, this can add up to a significant amount of extra storage.
+  2. **Write Performance**: When you `insert`, `update`, or `delete` data in an **indexed column**, the database also needs to update the index. This means write operations (`INSERT`, `UPDATE`, `DELETE`) can be slower on tables with many indexes.
+  3. **Maintenance**: As your data changes over time, **indexes** may become fragmented or unbalanced, which can reduce their effectiveness. Periodically, indexes may need to be rebuilt or reorganized to maintain their efficiency.
+  4. **Query Optimizer Overhead**: The database's query optimizer must consider all available indexes when planning to execute a query. Having too many indexes can actually slow down this planning phase.
+
+- **When to Use Indexes**:
+
+  1. **Columns used in `WHERE` clauses**:
+
+     - If you often search for books by their publication year, indexing the PublicationYear column can help.
+     - For example:
+       ```sql
+        SELECT * FROM Books WHERE PublicationYear = 2023;
+       ```
+     - With the `idx_books_year` index, this query can quickly find the relevant rows without scanning the entire table.
+
+  2. **Columns used in `JOIN` conditions**:
+
+     - If you frequently join the `Books` and `Authors` tables on `AuthorID`, indexing this column in both tables can speed up these operations.
+     - For example:
+       ```sql
+        SELECT Books.Title, Authors.Name
+        FROM Books
+        JOIN Authors ON Books.AuthorID = Authors.AuthorID;
+       ```
+     - Having indexes on `Books.AuthorID` and `Authors.AuthorID` can significantly speed up this join operation.
+
+  3. **Columns used in `ORDER BY` clauses**:
+
+     - If you often sort books by price, an index on the Price column can help.
+     - For example:
+
+       ```sql
+        SELECT * FROM Books ORDER BY Price DESC;
+       ```
+
+     - An index on `Price` would allow the database to retrieve the rows in sorted order without having to perform a separate sorting operation.
+
+  4. **Columns with a high degree of uniqueness**:
+
+     - Indexing a column like ISBN, or any unique IDs for each book, can be very effective. Searches on this column can quickly narrow down to a single row:
+       ```sql
+        SELECT * FROM Books WHERE ISBN = '9780747532743';
+       ```
+
+  5. **Foreign key columns**:
+     - These are often used in joins, so indexing them can improve performance.
+
+- **Remarks**:
+  - Don't create indexes on columns that are updated frequently. The overhead of updating the index might outweigh the benefits.
+  - Small tables (less than a few hundred rows) might not benefit much from indexing, as a full table scan might be just as fast.
+  - An index might not be helpful if a column has very low selectivity (i.e., most queries retrieve a large percentage of the rows). For example, if you have a Gender column with only 'M' and 'F' values, an index probably won't help much.
 
 ## 5. Database Sharding
 
@@ -226,8 +347,76 @@
     - If writes are more important, your sharding strategy should prioritize write throughput and data consistency. i.e., you can choose a shard key that distributes writes evenly across shards and minimizes the likelihood of hotspots. A **hash-based sharding strategy** can help with this.
     - Another approach can be to use a time-based sharding strategy where data is partitioned based on time intervals such as hours or days. This can help distribute write operations evenly. Discord uses this time-based sharding strategy to handle trillions of messages.
 
+# Query Optimization Techniques
+
+1. **Use Specific Column Names**
+
+   - Instead of using `SELECT *`, specify only the columns you need. This reduces the amount of data that needs to be retrieved and transmitted.
+
+     ```sql
+      -- Less efficient
+      SELECT * FROM <table_name> WHERE <field_name> = 1;
+
+      -- More efficient
+      SELECT col1, col2 FROM <table_name> WHERE <field_name> = 1;
+     ```
+
+2. **Optimize JOINs**
+
+   - **Joins** can be expensive operations, especially when dealing with large tables. Here are some tips for optimizing joins:
+     1. Use appropriate join types: Make sure you're using the right type of join for your query. `INNER JOIN`, `LEFT JOIN`, `RIGHT JOIN`, and `FULL OUTER JOIN` all have different use cases.
+     2. **Join** on **indexed columns**: Ensure that the columns you're joining on are indexed in both tables.
+     3. **Consider the order of joins**: In complex queries with multiple joins, the order of the joins can affect performance. Generally, start with the largest tables and join to progressively smaller ones.
+
+3. **Use LIMIT to Restrict Results**
+
+   - If you don't need all results, use LIMIT to restrict the number of rows returned. This can significantly reduce the amount of data processed and returned.
+
+4. **Use `EXISTS` Instead of `IN` for Subqueries**
+
+   - Generally, `EXISTS` is more efficient than `IN` for large datasets. `EXISTS` stops when it finds a match, while `IN` evaluates the entire subquery.
+
+     ```sql
+      -- Less efficient for large datasets
+      SELECT * FROM Authors WHERE AuthorID IN (SELECT AuthorID FROM Books WHERE Price > 20);
+
+      -- More efficient for large datasets
+      SELECT * FROM Authors WHERE EXISTS (SELECT 1 FROM Books WHERE Books.AuthorID = Authors.AuthorID AND Price > 20);
+     ```
+
+5. **Avoid Correlated Subqueries**
+
+   - Correlated subqueries can be slow because they must be re-executed for each row in the main query. Often, they can be rewritten as joins.
+
+     ```sql
+      -- Correlated subquery (less efficient)
+      SELECT Title FROM Books b
+      WHERE Price > (SELECT AVG(Price) FROM Books WHERE AuthorID = b.AuthorID);
+
+      -- Join (more efficient)
+      SELECT b.Title
+      FROM Books b
+      JOIN (SELECT AuthorID, AVG(Price) as AvgPrice FROM Books GROUP BY AuthorID) a
+      ON b.AuthorID = a.AuthorID
+      WHERE b.Price > a.AvgPrice;
+     ```
+
+6. **Optimize `GROUP BY` Queries**
+
+   - When using `GROUP BY`, ensure you have indexes on the grouped columns.
+   - Also, if you're grouping by multiple columns, the order of columns in your index should match the order in your `GROUP BY` clause for optimal performance.
+
+     ```sql
+      CREATE INDEX idx_author_genre ON Books (AuthorID, Genre);
+
+      SELECT AuthorID, Genre, AVG(Price) as AvgPrice
+      FROM Books
+      GROUP BY AuthorID, Genre;
+     ```
+
 # Resources and Further Reading
 
 1. [daily.dev - How Indexing Enhances Query Performance](https://digma.ai/how-indexing-enhances-query-performance/?ref=dailydev)
 2. [daily.dev - Database Sharding](https://planetscale.com/blog/database-sharding?ref=dailydev)
 3. [daily.dev - Database Sharding](https://newsletter.systemdesigncodex.com/p/database-sharding?ref=dailydev)
+4. [daily.dev - Indexing and Performance Optimization](https://www.codu.co/articles/indexing-and-performance-optimization-fqpwri3y?ref=dailydev)
