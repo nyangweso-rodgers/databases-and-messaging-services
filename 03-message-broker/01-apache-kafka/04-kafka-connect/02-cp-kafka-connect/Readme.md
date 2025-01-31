@@ -833,9 +833,14 @@
      ```
    - Example Output:
 
+## 2. Configure Debezium CDC Source Connector
+
+- Download [Debezium PostgreSQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-postgresql)
+
 # Resources and Further Reading
 
 1. [docs.confluent.io - Kafka Connect](https://docs.confluent.io/platform/current/connect/index.html)
 2. [docs.confluent.ion - How to Use Kafka Connect - Get Started](https://docs.confluent.io/platform/current/connect/userguide.html)
 3. [redpanda - Understanding Apache Kafka](https://www.redpanda.com/guides/kafka-tutorial-what-is-kafka-connect)
 4. [cloud.google.com/iam/docs/keys-create-delete#console](https://cloud.google.com/iam/docs/keys-create-delete#console)
+5. [www.iamninad.com - docker-compose-for-your-next-debezium-and-postgres-project](https://www.iamninad.com/posts/docker-compose-for-your-next-debezium-and-postgres-project/)
