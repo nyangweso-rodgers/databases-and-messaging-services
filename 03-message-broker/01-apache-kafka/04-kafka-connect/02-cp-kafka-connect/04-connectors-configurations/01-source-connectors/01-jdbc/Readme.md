@@ -4,122 +4,11 @@
 
 # Configure Source Connectors
 
-- You can download connectors from [https://www.confluent.io/hub/](https://www.confluent.io/hub/)
+
 
 # [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc)
 
-- The [Kafka Connect JDBC Source connector]() allows you to import data from any relational database with a **JDBC** driver into an **Apache Kafka topic**. This **connector** can support a wide variety of databases.
-- We add both the [Avro Converter](https://www.confluent.io/hub/confluentinc/kafka-connect-avro-converter) and [JDBC Source/Sink](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) plugins to our **Docker image**.
-
-# Limitations Of JDBC Connector
-
-1. The geometry column type isn’t supported for the **JDBC Source connector**.
-2. The **connector** does not support the array data type.
-3. If the **connector** makes numerous parallel insert operations in a large source table, insert transactions can commit out of order; this is typical and means that a greater auto_increment ID (for example, 101) is committed earlier and a smaller ID (for example, 100) is committed later. The time difference may only be a few milliseconds, but the commits are out of order nevertheless.
-
-# Features of jdbc Connector
-
-- The **JDBC Source connector** includes the following **features**:
-  1. **At least once delivery**: This **connector** guarantees that records are delivered to the **Kafka topic** at least once. If the **connector** restarts, there may be some duplicate records in the **Kafka topic**.
-  2. **Supports one task**: The **JDBC Source connector** can read one or more tables from a single task. In query mode, the **connector** supports running only one task.
-  3. Incremental query modes
-
-## 4. Message Key Feature
-
-- Kafka messages are **key**/**value** pairs. For a **JDBC connector**, the **value** (payload) is the contents of the table row being ingested. However, the **JDBC connector** does not generate the **key** by default.
-- Message **keys** are useful in setting up partitioning strategies. **Keys** can direct messages to a specific **partition** and can support downstream processing where joins are used. If no message **key** is used, messages are sent to partitions using round-robin distribution.
-- To set a message **key** for the **JDBC connector**, you use two **Single Message Transformations** (**SMTs**): the [ValueToKey](https://docs.confluent.io/platform/current/connect/transforms/valuetokey.html) **SMT** and the [ExtractField](https://docs.confluent.io/platform/current/connect/transforms/extractfield.html) **SMT**. You add these two SMTs to the **JDBC connector** configuration. **Example** (the following shows a snippet added to a configuration that takes the `id` column of the `accounts` table to use as the message key):
-
-  ```json
-  {
-    "name": "jdbc_source_mysql_01",
-    "config": {
-      "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
-      "connection.url": "jdbc:mysql://mysql:3306/test",
-      "connection.user": "connect_user",
-      "connection.password": "connect_password",
-      "topic.prefix": "mysql-01-",
-      "poll.interval.ms": 3600000,
-      "table.whitelist": "test.accounts",
-      "mode": "bulk",
-
-      "transforms": "createKey,extractInt",
-      "transforms.createKey.type": "org.apache.kafka.connect.transforms.ValueToKey",
-      "transforms.createKey.fields": "id",
-      "transforms.extractInt.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
-      "transforms.extractInt.field": "id"
-    }
-  }
-  ```
-
 ## 5. jdbc Connector Modes
-
-- The **Kafka JDBC Source Connector** supports several **modes** that determine how data is captured from a **relational database** and streamed to **Kafka topics**. Each **mode** serves a different purpose, depending on the nature of your data and the requirements of your streaming application.
-- Following Modes are suported:
-
-  1. `bulk` (**Bulk Mode**): In **bulk mode**, the **connector** loads the entire content of the specified tables at each poll interval.Use cases include:
-
-     - Suitable for use cases where the entire table data needs to be replicated periodically.
-     - Ideal when data is relatively small or when the table is static (rarely changes).
-     - Not efficient for large, frequently changing tables because it reloads all the data every time.
-     - Examle:
-       ```json
-       {
-         "mode": "bulk"
-       }
-       ```
-     - Common Use Cases for `bulk` Mode:
-       1. **Initial Data Load**: When you want to bootstrap your Kafka topics with the entire dataset from a database table.
-       2. **Periodic Batch Processing**: If your use case requires periodic full synchronization of data (e.g., every night or every few hours), bulk mode can fetch the full dataset to ensure the topic is fully up-to-date.
-       3. **Stateless Data Pipelines**: When your pipeline doesn't require tracking changes over time, and you only care about the full dataset being replicated periodically.
-       4. **Data Archiving**: If you want to archive or snapshot your entire database table to a Kafka topic for downstream processing, bulk mode is suitable.
-       5. **Testing and Debugging**: Useful for testing Kafka Connect configurations by quickly populating topics with large amounts of data.
-
-  2. `incrementing` (**Incrementing Mode**): The **connector** identifies new records based on an **incrementing column**, typically a **primary key** or auto-incrementing ID. It tracks the maximum value of this column seen so far and only fetches rows with a greater value. Use cases include:
-     - Suitable when records are only inserted, and the ID column is guaranteed to increment monotonically.
-     - Commonly used for tables with an auto-incremented primary key.
-     - Not suitable if rows can be updated, as updates won't be captured.
-     - Examle:
-       ```json
-       {
-         "mode": "incrementing",
-         "incrementing.column.name": "id"
-       }
-       ```
-  3. `timestamp` (**Timestamp Mode**): The **connector** tracks changes by monitoring a `timestamp` column. It queries only rows where the timestamp is greater than the last recorded timestamp. Use Cases include:
-     - Ideal for tables where records can be updated, and the timestamp column captures the last modified time.
-     - Suitable when records are inserted and updated, but no deletions occur.
-     - Requires a reliable timestamp column that is updated with every change.
-     - Example:
-       ```json
-       {
-         "mode": "timestamp",
-         "timestamp.column.name": "updated_at"
-       }
-       ```
-  4. `timestamp+incrementing` (**Timestamp + Incrementing Mode**): This **mode** combines **timestamp** and **incrementing modes**. It ensures that both new and updated records are captured. The **connector** uses the timestamp column to track updates and the incrementing column to ensure unique identification of records, especially in case of multiple updates within the same timestamp. Use Cases:
-     - Ideal for tables where both inserts and updates occur frequently.
-     - Ensures that no updates are missed, even if multiple updates happen within the same timestamp.
-     - Requires both a reliable timestamp and an incrementing column.
-     - Example:
-       ```json
-       {
-         "mode": "timestamp+incrementing",
-         "timestamp.column.name": "updated_at",
-         "incrementing.column.name": "id"
-       }
-       ```
-  5. `query` (**Custom Query Mode**): In this mode, you can define a custom SQL query to fetch data. The **connector** executes this query at each poll interval. It's useful when you need to filter or join tables in a specific way. Use Cases include:
-     - Best when you need more control over what data is captured, such as filtering specific rows, joining multiple tables, or using complex SQL logic.
-     - Allows for flexibility in handling various use cases that standard modes cannot cover.
-     - Requires manual management of change tracking within the query.
-     - Example:
-       ```json
-       {
-         "mode": "query",
-         "query": "SELECT * FROM customers WHERE updated_at > ?"
-       }
-       ```
 
 ## 1.1. JDBC Source Connector with with Single Message Transformations (SMTs) -> Key:`Long` and Value:`JSON`
 
@@ -127,60 +16,18 @@
 
 # Steps
 
-## Command : Register Source Connector
 
-- Register jdbc Postgres Source Connector by:
 
-  ```sh
-   curl -X POST --location "http://localhost:8083/connectors" -H "Content-Type: application/json" -H "Accept: application/json" -d @01-jdbc-postgresdb-source-connector-for-participants-surveys-with-protobuf.json
-  ```
 
-- Example Output:
 
-## Command : Get a List of all Connectors
 
-- To get a list of connectors for your Apache Kafka® cluster:
 
-  ```sh
-    curl --location --request GET 'http://localhost:8083/connectors'
-  ```
 
-- Example Output:
-  ```sh
-    ["jdbc-protobuf-connector-for-customers-postgresdb","jdbc-avro-connector-for-customers-postgresdb","jdbc-protobuf-connector-for-participants-surveys-postgresdb"]
-  ```
 
-## Command : Check the Connector Status
 
-- Use the following command to check the status of your Kafka Connect connector
-  ```sh
-    curl -X GET http://localhost:8083/connectors/jdbc-avro-connector-for-customers-postgresdb/status
-  ```
-- Example Output:
 
-## Command : Get Detailed Information on a Connector
 
-- Example Output:
 
-## Command : Pause a Connector
-
-- Example Output:
-
-## Command : Resume a Connector
-
-- Example Output:
-
-## Command : Update a Connector
-
-- Example Output:
-
-## Command : Delete a Connector
-
-- Remove the **connectors** by:
-  ```sh
-    curl -X DELETE http://localhost:8083/connectors/jdbc-protobuf-connector-for-participants-surveys-postgresdb
-  ```
-- Example Output:
 
 # Configuration Properties for the JDBC Connector:
 
