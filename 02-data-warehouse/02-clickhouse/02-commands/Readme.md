@@ -1,61 +1,210 @@
-# SQL Commands
+# ClickHouse SQL Commands
 
 ## Table Of Contents
 
+- [ClickHouse SQL Commands](#clickhouse-sql-commands)
+  - [Table Of Contents](#table-of-contents)
+- [SQL Commands](#sql-commands)
+- [1. Access Control Management (Creating Users and Roles in ClickHouse)](#1-access-control-management-creating-users-and-roles-in-clickhouse)
+- [Resources and Further Reading](#resources-and-further-reading)
+
 # SQL Commands
 
-## User Management
+# 1. Access Control Management (Creating Users and Roles in ClickHouse)
 
-1. **Check Permission**
+- **ClickHouse** supports access control management based on **Role-based access control** (**RBAC**) approach.
+- You can configure access entities using:
 
-   - Example: To check the permissions of the `default` user, run:
+  1. SQL-driven workflow.
+  2. Server configuration files `users.xml` and `config.xml`.
 
-     ```sql
-        -- sql
-        SHOW GRANTS FOR default;
-     ```
+- **User Account**
+- Resource Permission Lists
 
-   - Example: Check Permissions of `default_role`
-     ```sql
-        -- sql
-        SHOW GRANTS FOR default_role;
-     ```
-     - This will return a list of permissions assigned to the role. For example:
-       1. `GRANT SELECT ON my_database.* TO default_role`
-       2. `GRANT INSERT ON my_database.* TO default_role`
-     - Interpret the Results:
-       1. If `default_role` has permissions like `GRANT ALL ON *.*`, then the `default` user effectively has full **admin privileges**.
-       2. If `default_role` has limited permissions (e.g., only `SELECT` on specific databases), then the `default` user has restricted access.
-       3. If `default_role` has the following permissions: `GRANT SELECT ON my_database.* TO default_role;`, Then the `default` user can only read data from `my_database` and cannot perform administrative tasks like creating users or modifying schemas.
+  1. Database Resource
 
-2. **Grant Permissions**
+     - Available permissions include:
+       1. `CREATE`: CREATE DATABASE/TABLE/VIEW/DICTIONARY
+       2. `DELETE`: DROP/TRUNCATE DATABASE/TABLE/VIEW/DICTIONARY
+       3. `ADMIN`: CREATE/SHOW/SELECT/INSERT/ALTER/DROP/TRUNCATE/OPTIMIZE/SYSTEM/dictGet
 
-   - Here are some common permissions you can grant:
+  2. Table/View/Dictionary Resource
+     - Available permissions include:
+       1. `READ`: SELECT
+       2. `WRITE`: INSERT
+       3. `DELETE`: ALTER
+       4. `DELETE`: DROP/TRUNCATE
 
-     1. `SELECT`: Allows reading data from a table.
-     2. `INSERT`: Allows inserting data into a table.
-     3. `UPDATE`: Allows updating existing data in a table.
-     4. `DELETE`: Allows deleting data from a table.
-     5. `ALL`: Grants all permissions (equivalent to SELECT, INSERT, UPDATE, DELETE).
+- **Manage ClickHouse Users**
 
-   - Example: Grant Full Permissions to `default_role`
-     ```sql
-        -- sql
-        GRANT ALL ON *.* TO default_role WITH GRANT OPTION;
-     ```
+  - **Commands**:
 
-3. **Create a Dedicated Admin User**
-   - Instead of modifying the `default` user or `default_role`, it’s better to create a **dedicated admin user** for administrative tasks.
-   - Example: Create the Admin User
-     ```sql
-        -- sql
-        CREATE USER admin_user IDENTIFIED WITH plaintext_password BY 'strong_password';
-     ```
-   - Example: Grant Full Permissions
-     ```sql
-        -- sql
-        GRANT ALL ON *.* TO admin_user WITH GRANT OPTION;
-     ```
-   - Use `admin_user` for administrative tasks like **creating users**, **granting permissions**, etc.
+    1. **Command 1.1**: **View Users and their Roles**
+
+       - Connect to the cluster with the `admin` user.
+       - Get a list of users:
+         ```sql
+          -- sql
+          SHOW USERS;
+         ```
+       - View the user's **roles** and **privileges**:
+         ```sql
+          -- sql
+          SHOW GRANTS FOR <username>
+         ```
+       - Example: Check Permissions of `default_role`
+         ```sql
+           -- sql
+           SHOW GRANTS FOR default_role;
+         ```
+       - This will return a list of permissions assigned to the role. For example:
+         1. `GRANT SELECT ON my_database.* TO default_role`
+         2. `GRANT INSERT ON my_database.* TO default_role`
+       - Interpret the Results:
+         1. If `default_role` has permissions like `GRANT ALL ON *.*`, then the `default` user effectively has full **admin privileges**.
+         2. If `default_role` has limited permissions (e.g., only `SELECT` on specific databases), then the `default` user has restricted access.
+         3. If `default_role` has the following permissions: `GRANT SELECT ON my_database.* TO default_role;`, Then the `default` user can only read data from `my_database` and cannot perform administrative tasks like creating users or modifying schemas.
+
+    2. **Command 1.2**: **Create a User**
+
+       - Connect to the cluster with the `admin` user.
+       - Create a user:
+         ```sql
+          -- sql
+          CREATE USER <username> IDENTIFIED WITH sha256_password BY '<user_password>';
+         ```
+
+    3. **Command 1.3**: **Change a Password**
+
+    4. **Command 1.4**: **Edit a User**
+
+       - Connect to the cluster with the `admin` user.
+       - Modify the settings and privileges:
+         - Example: Edit `<username>`
+           ```sql
+             -- sql
+             ALTER USER <username> RENAME TO <new_username>
+           ```
+         - Example: Edit User's settings
+           ```sql
+            -- sql
+            ALTER USER <username> SETTINGS <list_of_ClickHouse_settings>;
+           ```
+         - Example: Assign Roles
+           ```sql
+            -- sql
+            GRANT <role> TO <username>
+           ```
+         - Example: Remove Roles
+           ```sql
+            -- sql
+            REVOKE <role>
+           ```
+         - Example: Grant privileges
+           ```sql
+            -- sql
+            GRANT SELECT ON <database_name>.* TO <username>;
+           ```
+         - Example: Revoke privileges
+           ```sql
+            -- sql
+            REVOKE SELECT(<column_name>) ON <database_name>.<table_name> FROM <username>;
+           ```
+       - **Remarks**:
+         - By default, the `GRANT` statement appends privileges. If you want to replace them, add the `WITH REPLACE OPTION` clause.
+         - If you want to allow the user to grant privileges of the same or lower scope to other users, use `WITH GRANT OPTION`.
+         - **Roles** and **privileges** are related, but they serve different purposes. When you give privileges to a specific user, you grant them certain permissions individually. With roles, you can grant a set of privileges to one or several users at the same time.
+         - Granting permissions through roles makes it easier to manage them than through assigning them individually.
+
+    5. **Command 1.5**: **Delete a User**
+       - Connect to the cluster with the `admin` user.
+       - Delete the user:
+         ```sql
+          -- sql
+          DROP USER <username>;
+         ```
+
+- **Manage ClickHouse Roles**
+
+  - A **role** is a collection of permissions that can be assigned to one or several users in a **ClickHouse cluster**. Roles allow you to manage privileges and access more efficiently.
+  - **ClickHouse** uses granular privileges that you can assign directly to a **user** or via **roles**. Common **privileges** include:
+
+    1.  `SELECT`: Read data from tables.
+    2.  `INSERT`: Write data to tables.
+    3.  `ALTER`: Modify table structure.
+    4.  `CREATE`: Create databases or tables.
+    5.  `DROP`: Delete databases or tables.
+    6.  `ALL`: Full access (use cautiously).
+    7.  `UPDATE`: Allows updating existing data in a table.
+
+  - **Commands**:
+
+    1. **Command 1.6**: **View Roles**
+
+       - Connect to the cluster with the `admin` user.
+       - View roles in the cluster:
+         ```sql
+          -- sql
+          SHOW ROLES
+         ```
+
+    2. **Command 1.7**: **Create a Role**
+
+       - Connect to the cluster with the `admin` user.
+       - Create a role:
+         ```sql
+          -- sql
+          CREATE ROLE <role_name>
+          // or
+          CREATE ROLE <role_name> SETTINGS <setting> = <setting_value>
+         ```
+       - (Optional) Grant privileges to the role:
+         ```sql
+           -- sql
+           GRANT SELECT ON <database_name>.* TO <role_name>;
+         ```
+
+    3. **Command 1.8**: **Assign a Role to a User**
+
+       - Connect to the cluster with the `admin` user.
+       - Assign a role to a user:
+         ```sql
+          -- sql
+          GRANT <role> TO <username>
+         ```
+
+    4. **Command 1.9**: **Edit a Role**
+
+       - Connect to the cluster with the `admin` user.
+       - Modify the settings and privileges:
+         - Example: Edit Role Name
+           ```sql
+            -- sql
+            ALTER ROLE <role_name> RENAME TO <new_role_name>
+           ```
+         - Example: Edit Role Setting
+           ```sql
+            -- sql
+            ALTER ROLE <role_name> SETTINGS <setting> = <new_setting_value>
+           ```
+         - Example: Grant Privileges
+           ```sql
+            -- sql
+            GRANT SELECT ON <database_name>.* TO <role_name>;
+           ```
+         - Example: Revoke Privileges
+           ```sql
+            -- sql
+            REVOKE SELECT(<column_name>) ON <database_name>.<table_name> FROM <role_name>;
+           ```
+
+    5. **Command 1.10**: **Delete a Role**
+       - Connect to the cluster with the `admin` user.
+       - Delete the role:
+         ```sql
+          -- sql
+          DROP ROLE <role_name>
+         ```
+       - This also revokes the role from all the users it was assigned to.
 
 # Resources and Further Reading
