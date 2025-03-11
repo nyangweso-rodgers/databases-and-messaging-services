@@ -13,27 +13,13 @@
 # 1. Access Control Management (Creating Users and Roles in ClickHouse)
 
 - **ClickHouse** supports access control management based on **Role-based access control** (**RBAC**) approach.
-- You can configure access entities using:
+- Permission Reference:
 
-  1. SQL-driven workflow.
-  2. Server configuration files `users.xml` and `config.xml`.
-
-- **User Account**
-- Resource Permission Lists
-
-  1. Database Resource
-
-     - Available permissions include:
-       1. `CREATE`: CREATE DATABASE/TABLE/VIEW/DICTIONARY
-       2. `DELETE`: DROP/TRUNCATE DATABASE/TABLE/VIEW/DICTIONARY
-       3. `ADMIN`: CREATE/SHOW/SELECT/INSERT/ALTER/DROP/TRUNCATE/OPTIMIZE/SYSTEM/dictGet
-
-  2. Table/View/Dictionary Resource
-     - Available permissions include:
-       1. `READ`: SELECT
-       2. `WRITE`: INSERT
-       3. `DELETE`: ALTER
-       4. `DELETE`: DROP/TRUNCATE
+  1. **Access type**: Access type that's granted or revoked.
+  2. **Databases**: Apply the privilege to all databases or one specific database.
+  3. **Tables**: Apply the privilege to all tables or one specific table.
+  4. **Columns** Apply the privilege to all columns or specific columns.
+  5. **Grant option**: Give the permission to execute the `GRANT` query and grant privileges of the same or lower scope.
 
 - **Manage ClickHouse Users**
 
@@ -42,17 +28,17 @@
     1. **Command 1.1**: **View Users and their Roles**
 
        - Connect to the cluster with the `admin` user.
-       - Get a list of users:
+       - Example: **Get a list of users**
          ```sql
           -- sql
           SHOW USERS;
          ```
-       - View the user's **roles** and **privileges**:
+       - Example: **View the user's roles and privileges**
          ```sql
           -- sql
           SHOW GRANTS FOR <username>
          ```
-       - Example: Check Permissions of `default_role`
+       - Example: **Check Permissions of** `default_role`
          ```sql
            -- sql
            SHOW GRANTS FOR default_role;
@@ -68,7 +54,7 @@
     2. **Command 1.2**: **Create a User**
 
        - Connect to the cluster with the `admin` user.
-       - Create a user:
+       - Example: **Create a user**
          ```sql
           -- sql
           CREATE USER <username> IDENTIFIED WITH sha256_password BY '<user_password>';
@@ -142,11 +128,17 @@
     1. **Command 1.6**: **View Roles**
 
        - Connect to the cluster with the `admin` user.
-       - View roles in the cluster:
+       - Example: **View roles in the cluster**
          ```sql
           -- sql
-          SHOW ROLES
+          SHOW ROLES;
          ```
+       - Sample Output:
+         1. `clickpipes`:
+         2. `clickpipes_system`:
+         3. `default_role`: The default role assigned to new users if no other role is specified. It typically has minimal privileges (e.g., `SELECT` on some tables) unless customized
+         4. `sql_console_admin`: An administrative role for the **SQL console** in **ClickHouse Cloud**, likely granting full privileges (`ALL PRIVILEGES`) on all databases and tables, including the ability to manage users and roles (e.g., `GRANT`, `CREATE USER`).
+         5. `sql_console_read_only`: A read-only role for the **SQL console**, likely limited to `SELECT` and `SHOW` privileges, without rights to modify data or structure (e.g., no `INSERT`, `CREATE`, or `GRANT`).
 
     2. **Command 1.7**: **Create a Role**
 
@@ -167,7 +159,7 @@
     3. **Command 1.8**: **Assign a Role to a User**
 
        - Connect to the cluster with the `admin` user.
-       - Assign a role to a user:
+       - Example: **Assign a role to a user**
          ```sql
           -- sql
           GRANT <role> TO <username>
@@ -177,22 +169,22 @@
 
        - Connect to the cluster with the `admin` user.
        - Modify the settings and privileges:
-         - Example: Edit Role Name
+         - Example: **Edit Role Name**
            ```sql
             -- sql
             ALTER ROLE <role_name> RENAME TO <new_role_name>
            ```
-         - Example: Edit Role Setting
+         - Example: **Edit Role Setting**
            ```sql
             -- sql
             ALTER ROLE <role_name> SETTINGS <setting> = <new_setting_value>
            ```
-         - Example: Grant Privileges
+         - Example: **Grant Privileges**
            ```sql
             -- sql
             GRANT SELECT ON <database_name>.* TO <role_name>;
            ```
-         - Example: Revoke Privileges
+         - Example: **Revoke Privileges**
            ```sql
             -- sql
             REVOKE SELECT(<column_name>) ON <database_name>.<table_name> FROM <role_name>;
@@ -200,7 +192,7 @@
 
     5. **Command 1.10**: **Delete a Role**
        - Connect to the cluster with the `admin` user.
-       - Delete the role:
+       - Example: **Delete the role**
          ```sql
           -- sql
           DROP ROLE <role_name>
@@ -208,3 +200,6 @@
        - This also revokes the role from all the users it was assigned to.
 
 # Resources and Further Reading
+
+1. [double.cloud - Manage ClickHouse® users](https://double.cloud/docs/en/managed-clickhouse/step-by-step/manage-users)
+2. [double.cloud - Manage ClickHouse® roles](https://double.cloud/docs/en/managed-clickhouse/step-by-step/manage-roles)
