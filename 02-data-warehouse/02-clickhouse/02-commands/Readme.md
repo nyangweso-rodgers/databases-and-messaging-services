@@ -6,6 +6,8 @@
   - [Table Of Contents](#table-of-contents)
 - [SQL Commands](#sql-commands)
 - [1. Access Control Management (Creating Users and Roles in ClickHouse)](#1-access-control-management-creating-users-and-roles-in-clickhouse)
+- [2. Database Operations](#2-database-operations)
+- [3. Database Table Operations](#3-database-table-operations)
 - [Resources and Further Reading](#resources-and-further-reading)
 
 # SQL Commands
@@ -198,6 +200,25 @@
           DROP ROLE <role_name>
          ```
        - This also revokes the role from all the users it was assigned to.
+
+# 2. Database Operations
+
+# 3. Database Table Operations
+
+1. **Command**: **Show Database Tables**
+
+   ```sql
+    -- sql
+    SHOW TABLES FROM <database_name>;
+   ```
+
+2. **Command**: **Drop Database Table**
+   - SQL Command to Delete a Table
+     ```sql
+      -- sql
+      DROP TABLE IF EXISTS <database_name>.<table_name> SYNC;
+     ```
+   - `SYNC`: Optional, ensures the drop operation completes synchronously (useful for scripting to avoid race conditions).
 
 # Resources and Further Reading
 
