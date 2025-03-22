@@ -23,7 +23,9 @@
       1. `postgres` – when you connect to a server, you need the name of a database to connect to, but you don’t always know what the name is. This is also true of database management tools. While it’s not strictly necessary, you can almost always rely on the postgres database existing – once you’ve connected to this empty, default database, you can list all the other databases on the server, create new databases, and so on.
       2. `template0`, `template1` – as the name suggests, these databases are templates used to create future databases.
 
-# Views vs Materialized views
+# PostgreSQL Concepts
+
+## 1. Views vs Materialized views
 
 - A **view** is a saved query. It is not stored on the disk. It dynamically fetches data from the underlying tables whenever queried. Since views do not have their own storage, views cannot have **indexes**.
 - **Materialized views** do not dynamically fetch data from underlying tables- they are stored on disk - and must be explicitly refreshed to update the contents. This makes them ideal for scenarios involving complex queries or frequent access to relatively static datasets. Because they can be stored on disk, materialized views can be indexed.
@@ -83,6 +85,175 @@
         REFRESH MATERIALIZED VIEW CONCURRENTLY recent_product_sales;
        ```
      - Materialized views that generate columns with non-unique values cannot use unique indexes - and cannot use the concurrent refresh option. In that case, you’ll have to work around it with the regular refresh.
+
+## 2. Postgres Extensions
+
+1. `PostGIS`
+
+   - **What it does**: Transforms PostgreSQL into a database system that can efficiently handle **spatial data**. It introduces additional data types such as `geometry`, `geography`, `raster`, and more, along with a suite of functions, operators, and indexing capabilities tailored to these spatial types.
+   - **Use case**: IoT applications, location-based services, and geospatial analysis.
+   - Installation:
+     ```sql
+      CREATE EXTENSION postgis;
+     ```
+   - **PostGIS sample query** (We want to know: “How many taxis picked up passengers within 400 meters of Times Square on New Year’s Day 2016?”):
+     ```sql
+      -- How many taxis picked up rides within 400m of Times Square on New Years Day?
+      -- Times Square coordinates: (40.7589, -73.9851)
+      SELECT time_bucket('30 minutes', pickup_datetime) AS thirty_min, COUNT(*) AS near_times_sq
+      FROM rides
+      WHERE ST_Distance(pickup_geom, ST_Transform(ST_SetSRID(ST_MakePoint(-73.9851,40.7589),4326),2163)) < 400
+      AND pickup_datetime < '2016-01-01 14:00'
+      GROUP BY thirty_min ORDER BY thirty_min
+      LIMIT 5;
+     ```
+
+2. `pg_stat_statements`
+
+   - **What it does**: Tracks execution statistics for all queries executed by a Postgres database. It'll help you debug queries, identify slow queries, and generally give you deeper information about how your queries are running.
+   - **Use Case**: Performance tuning and identifying slow queries.
+   - Installation:
+     ```sql
+      CREATE EXTENSION pg_stat_statements;
+     ```
+   - **Pg_stat_statements sample query** (What are the top 5 I/O-intensive SELECT queries?)
+     ```sql
+      SELECT query, calls, total_time, rows, shared_blks_hit, shared_blks_read
+      FROM pg_stat_statements
+      WHERE query LIKE 'SELECT%'
+      ORDER BY shared_blks_read DESC, calls DESC
+      LIMIT 5;
+     ```
+
+3. `pgcrypto`
+
+   - **What it does**: Adds cryptographic functions to PostgreSQL for encryption, hashing, and more.
+   - **Use Case**: Secure storage of sensitive data and password management.
+   - Installation:
+     ```sql
+      CREATE EXTENSION pgcrypto;
+     ```
+   - **Pgcrypto sample query** (Here’s how you might use `pgcrypto` to encrypt and decrypt data. Let’s say you want to store encrypted user passwords. First, you would encrypt a password when inserting it into a table:)
+     ```sql
+      INSERT INTO users (username, password) VALUES ('john_doe', crypt('my_secure_password', gen_salt('bf')));
+     ```
+   - In this statement, `crypt` is a function provided by `pgcrypto` that encrypts the password using the **Blowfish algorithm**, which is indicated by `gen_salt`('`bf`')
+   - Next, to authenticate a user, you would compare a stored password against one provided during login:
+     ```sql
+      SELECT username FROM users WHERE username = 'john_doe' AND password = crypt('input_password')
+     ```
+
+4. `pg_partman`
+
+   - **What it does**: Simplifies the creation and management of **table partitions**. Partitioning is a key database technique that involves splitting a large table into smaller, more manageable pieces while allowing you to access the data as if it were one table.
+   - **Use Case**: This automation is particularly useful for large, time-series datasets that can grow rapidly.
+   - Installation:
+     ```sql
+      CREATE EXTENSION pg_partman;
+     ```
+   - **Pg_partman sample query** (Consider a scenario where you have a large table of IoT device data that you want to partition by day. Here’s how you might set up a daily partition scheme for a table called device_data using `pg_partman`:)
+
+     ```sql
+      -- Create a parent table
+      CREATE TABLE device_data (
+          time timestamptz NOT NULL,
+          device_id int NOT NULL,
+          data jsonb NOT NULL
+      );
+
+      -- Set up pg_partman to manage daily partitions of the device_data table
+      SELECT partman.create_parent('public.device_data', 'time', 'partman', 'daily');
+     ```
+
+   - In this setup, `create_parent` is a function provided by pg_partman that takes the parent table name and the column to partition on (time), as well as the schema (partman) and the partition interval (daily).
+
+5. `postgres_fdw`
+
+   - **What it does**: Allows you to use a **Foreign Data Wrapper** to access tables on remote Postgres servers (hence the name "fdw"). A **Foreign Data Wrapper** lets you create proxies for data stored in other Postgres databases to query them as if they were coming from a table in the current database.
+   - **Use Case**: Distributed databases and multi-server setups.
+   - Installation:
+     ```sql
+      CREATE EXTENSION postgres_fdw;
+     ```
+   - **Postgres_fdw sample query** (**Here’s how you create a connection to your foreign server:**)
+     ```sql
+      CREATE SERVER myserver FOREIGN DATA WRAPPER postgres_fdw OPTIONS (host '123.45.67.8', dbname ‘postgres’, port '5432');
+     ```
+   - This query connects to a database hosted on IP address `123.45.67.8`, with the name `postgres` at port `5432`. Now, create a user mapping so that users on your database can access the foreign server:
+     ```sql
+      CREATE USER MAPPING FOR postgres
+      SERVER myserver
+      OPTIONS (user 'postgres', password 'password');
+     ```
+
+6. `pgvector`
+
+   - **What it does**: Adds support for vector operations in Postgres—enabling similarity search, nearest-neighbor search, and more.
+   - **Use Case**: Applications like recommendation systems, image retrieval, and semantic search.
+   - Installation:
+     ```sql
+      CREATE EXTENSION vector;
+     ```
+   - **Pgvector sample query** (Say you want to find the most similar images to a given feature vector. Here’s how you might use `pgvector` to perform a nearest-neighbor search:)
+
+     ```sql
+      -- Assuming we have a table with image features stored as vectors
+      -- Table: image_features
+      -- Columns: id (integer), features (vector)
+
+      -- Given a query vector, find the 5 most similar images
+      SELECT id, features
+      FROM image_features
+      ORDER BY features <-> 'query_vector'::vector
+      LIMIT 5;
+     ```
+
+   - This query orders the results by the distance between the query_vector and the features column, effectively returning the closest matches
+
+7. `hstore`
+
+   - **What it does**: A key-value store within Postgres, that stores sets of key/value pairs in a single Postgres data type.
+   - **Use Case**: Semi-structured data with varying attributes that need fast indexing and flexible schema requirements without table alterations.
+   - Installation:
+     ```sql
+      CREATE EXTENSION hstore;
+     ```
+   - **Hstore sample query** (Here’s an example of how you might use `hstore` to store and query product data with varying attributes:)
+
+     ```sql
+      -- Create a table with an hstore column for storing product attributes
+      CREATE TABLE products (
+          id serial PRIMARY KEY,
+          name text NOT NULL,
+          attributes hstore
+      );
+
+      -- Insert a product with attributes into the table
+      INSERT INTO products (name, attributes)
+      VALUES ('Smartphone', 'color => "black", storage => "64GB", battery => "3000mAh"');
+
+      -- Query to find products with a specific attribute
+      SELECT name
+      FROM products
+     ```
+
+8. `pgcre`
+   - **What it does**: Integrates Perl Compatible Regular Expressions (PCRE) into PostgreSQL, providing advanced string-matching functionality beyond PostgreSQL's built-in regex capabilities.
+   - **Use Case**: Applications requiring sophisticated text analysis with complex pattern-matching needs like parsing logs, searching text, or validating string formats with advanced regex features.
+   - Installation:
+     ```sql
+      CREATE EXTENSION pgpcre
+     ```
+   - **pgpcre sample query** (If you want to search for email addresses in a column of unstructured text, you might use a PCRE pattern for matching emails as follows:)
+     ```sql
+      -- Assuming we have a table named messages with a column named content
+      -- Table: messages
+      -- Column: content (text)
+      -- Use pgpcre to match email addresses within the content
+      SELECT content, pcre_match('^\S+@\S+$', content) AS email
+      FROM messages
+      WHERE pcre_match('^\S+@\S+$', content) IS NOT NULL;
+     ```
 
 # Troubleshooting Query Performance Issues in PostgreSQL
 
@@ -398,3 +569,4 @@
 1. [daily.dev - How Postgres stores data on disk – this one's a page turner](https://drew.silcock.dev/blog/how-postgres-stores-data-on-disk/?ref=dailydev)
 2. [Speak Data Science - 7 Crucial PostgreSQL Best Practices](https://speakdatascience.com/postgresql-best-practices/?ref=dailydev)
 3. [crunchydata.com - Indexing Materialized Views in Postgres](https://www.crunchydata.com/blog/indexing-materialized-views-in-postgres?ref=dailydev)
+4. [dev.to - 8 Postgres Extensions You Need to Know](https://dev.to/timescale/8-postgres-extensions-you-need-to-know-2mj3?ref=dailydev)
