@@ -51,4 +51,6 @@
 
      - **Snowflake Schema**: The snowflake schema is an extension of the star schema. In a snowflake schema, each dimension are normalized and connected to more dimension tables.
 
+## 2. Slowly Changing Dimension (SCD)
+
 # Resources
