@@ -5,11 +5,9 @@
 # Introduction to PostgreSQL
 
 - **PostgreSQL** is an free open-source database system that supports both relational (SQL) and non-relational (JSON) queries.
-
-# A Brief History
-
-- It began in 1986 as a research project at the University of California, Berkeley. The project aimed to create a database system that could handle complex data and relationships more effectively than existing systems.
-- In 1995, the project added support for SQL, a standard language for working with databases, and was renamed PostgreSQL.
+- **Brief History**
+  - It began in 1986 as a research project at the University of California, Berkeley. The project aimed to create a database system that could handle complex data and relationships more effectively than existing systems.
+  - In 1995, the project added support for SQL, a standard language for working with databases, and was renamed PostgreSQL.
 
 # How PostgreSQL Stores Data
 
@@ -24,6 +22,67 @@
     - When you start up a fresh Postgres server, **Postgres** will automatically create 3 databases for you. i.e.,:
       1. `postgres` – when you connect to a server, you need the name of a database to connect to, but you don’t always know what the name is. This is also true of database management tools. While it’s not strictly necessary, you can almost always rely on the postgres database existing – once you’ve connected to this empty, default database, you can list all the other databases on the server, create new databases, and so on.
       2. `template0`, `template1` – as the name suggests, these databases are templates used to create future databases.
+
+# Views vs Materialized views
+
+- A **view** is a saved query. It is not stored on the disk. It dynamically fetches data from the underlying tables whenever queried. Since views do not have their own storage, views cannot have **indexes**.
+- **Materialized views** do not dynamically fetch data from underlying tables- they are stored on disk - and must be explicitly refreshed to update the contents. This makes them ideal for scenarios involving complex queries or frequent access to relatively static datasets. Because they can be stored on disk, materialized views can be indexed.
+
+- **Examplaes** (**Building a materialized view with indexes**):
+
+  1. **Example 1** (**shows recent product sales by sku**):
+
+     - Suppose we have `products`, `orders`, `product_orders` database tables, We’d like to show how often this product has been purchased. This is helpful for marketing the product but we don’t need to recalculate this from the database every time a product is displayed. So static information in a materialized view is perfect for this use case. Pre-joining tables and having this ready to go will make queries to the sku really easy.
+       ```sql
+         -- sql
+         CREATE MATERIALIZED VIEW recent_product_sales AS
+         SELECT
+             p.sku,
+             SUM(po.qty) AS total_quantity
+         FROM
+             products p
+             JOIN product_orders po ON p.sku = po.sku
+             JOIN orders o ON po.order_id = o.order_id
+         WHERE
+             o.status = 'Shipped'
+         GROUP BY
+             p.sku
+         ORDER BY
+             2 DESC;
+       ```
+     - We will likely be looking this up by sku, so we can add a simple **b-tree index**, calling out the materialized view like we would a table.
+       ```sql
+         -- sql
+         CREATE INDEX sku_index ON recent_product_sales (sku);
+       ```
+     - Creating indexes for materialized views works exactly like it does with tables. Postgres supports all the major index types, **B-tree**, **hast**, **GiST**, **GIN**, **BRIN**, and others on materialized views.
+
+- **Refreshing our materialized view and indexes**: Materialized views are static, so to add new data, we have to refresh it. There’s two ways Postgres can refresh a materialized view. A regular refresh and one done concurrently.
+
+  1. **Non-Concurrent (locking) refresh**
+
+     - This refresh completely replaces the content of the materialized view. The index you built prior to this remain and Postgres will recreate the index with the refreshed data.
+     - Postgres acquires an exclusive lock on the materialized view during this refresh, preventing any reads or writes. This is the fastest option but it often won’t work for production systems with live reads coming in.
+       ```sql
+        -- sql
+        REFRESH MATERIALIZED VIEW recent_product_sales;
+       ```
+     - In addition to building the materialized view, Postgres will have to rebuild the index from scratch. Depending on data size, this can be a pretty long operation.
+
+  2. **Concurrent (non-locking) refresh**
+     - This refresh will update the materialized view without locking the table, letting you read currently while the refresh is happening. This utilizes the Postgres reindex concurrently too if you’re familiar with that feature. Postgres will reindex everything as the data is refreshed. This is normally slower than a regular refresh due to the incremental approach but allowing reads during the process makes it the favorable option for production databases.
+     - Concurrent refresh **requires a unique index** on the materialized view to function. The unique index ensures that each row in the materialized view can be uniquely identified. The b-tree index we added earlier has not been explicitly declared as unique, so we can add a new unique index and drop the old one.
+       ```sql
+        -- sql
+        CREATE UNIQUE INDEX unique_idx_recent_product_sales ON recent_product_sales(sku);
+        DROP INDEX sku_index ON recent_product_sales(sku);
+       ```
+     - Now we can do our concurrent refresh:
+       ```sql
+        -- sql
+        REFRESH MATERIALIZED VIEW CONCURRENTLY recent_product_sales;
+       ```
+     - Materialized views that generate columns with non-unique values cannot use unique indexes - and cannot use the concurrent refresh option. In that case, you’ll have to work around it with the regular refresh.
 
 # Troubleshooting Query Performance Issues in PostgreSQL
 
@@ -338,3 +397,4 @@
 
 1. [daily.dev - How Postgres stores data on disk – this one's a page turner](https://drew.silcock.dev/blog/how-postgres-stores-data-on-disk/?ref=dailydev)
 2. [Speak Data Science - 7 Crucial PostgreSQL Best Practices](https://speakdatascience.com/postgresql-best-practices/?ref=dailydev)
+3. [crunchydata.com - Indexing Materialized Views in Postgres](https://www.crunchydata.com/blog/indexing-materialized-views-in-postgres?ref=dailydev)
