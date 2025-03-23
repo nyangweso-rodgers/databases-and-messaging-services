@@ -212,13 +212,42 @@
     SHOW TABLES FROM <database_name>;
    ```
 
-2. **Command**: **Drop Database Table**
+2. **Command**: **Create Database**
+
+   - SQL Commands to `CREATE` a Database
+     ```sql
+      -- sql
+      CREATE DATABASE <database_name>
+     ```
+   - If you want to specify an **engine** for the database (e.g., **Atomic** for better transaction support), you can use:
+     ```sql
+      -- sql
+      CREATE DATABASE <database_name> ENGINE = Atomic;
+     ```
+   - To check if the database exists before creating it, use:
+     ```sql
+      -- sql
+      CREATE DATABASE IF NOT EXISTS <database_name>;
+     ```
+
+3. **Command**: **Drop Database Table**
+
    - SQL Command to Delete a Table
      ```sql
       -- sql
       DROP TABLE IF EXISTS <database_name>.<table_name> SYNC;
      ```
    - `SYNC`: Optional, ensures the drop operation completes synchronously (useful for scripting to avoid race conditions).
+
+4. **Command**: **Create Database Table**
+   - Create a new database table by:
+     ```sql
+      CREATE TABLE <database_name>.<table_name> (
+        <field_name> <data_type>,
+        <field_name> <data_type>
+      ) ENGINE = MergeTree()
+      ORDER BY (<field_name>)
+     ```
 
 # Resources and Further Reading
 
