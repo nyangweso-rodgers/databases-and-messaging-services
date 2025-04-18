@@ -25,7 +25,36 @@
 
 # PostgreSQL Concepts
 
-## 1. Views vs Materialized views
+## 1. Postgres Schema
+
+- **PostgreSQL schemas** are **namespaces** within a **single database** — and they allow you to organize **database objects** (like **tables**, **views**, **functions**) logically, without needing to create multiple databases.
+- By default, **PostgreSQL** creates a `public` schema in every database, and everything goes there unless you say otherwise. But in a production data stack, grouping by schema improves **clarity**, **security**, and **manageability**. For example, we might have:
+
+  1. `raw`: Contains raw ingested data from sources like MySQL, APIs, etc.
+  2. `staging`: Cleaned or lightly transformed data for modeling.
+  3. `analytics`: Final curated datasets for BI dashboards.
+  4. `internal_ops`: Back-office operational data.
+
+- **Examples**:
+  1. Create `finance` schema:
+     - If you want to create schemas manually, run:
+       ```sql
+        CREATE SCHEMA sales;
+       ```
+     - Then create a table in one:
+       ```sql
+        CREATE TABLE finance.invoices (
+          invoice_id SERIAL PRIMARY KEY,
+          amount NUMERIC,
+          issued_at TIMESTAMP
+       );
+       ```
+     - You can now access it like:
+       ```sql
+        SELECT * FROM finance.invoices;
+       ```
+
+## 2. Views vs Materialized views
 
 - A **view** is a saved query. It is not stored on the disk. It dynamically fetches data from the underlying tables whenever queried. Since views do not have their own storage, views cannot have **indexes**.
 - **Materialized views** do not dynamically fetch data from underlying tables- they are stored on disk - and must be explicitly refreshed to update the contents. This makes them ideal for scenarios involving complex queries or frequent access to relatively static datasets. Because they can be stored on disk, materialized views can be indexed.
@@ -86,7 +115,7 @@
        ```
      - Materialized views that generate columns with non-unique values cannot use unique indexes - and cannot use the concurrent refresh option. In that case, you’ll have to work around it with the regular refresh.
 
-## 2. Postgres Extensions
+## 3. Postgres Extensions
 
 1. `PostGIS`
 
