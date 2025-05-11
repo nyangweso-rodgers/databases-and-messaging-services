@@ -195,6 +195,16 @@
   2. Rebalancing data across shards can be a complex and time-consuming process.
   3. Joining data across shards can be challenging.
 
+# Data Engineering Concepts
+
+## 1. Star Schema Design
+
+## 2. Dimension and Fact Table Architecture
+
+## 3. Slowly Changing Dimensions (SCDs)
+
+## 4. Conformed Dimensions
+
 # Resources
 
 1. [MongoDB Basics - What are ACID Properties in Database Management Systems?](https://www.mongodb.com/basics/acid-transactions)
