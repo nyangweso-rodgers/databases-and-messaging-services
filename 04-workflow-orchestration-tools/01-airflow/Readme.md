@@ -67,6 +67,86 @@
       6. `@yearly` - run once a year midnight of January 1.
   - The **DAG** can also be scheduled using cron-based intervals
 
+- **DAG Best Practices**
+
+  1. **DAG as configuration file**
+
+     - Keep the **DAGs** light, more like a configuration file. As a step forward it will be a good choice to have a YAML/JSON-based definition of workflow and then generate the **DAG**, based on that. This has a double advantage.
+       1. DAGs, since are getting generated programmatically will be consistent and reproducible anytime.
+       2. Non-python users will also be able to use it.
+     - We can separate non-configuration-related code blocks outside the DAG definition and use the template_searchpath attribute to add those. For example, if you are trying to connect to an RDS and execute some SQL command, that SQL command should be loaded from a file. And the location of the file should be mentioned in the template_searchpath. Similarly with Hive queries(.hql).
+
+  2. **Invest in Airflow plugin system**
+
+     - Custom **Hooks** and **Operators** are great ways in making your pipelines easier to maintain, easier to debug, and easier to create.
+     - So it is good to have a proper plugin repo and maintain it to author custom plugins needed as per the organization’s requirement. While creating a plugin, be generic so that it is reusable across use cases. This helps in versioning as well as it helps in keeping workflows clean and mostly configuration details as opposed to implementation logic. Also, don’t perform heavy work/operation while initializing the class, push operations (like getting variable & connections) inside the execution method.
+
+  3. **Do not perform data processing in DAG files**
+
+     - Since **DAGs** are python-based, we will definitely be tempted to use **pandas** or similar stuff in **DAG**, but we should not. **Airflow** is an **orchestrator**, not an **execution framework**. All computation should be delegated to a specific target system. Follow the fire and track approach. Use the **operator** to start the **task** and the **sensor** to track the completion. **Airflow** is not designed for long-running tasks.
+
+  4. **Delegate API or DB calls to operators**
+
+     - This is somewhat similar to the first point. API call or DB connection made at top-level code in DAG files overloads the scheduler & webserver. These call defined outside of the operator is called on every heartbeat. So it is advisable to have these pushed down to a util/common (can be a python operator) operator.
+
+  5. **Use single variable per DAG**
+
+     - Every time we access DAG variables it creates a connection to metadata DB. It may overload the Db if we are having multiple DAGs running with multiple variables being called. It's better to use a single variable per DAG with a JSON object. This will create a single connection. We can parse the JSON to get the desired key-value pair.
+       ```py
+        # Combining SSM keys in one
+        dag_specific_variable = '{
+          "variable_1" : "value_1",
+          "variable_2" : "value_2",
+          "variable_3" : "value_3"
+        }'
+        # Single call to get all three varaibles
+        dag_specific_params =  Variable.get("dag_specific_variable", deserialize_json=True)
+        # Using these in DAG
+        {{ var.json.dag_specific_params.variable_1 }}
+       ```
+
+  6. **Tag the DAG**: Having Tags in **DAG** helps in filtering and grouping DAGs. Make it consistent with your infrastructure’s current tagging system. Like tag based on BU, Project, App Category, etc.
+  7. **Don’t Abuse XCom**: **XCom** acts as a channel between tasks for sharing data. It uses backend DB to do so. Hence we should not pass a huge amount of data using this, as with a bigger amount of data the backend DB will get overloaded.
+  8. **Use intermediate storage between tasks**
+
+     - If the data, to be shared between two **tasks**, is huge store it in an intermediate storage system. And pass the reference of it to the downstream task. We can even leverage an `xcom_custom_backend`. Remember Airflow is not a data storage solution.
+     - Note: When using `KubernetesPodOperator` use `@task.kubernetes` since it encapsulates the xcom logic, else we need to use script in the docker file to get the templated task xcom (e`nv_vars = { "INPUT_DATA" : '''{{ti.xcom_pull(task_ids="extract_data",key="return_value")}}'''}`) and write results in JSON for the sidecar container to read and populate db.
+
+  9. **Limit the use of PythonOperator**
+
+     - Limit the use of `PythonOperator`, prefer built-in operators. If **Operator** is not available then use `KubernetesPodOperator`. This will ensure that your operations are performed in a consistent and isolated environment, which can improve the performance and scalability of your pipeline.
+
+  10. **Use the power of Jinja templating**
+      - Many of the operators support template_fields. This tuple object defines which fields will get jinjaified.
+        ```py
+          class PythonOperator(BaseOperator):
+            template_fields = ('templates_dict', 'op_args', 'op_kwargs')
+        ```
+      - While writing your custom operator overrides this template_fields attribute.
+        ```py
+          class CustomBashOperator(BaseOperator):
+            template_fields = ('file_name', 'command', 'dest_host')
+        ```
+      - The above example is the fields ‘file_name’, ‘command’, ‘dest_host’ will be available for jinja templating.
+      - You can access variables as well with the template.
+        ```py
+          {{ var.value.key_name }}
+        ```
+      - Params can also be templatized like below:
+        ```py
+          # Define param
+          params={
+            "param_key_1": "param_value_1",
+            "param_key_2": "param_value_2"
+          }
+          # access param using template
+          {{ params.param_key_1 }}
+        ```
+  11. **Implement DAG Level Access control**: Leverage Flask App Builder views to have DAG level access control. Set the DAG owner to correct Linux user. Create a custom role to decide who can take DAG/Task actions.
+  12. **Use static start_date**: Static DAG start date helps in, correctly populating DAG runs and schedule.
+  13. **Rename DAGs in case of structural change**: Till the time the DAG versioning feature is implemented, in case of any structural change in DAG rename the DAG on changes. This will create a new DAG and all DAG history of the previous run for the old DAG version will be there without any inconsistency.
+  14. **Use AsyncOperators in newer versions**: **Operators** consume worker slots during the run of the triggered task. If the task is long-running then airflow will run out of slots although airflow itself is not doing much work. To avoid this scenario we should use the Async Operators. These operators do not consume worker slots for long.
+
 ## 2. Operators
 
 - **Operators** are the building blocks of a **DAG**; they represent a single, ideally idempotent, unit of work. Each **operator** in **Airflow** is designed to do one specific thing, and they can be extended to handle virtually any type of job, whether it involves running a **Python function**, **executing a SQL query**, **managing a Docker container**, **sending an email**, or more.
@@ -232,6 +312,30 @@
 
   2. **MySQLOperator**
   3. **SlackOperator**
+
+## 3. Executor
+
+- An **executor** in **Apache Airflow** is a component that is responsible for running **tasks**.
+- Two types of **executors**:
+
+  1. **Local executors**
+
+     - This is the simplest type of executor, but it is not scalable. The `LocalExecutor` runs **tasks** directly on the machine where the **scheduler** is deployed. It allows multiple **tasks** to be run in parallel by spawning dedicated processes for each task. It is the prime example of a local executor.
+
+  2. **Remote Executors**
+     - **Remote executors** run tasks on remote machines. This allows for scalability and fault tolerance.
+     - [Celery](https://docs.celeryq.dev/en/stable/getting-started/introduction.html), [Dask](https://www.dask.org/), and [Kubernetes](https://kubernetes.io/) are all tools that can be used for distributed computing and are capable of running tasks in parallel on multiple machines.
+       - **Celery** is a task queue that allows tasks to be distributed across multiple workers. It is often used to run asynchronous applications, such as web applications that send emails or process payments.
+       - **Dask** is a parallel computing library that can be used to speed up data analysis and machine learning tasks. It works by breaking your data into smaller chunks that can be processed in parallel on multiple machines.
+       - **Kubernetes** is a container orchestration system that can be used to manage and deploy applications across a cluster of machines.
+     - **Airflow** can take advantage of all of those tools thanks to **remote executors** such as the `CeleryExecutor`, the `DaskExecutor`, and the `KubernetesExecutor`.
+       1. The `KubernetesExecutor`
+          - Pros:
+            - Using `KubernetesExecutor`, **Airflow** runs each **task** in its own dedicated **pod**. This leads to the first major advantage over other execution modes — resource usage is strictly on demand.
+            - Another big advantage of the `KubernetesExecutor` is the ability to dynamically scale resources. You can configure how many CPUs and how much memory **Airflow** has to request from **Kubernetes** to execute each **task** in contrast to the `LocalExecutor`, which must always allocate enough resources for the most demanding task.
+            - Another benefit of `KubernetesExecutor` is that tasks are separated from each other. As `KubernetesExecutor` runs tasks in separate **pods**, it allows the use of different Docker images for each task. This makes it simple to use various Python versions, alternative interpreters, for example, PyPy or Jython, other things like PySpark or even tasks not related to Python.
+          - Cons:
+            - The disadvantages of the `KubernetesExecutor` are related to the complexity of the configuration. You need to have a working Kubernetes cluster, configure manifests of core Airflow components and task pods, set up remote logging, and enable synchronization with a `git`-based repository using `git-sync`.
 
 ## 3. Tasks
 
@@ -447,10 +551,64 @@
 
 - The **TaskFlow API** was introduced in **Airflow 2.0** and is a wonderful alternative to `PythonOperator`.
 - Benefits of `TaskFlow API` over the traditional `PythonOperator`:
+
   1. Reduced boilerplate code
-  2. Intuitive data transfer between DAGs
-  3. No unnecessary code for explicit dependency chain
-  4. Simplified task instantiation
+  2. **Automatic XCom handling**: Function return values are automatically stored in **XCom**.
+  3. Intuitive data transfer between DAGs
+  4. No unnecessary code for explicit dependency chain
+  5. **Supports parameterized tasks**: You can pass arguments between tasks easily.
+
+- **Example**:
+
+  ```py
+    from airflow.decorators import dag, task
+    from airflow.utils.dates import days_ago
+    from datetime import timedelta
+    import pandas as pd
+
+    # Define default arguments
+    default_args = {
+        "owner": "Md. Anower Hossain",                # The owner of the DAG
+        "start_date": days_ago(1),                     # The start date for the DAG
+        "retries": 1,                                  # Number of retries in case of failure
+        "retry_delay": timedelta(minutes=5),           # Time delay between retries
+        "catchup": False                               # Prevent running backlogged DAGs
+    }
+
+    @dag(schedule_interval="@daily", default_args=default_args, catchup=False)
+    def etl_taskflow():
+
+        @task
+        def extract():
+            """Simulating data extraction from an API"""
+            data = {"name": ["Anower", "Hossain"], "age": [25, 30]}
+            return data  # Automatically stored in XCom
+
+        @task
+        def transform(data: dict):
+            """Transform data: Convert to DataFrame and add a new column"""
+            df = pd.DataFrame(data)
+            df["age_category"] = df["age"].apply(lambda x: "Adult" if x >= 26 else "Minor")
+            return df.to_dict(orient="records")  # Return transformed data
+
+        @task
+        def load(transformed_data: list):
+            """Simulating loading data into a database"""
+            print(f"Loading data into DB: {transformed_data}")
+
+        # Task dependencies
+        raw_data = extract()
+        transformed_data = transform(raw_data)
+        load(transformed_data)
+
+    etl_dag = etl_taskflow()
+  ```
+
+  - where:
+    - `@dag` decorator: Defines the DAG function.
+    - `@task` decorator: Converts functions into tasks.
+    - **Task dependencies** are defined dynamically by calling functions (`extract() -> transform() -> load()`).
+    - **XCom is handled automatically**, passing data between tasks.
 
 # Running Apache Airflow
 
@@ -642,3 +800,5 @@
 - Step 4: Configure profiles.yml for BigQuery using a service account JSON key file
 
 # Resources and Further Reading
+
+1. [Medium - Airflow DAG — Best Practices](https://medium.com/swlh/airflow-dag-best-practices-716ac95b82d1)
