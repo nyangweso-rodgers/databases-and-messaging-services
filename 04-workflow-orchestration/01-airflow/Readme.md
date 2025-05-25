@@ -495,6 +495,14 @@
   3. Set Defaults: Always use `default_var` when fetching variables to handle missing values gracefully.
   4. Secure Variable Access: Limit access to variables by configuring user roles and permissions in the Airflow UI.
 
+## Hooks
+
+- **Hooks** are interfaces to external platforms and databases like Hive, S3, MySQL, Postgres, HDFS, and Pig. Hooks implement a common interface when possible, and act as a building block for operators.
+
+## XComs
+
+- **XComs** allows information sharing between **tasks**. We can use **XCom** to pass data or messages from one **task** to another by using `xcom_push()` and `xcom_pull()` functionalities.
+
 ## 6. Configurations
 
 - The **Configurations** page in the Airflow UI (under **Admin** > **Configurations**) is meant to display the contents of `airflow.cfg` (**Airflow’s main configuration file**) and **environment variables** used by **Airflow**. It allows admins to view settings like database connections, scheduler options, or SMTP details
