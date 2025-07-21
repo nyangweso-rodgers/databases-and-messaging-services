@@ -10,6 +10,77 @@
 
 # Database Concepts
 
+## Relational Databases
+
+- For relational database scaling, you can throw more hardware at the problem (**vertical scaling**) or split data across machines (**horizontal scaling**). Both options come with cost and complexity. Scaling decisions also affect your reliability, performance, and how much your team can actually maintain long term. Say your PostgreSQL instance starts timing out during peak hours. **Replication**? **Indexing**? **Sharding**?
+- **How to scale a relational database**
+
+  1. **Vertical scaling: the obvious but limited option**
+
+     - **Vertical scaling** is simple. Add more **CPU**, **memory**, or **SSDs** to your database server. It usually works—until it doesn’t.
+     - If **CPU** is maxed, bump the instance size. If IOPS are the problem, switch to provisioned volumes. The upside: no app changes. The downside: there's always a ceiling. And the bill is more expensive each time.
+     - Use vertical scaling early on. But as traffic grows or your dataset gets larger, it becomes a temporary band-aid rather than a long-term fix.
+
+  2. **Indexing: the low-hanging fruit of performance**
+
+     - **Indexes** are often the fastest way to fix performance without touching code. They work by creating shortcuts in how the DB finds data.
+     - Options: **B-tree** (default), **hash**, **GIN** for full-text search, **BRIN** for time-series data, partial indexes to cover specific cases
+     - But there’s no free lunch. **Indexes** slow down writes and increase storage. They also need maintenance.
+     - Use **indexes** when read latency is your problem and the access pattern is predictable. Avoid blindly indexing every column—monitor query plans first.
+
+  3. **Replication: scaling reads and ensuring high availability**
+
+     - **Replication** lets you offload reads and improve availability. You copy data from a primary to one or more replicas. There are different modes—async, sync, semi-sync—and they each trade consistency for performance.
+     - **Replication** helps in read-heavy workloads and HA setups. Just remember: writes still go to the primary, and **replication lag** can lead to stale reads. Design accordingly.
+
+  4. **Caching: reducing DB pressure with faster intermediaries**
+
+     - If replication handles read scale, caching handles read frequency. It’s about storing hot data closer to the user, often in memory with **Redis**, **Memcached**, or **AWS DAX**.
+     - This is where you want to know if you have more reads or writes. If you are read-heavy, you can cache this data because it barely changes.
+     - But caching is a trap if you don’t think through invalidation. You could end up with user-facing bugs because the TTLs weren’t tuned or updates didn’t invalidate correctly.
+     - Use caching when the data changes slowly and read throughput matters. Be explicit about how it gets refreshed, and what happens on cache misses.
+
+  5. **Denormalization: trading purity for performance**
+
+     - **Denormalization** is about duplicating data across tables so you avoid joins at read time. It’s a tradeoff: speed in exchange for data duplication.
+     - This works well for **analytics**, **dashboards**, or anything where performance matters more than consistency. But you have to think through update paths carefully.
+
+  6. **Materialized views: precomputing expensive queries**
+
+     - When you keep hitting expensive aggregations, materialized views are a win. You compute a complex query once and reuse the result.
+     - It’s fast and predictable. But it can get stale if not refreshed correctly. You need a clear strategy for when and how to refresh, especially if data comes from many sources.
+
+  7. **Partitioning: breaking large tables into smaller, manageable chunks**
+
+     - **Partitioning** splits large tables into logical pieces based on a column like **date** or **region**. It’s a must for time-series data, logs, or anything that grows linearly.
+     - Imagine having a logs table with over a billion rows. Once you partition it by month, queries drop from minutes to seconds. Archiving old data also became trivial. You can move them out of your database into a cold storage infrastructure, like **AWS S3 Glacier**.
+     - But it adds schema complexity. You have to manage partition creation and avoid uneven data distribution.
+     - Use partitioning when table size hurts query performance or cleanup. Especially when queries are scoped to recent data, and you keep old data for compliance and not for a customer's feature.
+
+  8. **Sharding: horizontal write scaling with distributed data**
+
+     - **Sharding** is the final boss of DB scaling. You split data across instances, often by a hash of a key like `user_id`. Each shard is like a smaller independent DB.
+     - This scales writes and isolates load. But it comes with huge costs. No global transactions. No joins across shards. Complex migrations. You need smart query routing and automation.
+     - Use sharding only when a single write node is the bottleneck and your data naturally segments.
+
+  9. **Archiving: keep the hot path lean**
+
+     - You don’t need all data online. **Archiving** moves cold data to slower, cheaper storage. It keeps your main DB fast and lean.
+     - For example, archive orders older than two years to S3 or a separate database. The live DB stays fast. Archived data is still available if needed—just slower to access.
+     - At Amazon, this comes up a lot. Teams often ignore cleanup, and databases get bloated. However, when a team configures a cold storage and some lifecycle rules to move data automatically, their bill becomes much cheaper.
+     - Archive when you have clear retention rules and infrequent access. Build rehydration paths early to avoid surprises.
+
+  10. **Connection Pooling**
+
+      - **Connection pooling** is basic hygiene. Without it, your app will kill itself by opening new connections every request. Always pool.
+
+  11. **Query Optimization**
+
+      - Query optimization means using `EXPLAIN` oftne to identify the data access patterns, fixing bad joins, and rewriting slow queries.
+
+  12. **Read-AfterWrite Patterns**
+      - Read-after-write patterns matter if you use caching or replicas. If your app reads stale data after writing, try write-through caching or wait until replicas catch up. You can't think about a database without thinking in the application using it.
+
 ## 1. Columnar vs. Row-Oriented Database
 
 - **Row-Oriented Databases**
@@ -420,3 +491,4 @@
 2. [daily.dev - Database Sharding](https://planetscale.com/blog/database-sharding?ref=dailydev)
 3. [daily.dev - Database Sharding](https://newsletter.systemdesigncodex.com/p/database-sharding?ref=dailydev)
 4. [daily.dev - Indexing and Performance Optimization](https://www.codu.co/articles/indexing-and-performance-optimization-fqpwri3y?ref=dailydev)
+5. [daily.dev - How to scale a relational database](https://strategizeyourcareer.com/p/how-to-scale-a-relational-database?ref=dailydev)
