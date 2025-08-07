@@ -10,6 +10,10 @@
 
 # Database Concepts
 
+## Database Management Systems
+
+- A **database management system** is software that allows users to formulate, manage, and interact with databases.
+
 ## Relational Databases
 
 - For relational database scaling, you can throw more hardware at the problem (**vertical scaling**) or split data across machines (**horizontal scaling**). Both options come with cost and complexity. Scaling decisions also affect your reliability, performance, and how much your team can actually maintain long term. Say your PostgreSQL instance starts timing out during peak hours. **Replication**? **Indexing**? **Sharding**?
