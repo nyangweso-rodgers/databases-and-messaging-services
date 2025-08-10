@@ -10,9 +10,57 @@
 
 # Database Concepts
 
-## Database Management Systems
+## Database Management Systems (DBMS)
 
 - A **database management system** is software that allows users to formulate, manage, and interact with databases.
+
+## SQL vs. NoSQL DBs
+
+- **When to Choose NoSQL over SQL**
+
+  - From backend point of view, question like:
+    1.  Do I need to update multiple related pieces of data at once and guarantee consistency?
+    2.  Is my data highly structured, or does it evolve with product requirements?
+    3.  Are my queries mostly write-heavy, read-heavy, or mixed?
+    4.  Will this system need to scale horizontally across regions or availability zones?
+    5.  Is it more important to serve fast reads or guarantee strong data integrity?
+  - When you frame it this way, you start seeing **SQL** and **NoSQL** not as competitors, but as different answers to different architectural constraints.
+  - **Considerations for NoSQL over SQL include**:
+
+    1. **Evolving Schemas Without Losing Sleep**
+
+       - One of the quiet realities of backend development is how often our data structures change, not because of bad design, but because the product evolves. Think about user **profiles**. You start with a `name`, `email`, and maybe a `preferences` JSON. Over time, preferences grow into a monster: notification settings, language choices, privacy toggles, A/B test participation flags, third-party integrations. In a relational schema, this becomes a nightmare. Either you add dozens of nullable columns, or stuff everything into a JSONB field and lose the ability to query effectively.
+       - In a **NoSQL** model, particularly with document stores, this evolution feels more natural. Each user document can carry only the fields that matter for that user. You don’t need to worry about updating thousands of rows when a new preference is introduced. You just start writing it into new documents. Your application logic is still responsible for validation but let’s be honest, you’re probably validating most of this stuff at the app layer anyway.
+         ```json
+          {
+            "_id": ObjectId("..."),
+            "email": "john@example.com",
+            "name": "John Doe",
+            "preferences": {
+              "language": "en",
+              "notifications": {
+                "email": true,
+                "sms": false
+              },
+              "beta_access": true
+            }
+          }
+         ```
+       - Now, new preferences are added as needed without modifying existing documents or running migrations. The key here is that **NoSQL** gives you schema flexibility without migrations. That’s not always good, it also means you need to be disciplined about what your documents look like. But when you’re iterating fast, or letting users define their own custom fields like in CMS platforms or form builders, this flexibility is a huge win.
+
+    2. **Write-Heavy, Scale-Crushing Workloads, Where NoSQL Shines**
+       - Imagine you’re running the backend for an IoT platform. Devices send temperature and humidity readings every few seconds. You’re ingesting millions of write operations per minute, and you need to store and query them efficiently. **SQL** can do this but it’s not built for this kind of brute-force ingestion at scale. You’ll eventually hit **write amplification issues**, **disk I/O bottlenecks**, and struggle with **partitioning** and **retention**. In SQL, appending billions of rows becomes painful.
+       - Here, time-series optimized **NoSQL** systems like **InfluxDB** or wide-column stores like **Cassandra** can shine. These are built for high-throughput writes and efficient compaction. You can configure data expiration (TTL), shard by time windows, and store years of data in a footprint SQL can’t match. You sacrifice transactional guarantees, but for sensor data ingestion, that’s usually acceptable. You care more about availability and throughput than about consistency.
+       - If you've ever tried to scale **PostgreSQL** to handle a billion rows of append-only data across multiple regions, you’ll appreciate what these systems are optimized for.
+
+- **Trade-Offs when Choosing NoSQL over SQL**:
+
+  - Choosing **NoSQL** doesn’t mean you get to skip thinking about **data modeling**, it just means the constraints are different. You need to plan your **indexes** up front. You need to think about access patterns ahead of time, because querying across non-indexed fields is expensive or outright unsupported. You don’t get joins, so you’ll often need to **duplicate** data across documents and you’ll be responsible for keeping it in sync when things change.
+  - You also need to wrestle with eventual consistency. In systems like **DynamoDB** or **Couchbase**, it’s entirely possible for two users to see different values briefly, depending on replica sync. If you’re working on a banking or invoicing system, that’s probably unacceptable. But for a product catalog or a blog feed, it’s a small price to pay for scale and availability.
+
+- **Choosing Both NoSQL and SQL**:
+  - In practice, most mature backends don’t use just **SQL** or just **NoSQL**. You’ll see teams using **PostgreSQL** for transactional data like orders and payments, **MongoDB** for `product` metadata, **Redis** for ephemeral caching, and Elasticsearch for search queries. This is what we call **polyglot persistence**, using multiple storage technologies in the same system, each tuned to its specific use case.
+  - It’s powerful, but it comes with its own complexity. You now have to maintain data across multiple systems. You may need to sync between them, eventually or in real time. Your team needs to be fluent in more than one database model. But when done right, this approach gives you the best of both worlds: transactional safety where you need it, and speed and flexibility where you don’t.
 
 ## Relational Databases
 
@@ -496,3 +544,4 @@
 3. [daily.dev - Database Sharding](https://newsletter.systemdesigncodex.com/p/database-sharding?ref=dailydev)
 4. [daily.dev - Indexing and Performance Optimization](https://www.codu.co/articles/indexing-and-performance-optimization-fqpwri3y?ref=dailydev)
 5. [daily.dev - How to scale a relational database](https://strategizeyourcareer.com/p/how-to-scale-a-relational-database?ref=dailydev)
+6. [When to Choose NoSQL Over SQL](https://hevalhazalkurt.com/blog/when-to-choose-nosql-over-sql/?ref=dailydev)
