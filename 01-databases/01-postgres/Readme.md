@@ -295,6 +295,120 @@
        ```
      - Materialized views that generate columns with non-unique values cannot use unique indexes - and cannot use the concurrent refresh option. In that case, you’ll have to work around it with the regular refresh.
 
+## 3. Indexing in PostgreSQL
+
+- **Index Types in PostgreSQL**:
+
+  1. **B-Tree Index**
+
+     - **Data Structure**: The **B - Tree** (balanced multi-way search tree) is a self-balanced tree structure. Each node in it can have multiple child nodes (multi-way). Usually, a **B - Tree node** contains multiple key-value pairs and pointers to child nodes. For example, an m-order **B - Tree** node can have at most m child nodes, and at least ⌈m/2⌉ child nodes (except for the root node).
+     - **Principle**: The **B - Tree index** is the most commonly used index type and is suitable for most data types. With its balanced tree structure, it can efficiently perform range queries, equality queries, and sorting operations. When performing a query, it starts from the root node, and recursively searches downward according to the size relationship of the key values until the target node is found or it is determined that the target does not exist.
+     - **Application Scenarios**:
+       1. **Equality Query (=)**: When you need to find a specific value, the **B - Tree** can quickly locate the node containing that value. For example, in the user table, find the user with user ID 100.
+       2. **Range Query (>, <, >=, <=)**: For queries that need to find values within a certain range, the **B - Tree** can use its orderliness to efficiently locate the start and end nodes of the range, and then traverse these nodes to obtain the results. For instance, find users whose age is between 20 and 30.
+       3. **Sorting Operation (ORDER BY)**: Since the key values in the **B - Tree** are stored in an ordered manner, the index can be directly used for sorting, avoiding additional sorting operations on the data and improving the sorting efficiency.
+     - Creation Statement
+       ```sql
+        CREATE INDEX idx_btree ON table_name (column_name);
+       ```
+
+  2. **Hash Index**
+
+     - **Data Structure**: The **Hash index** uses a hash table structure. It maps the key values to a slot in the hash table through a hash function. The hash table is usually an array, and each slot can store one or more key-value pairs. When a hash conflict occurs, the linked list method or open addressing method is usually used to handle it.
+     - **Principle**: The **Hash index** converts the key values into a fixed-length hash code through the **hash function**, and then finds the corresponding slot according to the hash code. It is only suitable for equality queries because the hash function cannot guarantee the order of the key values, so it does not support range queries and sorting operations.
+     - **Application Scenarios**:
+       1. **Equality Query (=)**: When you need to precisely match a certain value, the **Hash index** can quickly calculate the slot through the **hash function**, thereby locating the target data. For example, in the cache table, find the value corresponding to a specific cache key.
+     - Creation Statement
+       ```sql
+        CREATE INDEX idx_hash ON table_name USING hash (column_name);
+       ```
+
+  3. **GiST Index**
+     - **Data Structure**: **GiST** (**Generalized Search Tree**) is a general search tree structure. Its nodes can store different types of data and operator classes. Each node usually contains multiple key-value pairs and pointers to child nodes, and can perform customized splitting and merging operations according to different data types and operators.
+     - **Principle**: The **GiST index** is a general index structure that supports multiple data types and operator classes. It organizes the data into a tree structure by recursively dividing the data space, thus achieving efficient queries. When performing a query, according to the query conditions and operator classes, it starts from the root node and recursively searches downward until the nodes that meet the conditions are found.
+     - **Application Scenarios**:
+       1. **Full-text Search**: Text data can be tokenized, and then the **GiST index** can be used to store and query these tokens. For example, perform keyword search in the article table.
+       2. **Geometric Data Query**: For geometric data such as points, lines, and planes, the GiST index can efficiently handle spatial queries such as containment and intersection. For instance, find all the points of interest within a certain area in a map application.
+       3. **Multidimensional Data Query**: It is suitable for handling multidimensional data such as multidimensional arrays and vectors. For example, query high-dimensional feature vectors in a machine learning application.
+     - Creation Statement
+       ```sql
+        CREATE INDEX idx_gist ON table_name USING gist (column_name);
+       ```
+  4. **SP - GiST Index**
+
+     - **Data Structure**: **SP - GiST** (**Space - Partitioned GiST**) is a space-partitioned **GiST index**. It organizes the data into a tree structure by partitioning the data space. Each node contains multiple partitions and pointers to child nodes, and the partitions can be dynamically adjusted according to the distribution of the data.
+     - **Principle**: The **SP - GiST index** is suitable for handling unbalanced data distribution. It partitions the data space and evenly distributes the data to different nodes, thereby improving the query efficiency. When performing a query, according to the query conditions and partition information, it starts from the root node and recursively searches downward until the nodes that meet the conditions are found.
+     - **Application Scenarios**:
+       1. **Multidimensional Data Query**: For multidimensional data such as **multidimensional arrays** and **vectors**, the **SP - GiST index** can partition the data according to the distribution of the data, improving the query efficiency. For example, query multidimensional geographical data in a geographic information system.
+       2. **Sparse Data Query**: When there is a large amount of sparse data in the dataset, the SP - GiST index can effectively handle this data and avoid the performance problems of traditional indexes when dealing with sparse data.
+     - Creation Statement
+       ```sql
+        CREATE INDEX idx_spgist ON table_name USING spgist (column_name);
+       ```
+
+  5. **GIN Index**
+
+     - **Data Structure**: **GIN** (**Generalized Inverted Index**) is an inverted index. It records the occurrence positions of each key value in a list. Specifically, it maintains a mapping from key values to a list of document IDs, where the document IDs represent the records that contain that key value.
+     - **Principle**: The **GIN index** is suitable for multi-valued columns and full-text search. It achieves efficient queries by recording the occurrence positions of each key value. When performing a query, according to the query conditions, it finds the corresponding key value, and then obtains the list of document IDs that contain that key value, thereby locating the target data.
+     - **Application Scenarios**:
+       1. **Array Query**: When a certain column in the table is of array type, the **GIN index** can efficiently query arrays that contain specific elements. For example, find products that contain specific tags in the product table.
+       2. **JSON Data Query**: For **JSON data**, the **GIN index** can index the key-value pairs in **JSON**, thereby achieving efficient JSON data queries. For example, find users with specific attributes in the user table.
+       3. **Full-text Search**: The GIN index can tokenize text data and then record the occurrence positions of each token, achieving efficient full-text search. For example, perform keyword search in the news table.
+     - Creation Statement
+       ```sql
+        CREATE INDEX idx_gin ON table_name USING gin (column_name);
+       ```
+
+  6. **BRIN Index**
+
+     - **Data Structure**: **BRIN** (**Block Range INdex**) is a block range index. It reduces the size of the index by storing the minimum and maximum values of each data block. The index file is composed of a series of block range entries, and each entry contains the starting block number, ending block number, minimum value, and maximum value of a data block.
+     - **Principle**: The **BRIN index** is suitable for very large tables. By storing the minimum and maximum values of each block range, when performing a query, it can quickly determine whether a data block may contain data that meets the query conditions, thereby reducing the number of data blocks that need to be scanned. However, since it only records the boundary information of the block range, the query performance is relatively low.
+     - **Application Scenarios**:
+       1. **Very Large Tables**: When the table has a large amount of data, using the **BRIN index** can significantly reduce the storage space of the index and improve the maintenance efficiency of the index. For example, store a large number of log records in the log table.
+       2. **Data Inserted in Order**: If the data is inserted in order, the data in adjacent data blocks has a certain order, and the BRIN index can play a better role. For example, in time series data, data inserted in chronological order can be efficiently queried using the **BRIN index**.
+     - Creation Statement
+       ```sql
+        CREATE INDEX idx_brin ON table_name USING brin (column_name);
+       ```
+
+  7. **Bitmap Index**
+
+     - **Data Structure**: The **Bitmap index** uses a bitmap structure. For each different key value, it maintains a bitmap, and each bit of the bitmap corresponds to a record. If a bit is 1, it means that the corresponding record contains that key value; if it is 0, it means it does not contain it.
+     - **Principle**: The **Bitmap index** is suitable for columns with **low cardinality** (i.e., there are few different values in the column). It realizes efficient combined queries of multiple conditions through bit operations of the bitmap. When performing a query, according to the query conditions, it finds the corresponding bitmap, then performs bit operations to obtain the bitmap of the records that meet the conditions, and finally locates the target data according to the bitmap.
+     - **Application Scenarios**:
+       1. **Low Cardinality Columns**: When there are few different values in the column, using the Bitmap index can significantly reduce the storage space of the index and improve the query efficiency. For example, in the gender column, there are only two values, "male" and "female".
+       2. **Combined Queries of Multiple Conditions**: The **Bitmap index** is very effective for combined queries of multiple conditions because it can quickly merge the bitmaps of multiple conditions through bit operations to obtain the final query result. For example, in the user table, find users who are female and whose age is between 20 and 30.
+     - Creation Statement
+       ```sql
+        -- PostgreSQL itself does not have a direct syntax for creating a Bitmap index, but a similar effect can be achieved by combining B - Tree indexes
+        CREATE INDEX idx_bitmap ON table_name (column_name);
+       ```
+
+  8. **Partial Index**
+
+     - **Data Structure**: The data structure of the **Partial index** is the same as that of a **common index**, except that it only creates an index for a part of the data in the table. It only includes the data that meets the condition by adding a conditional expression.
+     - **Principle**: The **Partial index** reduces the size and maintenance cost of the **index** by only creating an index for part of the data, and improves the efficiency of the index. When performing a query, only the data that meets the conditions will be indexed, thereby reducing unnecessary index scans.
+     - **Application Scenarios**:
+       1. **Index Only a Part of the Data**: When you only need to index a part of the data in the table, you can use the Partial index. For example, in the user table, only index active users.
+       2. **Improve Index Efficiency**: By reducing the amount of data in the index, the Partial index can improve the query and maintenance efficiency of the index. For example, in the log table, only index the logs of the most recent month.
+     - Creation Statement
+       ```sql
+        CREATE INDEX idx_partial ON table_name (column_name) WHERE condition;
+       ```
+
+  9. **Unique Index**
+     - Data Structure
+       - The data structure of the **Unique index** is the same as that of a common index, and usually uses a **B - Tree** or other suitable index structure.
+       - Its characteristic is to ensure that all values in the index column are unique.
+     - **Principle**: The **Unique index** checks whether the values in the index column are unique when inserting or updating data to ensure that all values in the index column are unique. If the uniqueness constraint is violated, the operation will be rejected.
+     - **Application Scenarios**
+       1. **Primary Key Constraint**: The **Unique index** can be used to implement the **primary key** constraint to ensure that each row in the table has a unique identifier. For example, use the user ID as the primary key in the user table.
+       2. **Unique Constraint**: When you need to ensure that the values in a certain column are unique but it is not the primary key, you can use the Unique index. For example, use the email address as a unique constraint in the email table.
+     - Creation Statement
+       ```sql
+        CREATE UNIQUE INDEX idx_unique ON table_name (column_name);
+       ```
+
 ## 3. Postgres Extensions
 
 1. `PostGIS`
@@ -780,3 +894,4 @@
 3. [crunchydata.com - Indexing Materialized Views in Postgres](https://www.crunchydata.com/blog/indexing-materialized-views-in-postgres?ref=dailydev)
 4. [dev.to - 8 Postgres Extensions You Need to Know](https://dev.to/timescale/8-postgres-extensions-you-need-to-know-2mj3?ref=dailydev)
 5. [strongdm - PostgreSQL vs. MySQL: Differences for Tech Leaders & Teams](https://www.strongdm.com/blog/postgresql-vs-mysql?ref=dailydev)
+6. [leapcell.ion - A Complete Guide to PostgreSQL’s 9 Index Types](https://leapcell.io/blog/complete-guide-postgresql-9-index-types?ref=dailydev)
