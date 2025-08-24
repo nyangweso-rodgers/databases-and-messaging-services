@@ -537,6 +537,51 @@
       GROUP BY AuthorID, Genre;
      ```
 
+# Database Monitoring
+
+- **Key Metrics**
+
+  1. **Connection Metrics**
+
+     1. Connection Count:
+        - Keeping track of how many connections are currently active can help identify bottlenecks.
+     2. Connection Time
+        - Monitoring the time taken for connections to be established is crucial for detecting latency issues.
+     3. Connection Errors:
+        - Frequent connection errors can signify underlying issues that need immediate attention.
+
+  2. **Performance Metrics**
+
+     1. Query Execution Time:
+        - Understanding how long your queries take to execute helps in identifying slow queries and optimizing them.
+     2. Cache Hit Ratio
+        - A high cache hit ratio usually indicates that most of the data required for queries is being efficiently retrieved from memory instead of disk.
+     3. Index Usage
+        - Proper index usage can significantly speed up query processing and improve overall performance.
+     4. Table Scan Frequency
+        - Frequent table scans may suggest the need for better indexing or query optimization.
+
+  3. **Resource Uitlization Metrics**
+
+     1. CPU Usage
+        - Continuous monitoring of CPU usage can help prevent performance degradation due to CPU overload.
+     2. Memory Usage
+        - Keeping an eye on memory usage is vital to prevent out-of-memory errors which can crash databases.
+     3. Disk I/O
+        - High disk I/O can be the primary cause of slow queries and overall database performance issues.
+     4. Storage Space
+        - Monitoring available storage ensures you do not run out of space, which could impair database operations.
+
+  4. **Health and Availability**
+     1. Uptime
+        - Ensuring that your database remains operational and accessible is of utmost importance.
+     2. Replication Lag
+        - Monitoring replication lag can help maintain data consistency across different database instances.
+     3. Deadlocks
+        - Detecting and resolving deadlocks promptly can prevent them from affecting database performance.
+     4. Backup Success Rate & Recovery Time
+        - Regular backups and a trackable recovery time are crucial for data reliability and disaster recovery.
+
 # Resources and Further Reading
 
 1. [daily.dev - How Indexing Enhances Query Performance](https://digma.ai/how-indexing-enhances-query-performance/?ref=dailydev)
