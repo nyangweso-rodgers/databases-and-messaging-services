@@ -4,17 +4,13 @@
 
 # Database Concepts
 
-# OLTP (online transactional processing) versus OLAP databases
-
-- **OLTP databases** are designed for processing transactions. The most common transactions are: (i) read, (ii) insert, (iii) update and (iv) delete.
-
 # Database Concepts
 
-## Database Management Systems (DBMS)
+## 1. Database Management Systems (DBMS)
 
 - A **database management system** is software that allows users to formulate, manage, and interact with databases.
 
-## SQL vs. NoSQL DBs
+## 2. SQL vs. NoSQL DBs
 
 - **When to Choose NoSQL over SQL**
 
@@ -62,7 +58,58 @@
   - In practice, most mature backends don’t use just **SQL** or just **NoSQL**. You’ll see teams using **PostgreSQL** for transactional data like orders and payments, **MongoDB** for `product` metadata, **Redis** for ephemeral caching, and Elasticsearch for search queries. This is what we call **polyglot persistence**, using multiple storage technologies in the same system, each tuned to its specific use case.
   - It’s powerful, but it comes with its own complexity. You now have to maintain data across multiple systems. You may need to sync between them, eventually or in real time. Your team needs to be fluent in more than one database model. But when done right, this approach gives you the best of both worlds: transactional safety where you need it, and speed and flexibility where you don’t.
 
-## Relational Databases
+## 3. OLTP (Online Transaction Processing) vs OLAP
+
+- **Remark**:
+  - Tech is all about trade-offs, and database design is no exception. If a system is built to be fast for users, it’s often slower for analysis, and vice versa
+- **OLTP**
+
+  - **OLTP databases**, specialize in very fast, very small units of work. Think **“insert** this row” or **“update** that balance”. Basically, **OLTP** is all about capturing and storing information the moment it happens.
+  - **How OLTP systems store and structure their data**
+
+    - To achieve low latency when processing requests, **OLTP** databases use a so-called**row-based** storage, where all fields for a single record (shop item, user data, etc.) are stored together, one field after the other. It’s kind of similar to a spreadsheet where each row holds all the details for one specific record, such as a single customer or order.
+    - Storing all fields together is what allows an **OLTP database** to quickly fetch all fields for a single record.
+    - Conversely, when the database needs to update something, it can get that exact row and write new data with the minimal number of I/O operations. (The trade-off being that it can be slow for deeper analytical processing, which is why we use **OLAP** for analysis)
+
+  - **How data is organized**:
+
+    - Data in an **OLTP database** is usually not stored in one table, simply because cramming all data in one table will create massive data redundancy among a myriad of other problems.
+    - This is why most **OLTP databases** use a **normalized schema**, which means they store each piece of information only once and then connect it to other data by using IDs.
+    - This design helps keep data clean and consistent, and keeps the amount of data touched by each read/write operation small, making them very fast. (A caveat is that sometimes it can get in the way of read performance, since one operation has to read multiple tables, so **denormalization** is a common optimization technique.)
+    - **Example**:
+      - Instead of storing a customer’s `name` and `email` in every order, the system puts that information in a single `Users` table. Every time an order is placed, the `Orders` table just references the customer’s ID.
+      - This means that if the customer changes their `email`, you only have to update it in one place, and all related orders instantly have the correct information.
+
+  - **How OLTP uses indexes**
+
+    - A **database index** allows a database to pinpoint the location of a record on a disk. So instead of scrolling through hundreds of rows to find a customer by their ID, the index tells the database exactly where that row is. This means it can jump straight to the right spot and fetch the data almost instantly.
+
+  - **How OLTP keeps your data accurate and up-to-date**
+
+    - When several people try to change the same information at once, an **OLTP** system makes sure the data remains consistent and correct.
+    - most OLTP systems follow **ACID principles**, which are the rules that keep transactions reliable:
+      - **Atomicity** means that a transaction is all or nothing. As another example, if you transfer money from your account to someone else’s, the system must either take the money out of your account and put it into theirs or do nothing at all. There’s no situation where the money disappears or is duplicated
+      - **Consistency** guarantees that every committed transaction leaves the database in a state that satisfies all defined rules. One example of consistency is “referential integrity,” which is simply the rule that whenever one record points to another, the record it points to must actually exist, so the database never contains broken or missing links between related data
+      - **Isolation** makes sure that transactions don’t interfere with each other while running. If you’re booking a hotel room and someone else is booking the same one at the same moment, you won’t see half-finished updates that could cause confusion or double-booking. (although some databases have various “levels” of isolation, which can produce odd effects)
+      - **Durability** means that once a transaction is confirmed, it’s stored permanently. Even if the power goes out or the server crashes right after you click “book,” your reservation is still there when the system comes back online
+    - (A small caveat is that some OLTP systems, most notably NoSQL databases, may relax these properties to achieve higher performance).
+
+  - **OLTP Trade-offs**
+
+- **OLAP Databases**
+
+  - **OLAP** data stores are designed from the ground up for large-scale analysis, able to scan millions or even billions of rows, summarizing and combining information to reveal patterns.
+  - Some examples of **OLAP datastores** include **Snowflake**, **Google BigQuery**, **Amazon Redshift**, and many others.
+  - **How OLAP systems store and structure their data**
+
+    - **Columnar storage** is a big part of why **OLAP** can fly through millions or even billions of rows when running analytical queries.
+
+  - **How OLAP organizes data**
+    - Recall that **OLTP databases** usually use a **normalized schema** that connects multiple small related tables. This avoids duplication and can be great for transactions, but it can be a headache for analysis because of the way this design works.
+    - **OLAP** uses a set of completely different approaches to structuring data. One of the most popular is called a **star schema**, which organizes data around a central **fact table**, which is surrounded by **dimension tables**, each holding descriptive details (customers, products, dates, etc).
+    - The **fact table** represents business events (like `orders`), while **dimension tables** provide descriptive attributes.
+
+## 4. Relational Databases
 
 - For relational database scaling, you can throw more hardware at the problem (**vertical scaling**) or split data across machines (**horizontal scaling**). Both options come with cost and complexity. Scaling decisions also affect your reliability, performance, and how much your team can actually maintain long term. Say your PostgreSQL instance starts timing out during peak hours. **Replication**? **Indexing**? **Sharding**?
 - **How to scale a relational database**
@@ -133,7 +180,7 @@
   12. **Read-AfterWrite Patterns**
       - Read-after-write patterns matter if you use caching or replicas. If your app reads stale data after writing, try write-through caching or wait until replicas catch up. You can't think about a database without thinking in the application using it.
 
-## 1. Columnar vs. Row-Oriented Database
+## 5. Columnar vs. Row-Oriented Database
 
 - **Row-Oriented Databases**
 
@@ -163,7 +210,7 @@
 
     4. **Flexibility**: Less flexible for schema changes.
 
-## 2. Database Locks
+## 6. Database Locks
 
 - In database management, **locks** are mechanisms that prevent concurrent access to data to ensure data integrity and consistency.
 - Here are the common types of locks used in databases:
@@ -186,14 +233,14 @@
   9. Table-Level Lock
      - It locks an entire table. This is simple to implement but can reduce concurrency significantly.
 
-## 3. Database Replication
+## 7. Database Replication
 
 - **Replication** is the process of keeping database copies in sync.
 - There are two types of **replication** in **PostgreSQL**:
   1. Physical repication
   2. Logical replication
 
-## 4. Database Indexing
+## 8. Database Indexing
 
 - **Indexing** is a technique used in database management systems to improve the speed and efficiency of data retrieval operations. An **index** is a **data structure** that provides a quick way to look up rows in a table based on the values in one or more columns. **Database indexes** allow you to find specific data without searching through the entire database.
 - Technically, an **index** is a **data structure** (usually a **B-tree** or a **hash table**) that stores the values of one or more columns in a way that allows for quick **searches**, **sorting**, and **filtering**. The **index** provides pointers to the actual rows in the database table where the data resides.
@@ -391,7 +438,7 @@
   - Small tables (less than a few hundred rows) might not benefit much from indexing, as a full table scan might be just as fast.
   - An index might not be helpful if a column has very low selectivity (i.e., most queries retrieve a large percentage of the rows). For example, if you have a Gender column with only 'M' and 'F' values, an index probably won't help much.
 
-## 5. Database Sharding
+## 9. Database Sharding
 
 - **Sharding** is the process of scaling a database by spreading out the data across multiple servers, or **shards**. **Sharding** is the go-to database scaling solution for many large organizations managing data at petabyte scale
 
@@ -590,3 +637,4 @@
 4. [daily.dev - Indexing and Performance Optimization](https://www.codu.co/articles/indexing-and-performance-optimization-fqpwri3y?ref=dailydev)
 5. [daily.dev - How to scale a relational database](https://strategizeyourcareer.com/p/how-to-scale-a-relational-database?ref=dailydev)
 6. [When to Choose NoSQL Over SQL](https://hevalhazalkurt.com/blog/when-to-choose-nosql-over-sql/?ref=dailydev)
+7. [Beginner’s Guide to OLTP vs OLAP Data Systems](https://zerotomastery.io/blog/oltp-vs-olap/?ref=dailydev)
