@@ -118,11 +118,131 @@
         ENGINE = ReplicatedSummingMergeTree()
        ```
 
-## 2. ClickHouse Cloud
+## 2. Primary Key
+
+- **ClickHouse** indexes are based on **Sparse Indexing**, an alternative to the **B-Tree index** utilized by traditional **DBMSs**. In **B-tree**, every row is indexed, which is suitable for locating and updating a single row, also known as **pointy-queries** common in OLTP tasks. This comes with the cost of poor performance on high-volume insert speed and high memory and storage consumption. On the contrary, the **sparse index** splits data into multiple parts, each group by a fixed portion called **granules**. **ClickHouse** considers an index for every **granule** (**group of data**) instead of every row, and that’s where the **sparse index** term comes from. Having a query filtered on the primary keys, **ClickHouse** looks for those **granules** and loads the matched **granules** in parallel to the memory. That brings a notable performance on range queries common in OLAP tasks. Additionally, as data is stored in **columns** in multiple files, it can be compressed, resulting in much less storage consumption.
+- The nature of the **spars-index** is based on **LSM trees** allowing you to insert high-volume data per second. All these come with the cost of not being suitable for pointy queries, which is not the purpose of the **ClickHouse**.
+
+## 3. Partition Key
+
+- Create a table by specifying **partition key**:
+
+  ```sql
+    CREATE TABLE default.projects_partitioned
+    (
+
+        `project_id` UInt32,
+
+        `name` String,
+
+        `created_date` Date
+    )
+    ENGINE = MergeTree
+    PARTITION BY toYYYYMM(created_date)
+    PRIMARY KEY (created_date, project_id)
+    ORDER BY (created_date, project_id, name)
+  ```
+
+  - Here, **ClickHouse** partitions data based on the **month** of the `created_date`:
+
+## 4. Materialized View in Clickhouse
+
+- **Definitions and purpose**:
+
+  - **Materialized views** in **ClickHouse** are a powerful feature that can significantly enhance query performance and data processing efficiency.
+  - A **materialized view** in **ClickHouse** is essentially a trigger that runs a query on blocks of data as they are inserted into a source table.
+  - The results of this query are then stored in a separate “target” table.
+  - This allows for precomputation of aggregations, transformations, or complex calculations, shifting the computational burden from query time to insert time.
+
+- **Features**:
+
+  - Unlike traditional **materialized views** in some databases, **ClickHouse materialized views** are updated in real-time as data flows into the source table.
+  - By querying **materialized views** instead of raw data, resource-intensive calculations are offloaded to the initial view creation process.
+  - This can drastically reduce query execution time, especially for complex analytical queries.
+
+- **Use Cases**:
+
+  1. Materialized views are particularly useful for real-time analytics dashboards, where instant insights from large volumes of data are required.
+  2. They can precompute aggregations, perform data transformations, or filter data for specific use cases.
+
+- **Considerations**:
+
+  - While **materialized views** offer significant performance benefits, they do consume additional CPU, memory, and disk resources as data is processed and written into the new form.
+
+- **Types of Materialized Views in ClickHouse**: ClickHouse offers several types of materialized views based on different storage engines:
+
+  1. **AggregatingMergeTree**
+
+     - Best for aggregation operations
+     - Maintains running totals and counts
+     - Example:
+       ```sql
+        CREATE MATERIALIZED VIEW view_name
+        ENGINE = AggregatingMergeTree()
+        ORDER BY key_column
+        AS SELECT
+            key_column,
+            aggregateFunction(value_column)
+        FROM source_table
+        GROUP BY key_column;
+       ```
+
+  2. **SummingMergeTree**:
+
+     - Optimized for summing operations
+     - Automatically combines rows with the same primary key
+     - Example:
+       ```sql
+        CREATE MATERIALIZED VIEW view_name
+        ENGINE = SummingMergeTree()
+        ORDER BY key_column
+        AS SELECT
+            key_column,
+            sum(value_column) as total
+        FROM source_table
+        GROUP BY key_column;
+       ```
+
+  3. **ReplacingMergeTree**
+     - Keeps only the latest version of each row
+     - Useful for deduplication
+     - Example:
+       ```sql
+        CREATE MATERIALIZED VIEW view_name
+        ENGINE = ReplacingMergeTree(version_column)
+        ORDER BY key_column
+        AS SELECT * FROM source_table;
+       ```
+
+## 5. System Tables
+
+- **ClickHouse** has a lot of tables with internal information or meta data.
+- Show all **system tables** by:
+  ```sql
+    SHOW TABLES FROM system
+  ```
+
+## 6. ClickHouse Cloud
 
 - The advantage of the hosted version, is that users won’t have to manage a complex database system themselves. The system will automatically handle **sharding**, **replication** and **upgrading**. Auto-scaling, too, is built into ClickHouse Cloud
 
-## Data Types
+## 7. ETL Tools for ClickHouse
+
+1. Airbyte
+2. Apache NiFi
+3. Debezium
+4. dbt (Data Build Tool)
+5. Custom Python Scripts
+6. Kafka Connect with ClickHouse Sink
+7. pg2ch
+8. Flink
+9. ClickHouse’s Built-in MySQL and PostgreSQL Engines
+10. Logstash
+11. Metabase (for Ad-hoc ETL)
+12. Custom Shell Scripts
+    - You can use shell scripts with tools like `mysqldump`, `pg_dump`, and `curl` to extract data and load it into ClickHouse.
+
+# Data Types
 
 1. `Int` and `UInt`
 2. `Float32`, `Float64`, and `BFloat16`
