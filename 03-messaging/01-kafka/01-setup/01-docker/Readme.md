@@ -4,7 +4,13 @@
 
 # Setting up Kafka on Docker
 
-- With **Docker**, we don't have to install various tools manually, instead, we write a `docker-compose.yml` to manage **containers**.
+## Prerequiasites
+
+1. **Docker**
+
+   - With **Docker**, we don't have to install various tools manually, instead, we write a `docker-compose.yml` to manage **containers**.
+
+2. Zookeeper
 
 # Configure Zookeeper Docker Container
 
