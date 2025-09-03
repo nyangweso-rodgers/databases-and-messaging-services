@@ -1,10 +1,19 @@
-# Redis
+# Redis (Remote Dictionary Server)
 
 ## Table Of Contents
 
 # What is Redis?
 
-- **Redis**, which stands for **Remote Dictionary Server**, is a fast, open source, in-memory, key-value data store. **Redis** delivers sub-millisecond response times, enabling millions of requests per second for real-time applications in industries like gaming, ad-tech, financial services, healthcare, and IoT.
+- **Redis**, is a fast, open source, in-memory, key-value data store. **Redis** delivers sub-millisecond response times, enabling millions of requests per second for real-time applications in industries like gaming, ad-tech, financial services, healthcare, and IoT.
+- It is used as a **database**, **cache**, and **message broker**. **Redis** supports various data structures including **strings**, **hashes**, **lists**, **sets**, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries, and streams.
+- **What does this key-value store mean?**
+
+  - A **key-value database** (**key-value store**), utilizes a simple key-value pair method to store data. These databases consist of a unique string (the key) and a large data field (the value). This makes them a simple option for data storage, easy to design and implement. **Key-value databases** differ significantly from relational databases, which organize data into tables and define relationships between those tables.
+
+- **When to use a key-value database**
+
+  - Your application might become unstable if it needs to handle a large number of small, constant read and write operations. **Key-value databases** provide fast, in-memory access.
+  - They are used for storing webpages with the URL as the key and the webpage as the value, fundamental data such as customer information, and preserving the contents of shopping carts, product categories, and e-commerce product information. These databases are suitable for programs that do not require frequent updates or support for complex queries.
 
 - **Advantages of Redis**
 
@@ -14,6 +23,12 @@
   4. We can store data as key value pairs
   5. Downtime is negligible in terms of scaling
   6. It’s open source and stable
+
+- **Features of Redis**:
+
+  1.  It’s a NoSQL database, which means it does not have structures like tables, rows, and columns, or use statements like SELECT, UPDATE, INSERT, and DELETE, unlike MySQL and Oracle databases.
+  2.  Redis utilizes various data structures to store data, including primary ones like String, Lists, Sets, Sorted Sets, and Hashes, as well as additional data structures such as Bitmaps, HyperLogLogs, and Geospatial Indexes.
+  3.  Interaction with the data is command-based.
 
 - **Uses Cases Of Using Redis**
 
