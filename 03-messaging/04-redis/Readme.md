@@ -40,6 +40,85 @@
 
   4. **Gaming Leaderboard Applications**: Redis is a very popular choice among game developers looking to build real-time leaderboards or scoreboards. Redis Sorted Set data structure can be simply used to implement this use case, which provides uniqueness of elements while keeping the list sorted by users’ scores(points) associated with the key. Need to update the user’s score whenever it changes. We can also use Sorted Sets to handle time-series data by using timestamps as the score for ranking based on timestamps.
 
+# Key Concepts in Redis
+
+## Redis Pipeline
+
+- **Redis pipeline** allows you to send multiple commands to the server without waiting for individual responses. Instead of this back-and-forth ping-pong of requests and responses, you bundle commands together, fire them off in one go, and then receive all responses simultaneously.
+- Without **pipelining**, each **Redis** command creates a full TCP roundtrip:
+  - Client sends command
+  - Server processes command
+  - Server sends response
+- Client above pattern creates latency – the sneaky performance killer that adds up quickly, especially over networks.
+
+- **Implementing Redis in Python**
+
+  - Example code:
+
+    ```py
+      import redis
+
+      r = redis.Redis(host='localhost', port=6379, db=0)
+
+      # Start a pipeline
+      pipe = r.pipeline()
+
+      # Queue up commands (these don't execute yet)
+      pipe.set("user:1:name", "Alex")
+      pipe.set("user:1:email", "alex@example.com")
+      pipe.incr("user:1:visits")
+      pipe.expire("user:1:sessions", 3600)
+
+      # Execute all commands in a single roundtrip
+      results = pipe.execute()
+
+      # Results is an array of responses in the same order as commands
+      print(results)  # [True, True, 1, True]
+    ```
+
+  - **Explanation**:
+    - This code creates a pipeline object that acts as a command buffer. Each method call (`.set()`, `.incr()`, etc.) doesn't actually send anything to Redis yet – it just queues the command.
+    - When `.execute()` is called, all commands are sent to **Redis** in a single network operation, and all results are returned together as an array. The order of responses matches the order of commands, so `results[0]` corresponds to the first command, `results[1]` to the second, and so on.
+
+- **Node.js Implementation with ioredis**
+
+  - Example Code:
+
+    ```js
+    const Redis = require("ioredis");
+    const redis = new Redis({
+      host: "localhost",
+      port: 6379,
+    });
+
+    // Create pipeline
+    const pipeline = redis.pipeline();
+
+    // Queue commands
+    pipeline.set("product:1234:views", 0);
+    pipeline.incr("product:1234:views");
+    pipeline.get("product:1234:views");
+
+    // Execute pipeline
+    pipeline.exec((err, results) => {
+      if (err) {
+        console.error("Pipeline failed:", err);
+        return;
+      }
+
+      // Each result is [err, response]
+      console.log(results); // [[null, 'OK'], [null, 1], [null, '1']]
+
+      // Access individual results
+      const viewCount = results[2][1];
+      console.log(`Product view count: ${viewCount}`);
+    });
+    ```
+
+  - **Explanation**:
+    - In ioredis, the pipeline pattern is similar, but the response format is slightly different. Each result in the array is itself an array with two elements: `[error, response]`.
+    - This allows for per-command error handling. If a command succeeds, its error value is `null`. The second example also shows how to use the results – accessing the third command's response (`results[2][1]`) to get the view count.
+
 # Redis Metrics: Monitoring, Performance
 
 - **Why Monitoring Redis Matters**
@@ -136,3 +215,4 @@
 # Resources and Further Reading
 
 1. [Last9.io - Redis Metrics: Monitoring, Performance, and Best Practices](https://last9.io/blog/redis-metrics-monitoring/?ref=dailydev)
+2. [Last9.io - How to Make the Most of Redis Pipeline](https://last9.io/blog/how-to-make-the-most-of-redis-pipeline/?ref=dailydev)
