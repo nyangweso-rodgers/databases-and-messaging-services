@@ -84,11 +84,69 @@
 
 - **Core Function**: Provides the web interface and REST API
 - **What it does**:
+
   1.  Serves the Dagster web UI on port 3004 (what you see in your browser)
   2.  Provides REST API endpoints for external integrations
   3.  Communicates with the gRPC server to get pipeline information
   4.  Handles user interactions (launching runs, viewing assets, etc.)
   5.  Displays pipeline visualizations, run history, and monitoring
+
+- **Dagster Web UI Sections**
+
+  1. **Overview**
+
+     - **What it is**: Your Dagster instance dashboard/homepage
+     - **What you'll see**:
+       - Summary of recent pipeline activity
+       - Failed runs that need attention
+       - Asset materialization status
+       - Quick link to important resources
+       - Instance health metrics
+
+  2. **Runs**
+
+     - **What it is**: History and monitoring of all pipeline executions
+     - **What you'll see**:
+       - List of all job executions (successful, failed, in-progress)
+       - Run details: logs, execution time, resource usage
+       - Step-by-step execution breakdown
+       - Error messages and stacks traces for debugging
+
+  3. **Assets**
+
+     - **What it is**: Your data assets and their relationships
+     - **What you'll see**:
+       - Visual graph of all your data assets
+       - Asset lineage (what depends on what)
+       - Materialization history (when assets were last updated)
+       - Asset metadata and descriptions
+       - Data quality checks and obeservatiobs
+
+  4. **Jobs**
+
+     - **What it is**: Executable units (collections of asset/ops)
+     - **What you'll see**:
+       - List of all defined jobs
+       - Job definitions and their asset/op structure
+       - Launch interface for manual job execution
+       - Job configuration options
+
+  5. **Automation**
+
+     - **What it is**: Scheduled and sensor-based pipeline triggers
+     - **What you'll see**:
+       - **Schedules**: Time-based triggers (daily, hourly, etc.)
+       - **Sensors**: Event-based triggers (file changes, database updates)
+       - **Asset Sensors**: Triggers based on asset materializations
+       - Enable/disable automation toggles
+
+  6. **Deployment**
+     - **What it is**: Configuration and monitoring of your Dagster deployment
+     - **What you'll see**:
+       - **Code Locations**: Your loaded code (like customers_sync.py)
+       - **Workspace**: Configuration of your Dagster instance
+       - **Resources**: Database connections, external services
+       - **Instance Configuration**: Storage, executors, run launchers
 
 ## 3. `dagster_daemon` (Background Scheduler)
 
