@@ -41,28 +41,64 @@
 
 # Dagster Components
 
-- **Dagster** has three main components that work together to schedule, execute, and monitor workflows:
+## 1. Dagit
 
-  1. **Dagster Core**
+- **Dagit** was Dagster's original standalone web UI application - essentially a separate web interface for visualizing and interacting with your **Dagster pipelines**, **assets**, and **runs**. It provided:
 
-     - This is the heart of **Dagster** that allows you to define and execute **DAGs** (**Directed Acyclic Graphs**), but with a more software engineering-friendly approach. Instead of defining tasks and dependencies manually (like in **Airflow**), **Dagster** uses solids (compute units) and graphs (workflow definitions).
+  1. Pipeline visualization and monitoring
+  2. Asset lineage graphs
+  3. Run execution and debugging interfaces
+  4. Schedule and sensor management
+  5. Job launching capabilities
 
-  2. **Dagster Webserver** (`dagster-webserver`): This is the **UI** (**Dagit**) that provides:
+- **Why was Dagit deprecated?**
 
-     - A visualization of pipelines.
-     - The ability to trigger runs.
-     - Logs and monitoring.
-     - Debugging tools.
+  1.  **UI Consolidation**: The Dagster team consolidated the web UI functionality directly into `dagster-webserver`, creating a unified interface. Instead of maintaining two separate packages (`dagit` and `dagster-webserver`), they merged the UI capabilities into a single, more streamlined solution.
 
-  3. **Dagster Daemon** (`dagster-daemon`)
-     - This is the **background worker** responsible for running schedules and sensors.
-     - Unlike **Airflow**, where the **scheduler** is part of the main process, **Dagster** separates it.
-     - It polls for scheduled runs and kicks off executions.
+  2.  **Simplified Architecture**
 
-- **How they work together**:
-  1. You define **pipelines** (**jobs**) in **Dagster**.
-  2. The **webserver** (**Dagit**) lets you inspect and trigger jobs.
-  3. The **daemon** handles scheduled jobs in the background.
+      - **Before**: You needed both `dagit` (for UI) + `dagster-webserver` (for API/backend)
+      - **Now**: `dagster-webserver` hosts Dagster's web UI for developing and operating Dagster - everything in one package
+
+  3.  **Reduced Maintence Overhead**: Maintaining two separate web interfaces created unnecessary complexity and potential version compatibility issues (like you experienced with the Pydantic warnings).
+
+- **Remarks**:
+  - You can safely remove `dagit==1.11.9` from your Dockerfile because:
+    1. All UI functionality is now included in `dagster-webserver==1.11.9`
+    2. Your Docker Compose already uses `dagster-webserver` commands
+    3. The web UI will be accessible at the same port (3004) as before
+
+# Docker Setup Services
+
+## 1. `dagster` (Code/gRPC Server)
+
+- **Core Function**: Hosts your pipeline code and serves it via gRPC
+- **What it does**:
+  1. Loads and vaidates pipeline definiitons
+  2. Exposes assets, jobs, and schedules via gRPC API on `port 4000`
+  3. Executes the actual pipeline logic when jobs are triggered
+  4. Handles asset materializations and computations
+  5. Servers as the "brain" that knows about your data pipeline structure
+
+## 2. `dagster_webserver` (Web UI + API)
+
+- **Core Function**: Provides the web interface and REST API
+- **What it does**:
+  1.  Serves the Dagster web UI on port 3004 (what you see in your browser)
+  2.  Provides REST API endpoints for external integrations
+  3.  Communicates with the gRPC server to get pipeline information
+  4.  Handles user interactions (launching runs, viewing assets, etc.)
+  5.  Displays pipeline visualizations, run history, and monitoring
+
+## 3. `dagster_daemon` (Background Scheduler)
+
+- **Core Function**: Handles automated scheduling and background tasks
+- **What it does**:
+  1.  **Scheduler**: Executes scheduled jobs at their specified times
+  2.  **Sensor**: Monitors for changes and triggers jobs based on conditions
+  3.  **Asset Daemon**: Manages asset auto-materialization
+  4.  **Backfill Daemon**: Handles large-scale historical data processing
+  5.  **Run Coordinator**: Manages job queuing and execution coordination
 
 # Resources and Further Reading
 
