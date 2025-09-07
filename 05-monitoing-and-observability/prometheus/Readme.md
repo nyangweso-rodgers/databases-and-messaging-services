@@ -4,7 +4,7 @@
 
 # Prometheus
 
-- **Prometheus** is an open-source systems **monitoring** and **alerting** toolkit originally built at **SoundCloud** and later donated to the **Cloud Native Computing Foundation**. It’s designed for **monitoring** highly dynamic container environments and microservices architectures.
+- **Prometheus** is an open-source systems **monitoring** and **alerting** toolkit originally built at **SoundCloud** and later donated to the **Cloud Native Computing Foundation** (**CNCF**). It’s designed for **monitoring** highly dynamic container environments and microservices architectures.
 - **Key features and concepts of Prometheus**:
   1.  **Multi-Dimensional Data Model**: **Metrics** are identified by metric name and key-value pairs called labels, enabling flexible querying and aggregation.
   2.  **PromQL**: A powerful query language for selecting and aggregating time series data, allowing complex monitoring and alerting rules.
