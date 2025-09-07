@@ -217,4 +217,42 @@
        - Deployment scripts
        - Backup and restore
 
+# Database
+
+- The following database tables are created when we use **Postgres** for its **run/event/schedule storage** (instead of local **SQLite**). They’re part of Dagster’s instance schema, which is how it tracks all metadata about **runs**, **assets**, **schedules**, **sensors**, etc.
+
+  1. **Core Tables**
+
+     1. `alembic_version`: Tracks the schema migration version (managed by Alembic). Dagster upgrades run migrations here.
+     2. `instance_info`: Metadata about the **Dagster** instance (version, etc.).
+     3. `kvs`: A key-value store used internally for persisting misc. state.
+     4. `secondary_index`: Used by **Dagster** to track whether certain indexes (on logs/events) have been built.
+
+  2. **Runs and Executions**
+
+     1. `runs`: The central table storing metadata about each run (**status**, **run_id**, **job name**, etc.).
+     2. `pending_steps`: Steps inside a run that are queued but not yet executed.
+     3. `run_tags`: Key-value tags associated with runs (e.g., partition key, environment, custom labels).
+     4. `event_logs`: The big one — stores all events emitted during runs (step start, success, failure, materializations, logs, etc.).
+
+  3. **Assets**
+
+     1. `asset_keys`: All known asset keys in your instance.
+     2. `asset_event_tags`: Tags attached to asset-related events.
+     3. `asset_check_executions`: Tracks executions of asset checks (Dagster’s way of validating asset health).
+     4. `asset_daemon_asset_evaluations`: State/history of asset daemon evaluations (if you use auto-materialization policies).
+
+  4. **Jobs, schedules, and sensors**
+
+     1. `jobs`: Stores job/sensor/schedule definitions known to the instance.
+     2. `job_ticks`: Execution ticks for schedules/sensors (each time the scheduler/daemon “wakes up”).
+     3. `instigators`: State of schedules and sensors (active/inactive, cursor state, etc.).
+
+  5. **System-level**
+     1. `daemon_heartbeats`: Tracks the health of Dagster daemons (scheduler, sensor daemon, etc.) by recording their periodic heartbeats.
+     2. `bulk_actions`: Metadata about bulk operations triggered in Dagit (like clearing runs).
+     3. `concurrentcy_slots`: Tracks concurrency limits for jobs/assets if you configure them.
+     4. `dynamic_partitions`: Stores partitions added dynamically (instead of statically defined).
+     5. `snapshots`: Historical snapshots of pipeline/job/asset definitions (so Dagster can run old runs even if code changes).
+
 # Resources and Further Reading
