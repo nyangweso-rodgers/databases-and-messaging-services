@@ -199,6 +199,33 @@
   1. **Monolithic**. This is the best place to start for beginners. It runs everything as a single binary or Docker image. **Monolithic** mode can even be scaled to multiple replicas to act as a middle-ground option.
   2. **Microservices**. Designed for Kubernetes deployment, you can run components as entirely separate services. This is the most scalable, flexible, and reliable option, but it’s also the most complex.
 
+# Dashboard Templates
+
+- [Grafana dashboards](https://grafana.com/grafana/dashboards/?search=api)
+  1. **AWS**
+     1. **CloudWatch**
+        1. [CloudWatch Exporter](https://grafana.com/grafana/dashboards/10925-cloudwatch-exporter/)
+     2. **SQS**
+        1. [AWS SQS (Prometheus)](https://grafana.com/grafana/dashboards/19315-aws-sqs-prometheus/)
+  2. **PostgreSQL**
+     1. [PostgreSQL Database](https://grafana.com/grafana/dashboards/9628-postgresql-database/)
+  3. **MySQL**
+     1. [MySQL Overview](https://grafana.com/grafana/dashboards/7362-mysql-overview/)
+  4. [FastAPI Observability](https://grafana.com/grafana/dashboards/22676-fastapi-observability/)
+  5. [Speedtest dashboard](https://grafana.com/grafana/dashboards/13306-speed-test-dashboard/)
+  6. [OTC - RDS](https://grafana.com/grafana/dashboards/7409-otc-rds/)
+  7. [App Metrics - Web Monitoring - Prometheus](https://grafana.com/grafana/dashboards/15840-app-metrics-web-monitoring-prometheus/)
+  8. [Prometheus Speedtest Exporter](https://grafana.com/grafana/dashboards/22651-prometheus-speedtest-exporter/)
+  9. **Redis**
+  10. [Redis Overview](https://grafana.com/grafana/dashboards/17408-redis-overview/)
+  11. [Redis Dashboard 2](https://grafana.com/grafana/dashboards/15895-redis-dashboard-2/)
+  12. [Redis Server](https://grafana.com/grafana/dashboards/12497-redis-server/)
+  13. [Prometheus Redis (by addr and host)](https://grafana.com/grafana/dashboards/4074-prometheus-redis-by-addr-and-host/)
+  14. [9102 - kafka](https://grafana.com/grafana/dashboards/13572-9102-kafka/)
+  15. [Arista General Statistics by IP](https://grafana.com/grafana/dashboards/10222-arista-general-statistics-by-ip/)
+  16. [Prometheus Network Exporter](https://grafana.com/grafana/dashboards/15297-prometheus-network-exporter/)
+  17. []
+
 # Resources and Further Reading
 
 1. [last9.io - How to Monitor and Manage Grafana Memory](https://last9.io/blog/grafana-memory-usage/?ref=dailydev)
