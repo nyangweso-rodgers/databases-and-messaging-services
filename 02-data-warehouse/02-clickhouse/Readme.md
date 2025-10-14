@@ -73,24 +73,49 @@
 
      - **MergeTree** is the default **table engine** in **ClickHouse**. It's designed for inserting a very large amount of data into a table. The data is written to the table part by part, then rules are applied for merging the parts in the background. This method is much more efficient than continually rewriting the data in storage during insert.
      - **MergeTree tables** are sorted by a **primary key**, and data is stored in sorted order, enabling high-performance range queries and efficient data compression.
-     - MergeTree limitations for production clusters
+     - **MergeTree Limitations**:
        - The **MergeTree engine** can't synchronize data between **replicas**.
        - If you want to use replication in your cluster, use the **ReplicatedMergeTree** engine. It's specifically designed to handle data replication and synchronization within **shards**, thus providing better performance and fault tolerance.
      - To set up this table engine, use the following syntax in your `CREATE TABLE` query:
        ```sql
-        -- sql
+        CREATE TABLE page_views
+        (
+            view_time DateTime,
+            user_id UInt64,
+            url String,
+            duration Float32
+        )
         ENGINE = MergeTree()
+        PARTITION BY toYYYYMM(view_time)
+        ORDER BY (user_id, view_time)
+        SETTINGS index_granularity = 8192;
        ```
+       - What it does:
+         - Sorts data by ORDER BY keys for fast lookups
+         - Automatically merges small data parts in the background
+         - Allows time-based partitioning for efficient queries
 
-  2. **ReplicatedMergeTree**
+  2. **ReplicatedMergeTree** - For deduplication
 
+     - Need to overwrite or deduplicate rows? **ReplacingMergeTree** does that automatically using a version column.
      - **ReplicatedMergeTree** is an extension of the **MergeTree engine** designed to optimize data **replication** and fault tolerance. It's used when high availability and durability are essential. **ReplicatedMergeTree** creates multiple replicas per shard, ensuring data redundancy and automatic synchronization across replicas.
-     - Remark: Recommended option for multi-replica sharded clusters
+     - **Remark**: Recommended option for multi-replica sharded clusters
      - Every **MergeTree** family table engine has a replicated version
      - To set up this table engine, use the following syntax in your `CREATE TABLE` query:
        ```sql
-        ENGINE = ReplicatedMergeTree()
+        CREATE TABLE user_profiles
+        (
+            user_id UInt64,
+            name String,
+            updated_at DateTime
+        )
+        ENGINE = ReplacingMergeTree(updated_at)
+        ORDER BY user_id;
        ```
+       - **What it does**: When merging, it keeps only the most recent version (highest `updated_at`) per key. This is super useful for **slowly changing dimensions** or log streams where duplicates might appear.
+     - **Use it for**:
+       1. deduplicating event logs, 
+       2. updating user data snapshots.
 
   3. **ReplicatedAggregatingMergeTree**
 
