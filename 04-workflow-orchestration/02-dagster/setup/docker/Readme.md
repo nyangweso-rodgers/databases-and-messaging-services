@@ -221,19 +221,43 @@
 
 - The following database tables are created when we use **Postgres** for its **run/event/schedule storage** (instead of local **SQLite**). They’re part of Dagster’s instance schema, which is how it tracks all metadata about **runs**, **assets**, **schedules**, **sensors**, etc.
 
+  1. alembic_version
+  2. asset_check_executions
+  3. asset_daemon_asset_evaluations
+  4. asset_event_tags
+  5. asset_keys
+  6. backfill_tags
+  7. bulk_actions
+  8. concurrency_limits
+  9. concurrentcy_slots
+  10. daemon_heartbeats
+  11. dynamic_partitions
+  12. event_logs
+  13. instance_info
+  14. instigators
+  15. jobs
+  16. kvs
+  17. pending_steps
+  18. run_tags
+  19. runs
+  20. secondary_indexes
+  21. snapshots
+
+- Details include:
+
   1. **Core Tables**
 
-     1. `alembic_version`: Tracks the schema migration version (managed by Alembic). Dagster upgrades run migrations here.
-     2. `instance_info`: Metadata about the **Dagster** instance (version, etc.).
+     1. `alembic_version`: Tracks the schema migration version (managed by **Alembic**). Dagster upgrades run migrations here.
+     2. `instance_info`: Metadata about the **Dagster** instance (**version**, etc.).
      3. `kvs`: A key-value store used internally for persisting misc. state.
-     4. `secondary_index`: Used by **Dagster** to track whether certain indexes (on logs/events) have been built.
+     4. `secondary_indexes`: Used by **Dagster** to track whether certain indexes (on logs/events) have been built.
 
   2. **Runs and Executions**
 
      1. `runs`: The central table storing metadata about each run (**status**, **run_id**, **job name**, etc.).
      2. `pending_steps`: Steps inside a run that are queued but not yet executed.
      3. `run_tags`: Key-value tags associated with runs (e.g., partition key, environment, custom labels).
-     4. `event_logs`: The big one — stores all events emitted during runs (step start, success, failure, materializations, logs, etc.).
+     4. `event_logs`: The big one — stores all events emitted during runs (**step**, **start**, **success**, **failure**, **materializations**, **logs**, etc.).
 
   3. **Assets**
 
