@@ -114,7 +114,7 @@
        ```
        - **What it does**: When merging, it keeps only the most recent version (highest `updated_at`) per key. This is super useful for **slowly changing dimensions** or log streams where duplicates might appear.
      - **Use it for**:
-       1. deduplicating event logs, 
+       1. deduplicating event logs,
        2. updating user data snapshots.
 
   3. **ReplicatedAggregatingMergeTree**
@@ -149,6 +149,25 @@
 - The nature of the **spars-index** is based on **LSM trees** allowing you to insert high-volume data per second. All these come with the cost of not being suitable for pointy queries, which is not the purpose of the **ClickHouse**.
 
 ## 3. Partition Key
+
+- When Should You Introduce Partitioning?
+
+  1. **Large Tables**: For tables larger than 10 GB, it's beneficial to introduce a partition key to split the table into logical groups.
+  2. **Targeted Queries**: If your queries frequently filter data based on a specific dimension (like date or category) and only need a subset of the total data, partitioning by that dimension can significantly improve query performance. This allows ClickHouse to skip entire partitions that don't match the query filter, a process known as partition pruning.
+  3. **Memory Management**: By allowing ClickHouse to process only the necessary partitions for a query, partitioning can help manage memory usage, especially for large datasets.
+
+- Common Partitioning Strategies:
+
+  ```sql
+    -- For time-series data, partitioned by month
+    PARTITION BY toYYYYMM(timestamp)
+
+    -- For an incremental column, creating a partition for every 1,000,000 sessions
+    PARTITION BY intDiv(session_id, 1000000)
+
+    -- For dimension tables, creating 100 partitions based on user_id
+    PARTITION BY user_id % 100
+  ```
 
 - Create a table by specifying **partition key**:
 
